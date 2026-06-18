@@ -2,41 +2,60 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FileText, ShieldCheck, AlertTriangle, ShieldAlert, 
-  ArrowUpRight, Clock
+  ArrowUpRight, Clock, Loader2
 } from 'lucide-react';
 import dashboardService from '../../services/dashboardService';
 
 export default function DashboardScreen() {
   const navigate = useNavigate();
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
   const [summaryData, setSummaryData] = useState({
-    totalSubmissions: 156,
-    passed: 112,
-    warnings: 34,
-    critical: 10,
+    totalSubmissions: 0,
+    passed: 0,
+    warnings: 0,
+    critical: 0,
   });
 
-  const [recentActivities, setRecentActivities] = useState([
-    { id: 'SUB-101', student: 'Nguyễn Văn A', class: 'INT4050', time: '10 phút trước', score: 85, status: 'pass' },
-    { id: 'SUB-102', student: 'Trần Thị B', class: 'INT3307', time: '1 giờ trước', score: 55, status: 'warning' },
-    { id: 'SUB-103', student: 'Lê Hoàng C', class: 'INT4050', time: '3 giờ trước', score: 32, status: 'fail' },
-    { id: 'SUB-104', student: 'Phạm Văn D', class: 'INT3110', time: 'Hôm qua', score: 92, status: 'pass' },
-  ]);
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
+      setLoading(true);
+      setError('');
       try {
         const summary = await dashboardService.getSummary();
         const activities = await dashboardService.getRecentActivities();
-        setSummaryData(summary);
-        setRecentActivities(activities);
-      } catch (error) {
-        console.error("Lỗi khi tải dữ liệu Dashboard:", error);
+        
+        setSummaryData({
+          totalSubmissions: summary.totalSubmissions ?? summary.total_submissions ?? 0,
+          passed: summary.passed ?? summary.verified ?? 0,
+          warnings: summary.warnings ?? summary.partial ?? 0,
+          critical: summary.critical ?? summary.not_found ?? summary.unknown ?? 0,
+        });
+        
+        setRecentActivities(activities || []);
+      } catch (err: any) {
+        console.error("Lỗi khi tải dữ liệu Dashboard:", err);
+        setError(err.response?.data?.message || 'Không thể kết nối đến máy chủ để lấy số liệu tổng quan.');
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchDashboardData();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3">
+        <Loader2 size={32} className="text-zinc-900 dark:text-white animate-spin" />
+        <p className="text-zinc-500 dark:text-zinc-400 font-semibold text-xs">Đang tải thông tin tổng quan...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full animate-fade-in space-y-6">
@@ -53,6 +72,13 @@ export default function DashboardScreen() {
         </button>
       </div>
 
+      {/* HIỂN THỊ LỖI NẾU CÓ */}
+      {error && (
+        <div className="flex items-center gap-1.5 p-3.5 bg-red-50 dark:bg-red-950/20 text-red-650 dark:text-red-400 font-semibold rounded-lg border border-red-200 dark:border-red-900/50 text-xs animate-fade-in">
+          <AlertTriangle size={14} className="shrink-0" /> {error}
+        </div>
+      )}
+
       {/* 4 THẺ KPI */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-zinc-950 p-5 rounded-lg border border-zinc-200 dark:border-zinc-900 flex flex-col shadow-sm">
@@ -64,7 +90,7 @@ export default function DashboardScreen() {
         </div>
 
         <div className="bg-white dark:bg-zinc-950 p-5 rounded-lg border border-zinc-200 dark:border-zinc-900 flex flex-col shadow-sm">
-          <div className="text-zinc-400 dark:text-zinc-500 mb-3">
+          <div className="text-green-600 dark:text-green-500 mb-3">
             <ShieldCheck size={18} />
           </div>
           <p className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Đạt chuẩn (Hợp lệ)</p>
@@ -72,7 +98,7 @@ export default function DashboardScreen() {
         </div>
 
         <div className="bg-white dark:bg-zinc-950 p-5 rounded-lg border border-zinc-200 dark:border-zinc-900 flex flex-col shadow-sm">
-          <div className="text-zinc-400 dark:text-zinc-500 mb-3">
+          <div className="text-amber-500 mb-3">
             <AlertTriangle size={18} />
           </div>
           <p className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Cần xem xét</p>
@@ -80,7 +106,7 @@ export default function DashboardScreen() {
         </div>
 
         <div className="bg-white dark:bg-zinc-950 p-5 rounded-lg border border-zinc-200 dark:border-zinc-900 flex flex-col shadow-sm">
-          <div className="text-zinc-400 dark:text-zinc-500 mb-3">
+          <div className="text-rose-600 dark:text-rose-550 mb-3">
             <ShieldAlert size={18} />
           </div>
           <p className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Rủi ro cao</p>
@@ -130,23 +156,39 @@ export default function DashboardScreen() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-900 text-xs">
-                {recentActivities.map((item, idx) => (
-                  <tr key={idx} className="hover:bg-zinc-550/5 transition-colors cursor-pointer" onClick={() => navigate('/report')}>
-                    <td className="p-3 pl-5 font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-[10px] text-zinc-500 font-bold shrink-0">
-                        {item.student.charAt(0)}
-                      </div>
-                      {item.student}
-                    </td>
-                    <td className="p-3 font-semibold text-zinc-650 dark:text-zinc-450">{item.class}</td>
-                    <td className="p-3 text-zinc-450 dark:text-zinc-500 font-medium">{item.time}</td>
-                    <td className="p-3 text-center">
-                      {item.status === 'pass' && <span className="inline-flex px-2 py-0.5 bg-green-50/50 dark:bg-green-950/20 text-green-700 dark:text-green-400 font-bold text-[10px] rounded border border-green-150 dark:border-green-900/50">Đạt chuẩn</span>}
-                      {item.status === 'warning' && <span className="inline-flex px-2 py-0.5 bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 font-bold text-[10px] rounded border border-amber-150 dark:border-amber-900/50">Cảnh báo</span>}
-                      {item.status === 'fail' && <span className="inline-flex px-2 py-0.5 bg-rose-50/50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 font-bold text-[10px] rounded border border-rose-150 dark:border-rose-900/50">Rủi ro cao</span>}
+                {recentActivities.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="p-8 text-center text-zinc-400 font-semibold text-xs">
+                      Không có hoạt động kiểm duyệt nào gần đây.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  recentActivities.map((item, idx) => {
+                    const statusVal = item.status?.toLowerCase() || 
+                      (item.score >= 80 ? 'pass' : item.score >= 50 ? 'warning' : 'fail');
+                    return (
+                      <tr 
+                        key={idx} 
+                        className="hover:bg-zinc-550/5 transition-colors cursor-pointer" 
+                        onClick={() => navigate(item.submission_id ? `/report/${item.submission_id}` : item.id ? `/report/${item.id}` : '/report')}
+                      >
+                        <td className="p-3 pl-5 font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-[10px] text-zinc-500 font-bold shrink-0">
+                            {item.student?.charAt(0) || 'S'}
+                          </div>
+                          {item.student || 'Sinh viên'}
+                        </td>
+                        <td className="p-3 font-semibold text-zinc-650 dark:text-zinc-455">{item.class || item.class_code || 'N/A'}</td>
+                        <td className="p-3 text-zinc-450 dark:text-zinc-500 font-medium">{item.time || new Date(item.created_at).toLocaleDateString('vi-VN')}</td>
+                        <td className="p-3 text-center">
+                          {statusVal === 'pass' && <span className="inline-flex px-2 py-0.5 bg-green-50/50 dark:bg-green-950/20 text-green-700 dark:text-green-400 font-bold text-[10px] rounded border border-green-150 dark:border-green-900/50">Đạt chuẩn</span>}
+                          {statusVal === 'warning' && <span className="inline-flex px-2 py-0.5 bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 font-bold text-[10px] rounded border border-amber-150 dark:border-amber-900/50">Cảnh báo</span>}
+                          {statusVal === 'fail' && <span className="inline-flex px-2 py-0.5 bg-rose-50/50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 font-bold text-[10px] rounded border border-rose-150 dark:border-rose-900/50">Rủi ro cao</span>}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>

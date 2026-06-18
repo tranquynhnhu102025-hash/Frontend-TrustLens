@@ -10,6 +10,7 @@ import ProfileScreen from './features/auth/ProfileScreen';
 import SettingsScreen from './features/settings/SettingsScreen';
 import AdminScreen from './features/admin/AdminScreen';
 import ReportScreen from './features/report/ReportScreen';
+import AnalyzingScreen from './features/analyzing/AnalyzingScreen';
 
 // Import Landing Pages
 import LandingLayout from './features/landing/LandingLayout';
@@ -47,6 +48,7 @@ export default function App() {
             <Route path="/profile" element={<ProfileScreen />} />
             <Route path="/report" element={<ReportScreen />} />
             <Route path="/report/:id" element={<ReportScreen />} />
+            <Route path="/analyzing/:jobId" element={<AnalyzingScreen />} />
           </Route>
         </Route>
         

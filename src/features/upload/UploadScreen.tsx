@@ -123,19 +123,10 @@ export default function UploadScreen() {
       updateItem(item.id, { status: 'uploading', progress: 10, error: undefined });
 
       if (import.meta.env.VITE_USE_MOCK === 'true') {
-        try {
-          await new Promise(r => setTimeout(r, 600));
-          updateItem(item.id, { progress: 30 });
-          await new Promise(r => setTimeout(r, 600));
-          updateItem(item.id, { progress: 60 });
-          await new Promise(r => setTimeout(r, 600));
-          updateItem(item.id, { progress: 85 });
-          await new Promise(r => setTimeout(r, 600));
-          updateItem(item.id, { status: 'success', progress: 100, submissionId: `mock-${item.id}` });
-        } catch (err: any) {
-          updateItem(item.id, { status: 'failed', error: 'Lỗi mô phỏng xử lý hệ thống.' });
-        }
-        continue;
+        const mockJobId = `mock-job-${item.id}-${Math.random().toString(36).substring(2, 9)}`;
+        // Chuyển hướng ngay sang màn hình phân tích (mock)
+        navigate(`/analyzing/${mockJobId}`);
+        return;
       }
 
       try {
@@ -145,27 +136,28 @@ export default function UploadScreen() {
           item.file
         );
         const submissionId = res.id || res.submission?.id;
-        updateItem(item.id, { progress: 30 });
-
-        // @ts-ignore
-        await uploadService.analyzeSubmission(submissionId);
+        if (!submissionId) {
+          throw new Error('Không lấy được Submission ID từ phản hồi tải lên.');
+        }
+        
         updateItem(item.id, { progress: 50 });
+
+        // Gọi API phân tích để lấy job_id
+        const analyzeRes = await uploadService.analyzeSubmission(submissionId);
+        const jobId = analyzeRes.job_id || analyzeRes.id;
         
-        // @ts-ignore
-        await uploadService.detectReferences(submissionId);
-        updateItem(item.id, { progress: 70 });
-        
-        // @ts-ignore
-        await uploadService.parseCitations(submissionId);
-        updateItem(item.id, { progress: 85 });
-        
-        // @ts-ignore
-        await uploadService.verifyMetadata(submissionId);
-        
+        if (!jobId) {
+          throw new Error('Không lấy được Job ID từ phản hồi phân tích.');
+        }
+
         updateItem(item.id, { status: 'success', progress: 100, submissionId });
+        
+        // Điều hướng đến trang analyzing của Job
+        navigate(`/analyzing/${jobId}`);
+        return; // Dừng vòng lặp do đã điều hướng trang
       } catch (err: any) {
         console.error("Lỗi xử lý file:", item.file.name, err);
-        const errorMessage = err.response?.data?.message || 'Lỗi xử lý hệ thống.';
+        const errorMessage = err.response?.data?.message || err.message || 'Lỗi xử lý hệ thống.';
         updateItem(item.id, { status: 'failed', error: errorMessage });
       }
     }
