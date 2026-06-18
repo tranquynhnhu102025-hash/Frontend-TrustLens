@@ -1,20 +1,7 @@
 import uploadService from "../../services/uploadService";
 import { useState } from 'react';
-import { 
-  Send, AlertCircle, UploadCloud, X, FileText, 
-  Loader2, CheckCircle2, ArrowLeft, Trash2, Eye 
-} from 'lucide-react';
-import { useNavigate, useLocation, useOutletContext } from 'react-router-dom';
-
-interface FileItem {
-  id: string;
-  file: File;
-  ownerLabel: string;
-  status: 'idle' | 'uploading' | 'success' | 'failed';
-  progress: number;
-  error?: string;
-  submissionId?: string;
-}
+import { Send, AlertCircle, UploadCloud, X, FileText, Loader2, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function UploadScreen() {
   const navigate = useNavigate();
@@ -26,6 +13,20 @@ export default function UploadScreen() {
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(false);
 
+  // TẠO BIẾN CHỨA LỚP HỌC
+  const [currentClass, setCurrentClass] = useState<any>(null);
+
+// 18. VỪA VÀO TRANG LÀ TỰ ĐỘNG ĐI LẤY THÔNG TIN LỚP HỌC TỪ LOCALSTORAGE
+  useEffect(() => {
+    const savedClass = localStorage.getItem('selectedClass');
+    if (savedClass) {
+      try {
+        setCurrentClass(JSON.parse(savedClass));
+      } catch (e) {
+        console.error("Lỗi đọc dữ liệu lớp học:", e);
+      }
+    }
+  }, []);
   const handleFileDrop = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = e.target.files;
     setError('');
@@ -84,62 +85,43 @@ export default function UploadScreen() {
   };
 
   const handleUpload = async () => {
-    if (fileItems.length === 0) return;
-
-    // Kiểm tra các tệp chưa nhập nhãn sinh viên
-    const idleItems = fileItems.filter(item => item.status === 'idle');
-    const missingLabel = idleItems.some(item => !item.ownerLabel.trim());
-    if (missingLabel) {
-      setError('Vui lòng điền thông tin Sinh viên / Nhóm thực hiện cho tất cả các file nộp!');
+    if (!file || !selectedClass?.assignment_id) {
+      setError('Vui lòng chọn lớp học hợp lệ!');
       return;
     }
 
-    setError('');
-    setProcessing(true);
+    setUploadStatus('uploading');
+    setProgress(10);
+
+    try {
     
-    // Xử lý tuần tự từng file nộp
-    for (let i = 0; i < fileItems.length; i++) {
-      const item = fileItems[i];
-      if (item.status !== 'idle' && item.status !== 'failed') continue;
+      const res = await uploadService.uploadSubmission(selectedClass.assignment_id, 'User_Name', file);
+      const submissionId = res.id || res.submission?.id;
+      setProgress(30);
 
-      updateItem(item.id, { status: 'uploading', progress: 10, error: undefined });
+    
+      // @ts-ignore
+      await uploadService.analyzeSubmission(submissionId);
+      setProgress(50);
+      
+      // @ts-ignore
+      await uploadService.detectReferences(submissionId);
+      setProgress(70);
+      
+      // @ts-ignore
+      await uploadService.parseCitations(submissionId);
+      setProgress(85);
+      
+      // @ts-ignore
+      await uploadService.verifyMetadata(submissionId);
+      setProgress(100);
 
-      try {
-        // 1. Tải lên tệp
-        const res = await uploadService.uploadSubmission(
-          selectedClass.assignment_id || selectedClass.id, 
-          item.ownerLabel.trim(), 
-          item.file
-        );
-        const submissionId = res.id || res.submission?.id;
-        updateItem(item.id, { progress: 30 });
-
-        // 2. Chạy luồng phân tích văn bản thô
-        // @ts-ignore
-        await uploadService.analyzeSubmission(submissionId);
-        updateItem(item.id, { progress: 50 });
-        
-        // 3. Phát hiện danh sách tài liệu tham khảo
-        // @ts-ignore
-        await uploadService.detectReferences(submissionId);
-        updateItem(item.id, { progress: 70 });
-        
-        // 4. Bóc tách chi tiết từng trích dẫn
-        // @ts-ignore
-        await uploadService.parseCitations(submissionId);
-        updateItem(item.id, { progress: 85 });
-        
-        // 5. Đối chiếu API chéo metadata
-        // @ts-ignore
-        await uploadService.verifyMetadata(submissionId);
-        
-        // Hoàn tất thành công
-        updateItem(item.id, { status: 'success', progress: 100, submissionId });
-      } catch (err: any) {
-        console.error("Lỗi xử lý file:", item.file.name, err);
-        const errorMessage = err.response?.data?.message || 'Lỗi xử lý hệ thống.';
-        updateItem(item.id, { status: 'failed', error: errorMessage });
-      }
+      setUploadStatus('success');
+      setTimeout(() => navigate(`/report/${submissionId}`), 1000);
+   } catch (err: any) {
+      setUploadStatus('failed');
+      const errorMessage = err.response?.data?.message || 'Lỗi xử lý hệ thống. Vui lòng thử lại!';
+      setError(errorMessage);
     }
 
     setProcessing(false);
@@ -173,9 +155,9 @@ export default function UploadScreen() {
   return (
     <div className="w-full max-w-4xl mx-auto mt-6">
       <div className="mb-8 text-center">
-        <h2 className={`text-3xl font-black mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Tải lên bài báo cáo</h2>
-        <p className={`font-medium ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-          Lớp học phần: <span className="text-blue-650 font-black">{selectedClass.name} ({selectedClass.id})</span>
+        <h2 className="text-3xl font-black text-slate-800 mb-2">Tải lên bài báo cáo</h2>
+        <p className="text-slate-500 font-medium">
+          Lớp học phần: <span className="text-blue-600 font-bold">{selectedClass?.name || 'Đồ án Tốt nghiệp'}</span>
         </p>
       </div>
 
