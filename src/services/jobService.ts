@@ -20,18 +20,7 @@ export interface JobStatusResponse {
   error: JobError | null;
 }
 
-const MOCK_STAGES = [
-  { status: 'queued', progress: 0, current_step: 'queued' },
-  { status: 'validating', progress: 5, current_step: 'validating' },
-  { status: 'extracting', progress: 15, current_step: 'extracting' },
-  { status: 'detecting_references', progress: 30, current_step: 'detecting_references' },
-  { status: 'parsing_citations', progress: 40, current_step: 'parsing_citations' },
-  { status: 'normalizing', progress: 50, current_step: 'normalizing' },
-  { status: 'verifying_metadata', progress: 65, current_step: 'verifying_metadata' },
-  { status: 'scoring', progress: 80, current_step: 'scoring' },
-  { status: 'building_report', progress: 90, current_step: 'building_report' },
-  { status: 'completed', progress: 100, current_step: 'completed' },
-];
+import { MOCK_STAGES } from '../mocks/dummyData';
 
 const mockJobStates: Record<string, number> = {};
 

@@ -1,4 +1,5 @@
 import axiosClient from './axiosClient';
+import { MOCK_USER } from '../mocks/dummyData';
 
 
 export interface RegisterData {
@@ -17,9 +18,9 @@ export const authService = {
             access_token: 'mock-access-token',
             refresh_token: 'mock-refresh-token',
             user: {
-              full_name: email === 'lecturer@trustlens.vn' ? 'Demo Lecturer' : 'Trần Quỳnh Như',
-              email: email,
-              role: 'lecturer'
+              ...MOCK_USER,
+              full_name: email === 'lecturer@trustlens.vn' ? 'Demo Lecturer' : MOCK_USER.full_name,
+              email: email
             }
           };
           localStorage.setItem('access_token', data.access_token);
@@ -66,12 +67,7 @@ export const authService = {
     if (import.meta.env.VITE_USE_MOCK === 'true') {
       return new Promise<any>((resolve) => {
         setTimeout(() => {
-          resolve({
-            id: 'mock-user-id',
-            full_name: 'Trần Quỳnh Như',
-            email: 'quynhnhu@nttu.edu.vn',
-            role: 'lecturer'
-          });
+          resolve(MOCK_USER);
         }, 300);
       });
     }
