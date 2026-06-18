@@ -1,22 +1,17 @@
 import uploadService from "../../services/uploadService";
-<<<<<<< HEAD
-import { useState, useEffect } from 'react';
-import { Send, AlertCircle, UploadCloud, X, FileText, Loader2, CheckCircle2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-
-=======
 
 import { useState, useEffect } from 'react'; // Tui thêm useEffect ở đây nha
 import { Send, AlertCircle, UploadCloud, X, FileText, Loader2, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
->>>>>>> 356b16220f440434e2b2ce0615a36e3414c58b30
+
 export default function UploadScreen() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme } = useOutletContext<{ theme: 'light' | 'dark' }>();
   const selectedClass = location.state?.selectedClass;
 
-  const [file, setFile] = useState<File | null>(null);
+  const [fileItems, setFileItems] = useState<FileItem[]>([]);
   const [error, setError] = useState('');
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'failed'>('idle');
   const [progress, setProgress] = useState(0);
@@ -36,26 +31,61 @@ export default function UploadScreen() {
   }, [navigate]);
 
   const handleFileDrop = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
+    const selectedFiles = e.target.files;
     setError('');
     
-    if (!selectedFile) return;
+    if (!selectedFiles || selectedFiles.length === 0) return;
 
     // Chỉ nhận PDF và DOCX
     const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-    if (!validTypes.includes(selectedFile.type)) {
-      setError('Định dạng không hợp lệ. Chỉ chấp nhận file .PDF hoặc .DOCX!');
-      return;
-    } 
+    const newItems: FileItem[] = [];
 
-    if (selectedFile.size > 20 * 1024 * 1024) {
-      setError('File quá lớn. Kích thước tối đa cho phép là 20MB!');
-      return;
+    for (let i = 0; i < selectedFiles.length; i++) {
+      const selectedFile = selectedFiles[i];
+
+      // Kiểm tra định dạng tệp
+      if (!validTypes.includes(selectedFile.type)) {
+        setError('Có tệp định dạng không hợp lệ. Chỉ chấp nhận file .PDF hoặc .DOCX!');
+        continue;
+      } 
+
+      // Kiểm tra dung lượng (tối đa 20MB)
+      if (selectedFile.size > 20 * 1024 * 1024) {
+        setError('Có tệp kích thước quá lớn. Giới hạn tối đa là 20MB!');
+        continue;
+      }
+
+      // Tránh trùng lặp tệp trùng tên trong hàng đợi hiện tại
+      if (fileItems.some(item => item.file.name === selectedFile.name)) {
+        continue;
+      }
+
+      newItems.push({
+        id: Math.random().toString(36).substring(2, 9),
+        file: selectedFile,
+        ownerLabel: '',
+        status: 'idle',
+        progress: 0
+      });
     }
 
-    setFile(selectedFile);
-    setUploadStatus('idle');
-    setProgress(0);
+    setFileItems((prev) => [...prev, ...newItems]);
+  };
+
+  const updateOwnerLabel = (id: string, label: string) => {
+    setFileItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, ownerLabel: label } : item))
+    );
+  };
+
+  const removeFile = (id: string) => {
+    setFileItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const updateItem = (id: string, fields: Partial<FileItem>) => {
+    setFileItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, ...fields } : item))
+    );
   };
 
   const handleUpload = async () => {
@@ -85,20 +115,26 @@ export default function UploadScreen() {
 
       setUploadStatus('success');
       setTimeout(() => navigate(`/report/${submissionId}`), 1000);
-    } catch (err: any) {
+   } catch (err: any) {
       setUploadStatus('failed');
       // Đây là chỗ hiện lỗi thực sự từ Backend
       const errorMessage = err.response?.data?.message || 'Lỗi không xác định. Vui lòng kiểm tra lại nội dung file!';
       setError(errorMessage);
     }
+
+    setProcessing(false);
   }; 
 
   if (!selectedClass) {
     return (
-      <div className="w-full max-w-md mx-auto mt-16 p-8 bg-white border border-slate-200 rounded-3xl shadow-lg text-center animate-fade-in">
+      <div className={`w-full max-w-md mx-auto mt-16 p-8 border rounded-3xl text-center animate-fade-in transition-colors duration-300 ${
+        theme === 'dark' 
+          ? 'bg-slate-900/40 border-slate-900 shadow-lg' 
+          : 'bg-white border-slate-200 shadow-md shadow-slate-100'
+      }`}>
         <AlertCircle size={48} className="text-amber-500 mx-auto mb-4" />
-        <h3 className="text-xl font-black text-slate-800 mb-2">Chưa chọn lớp học phần</h3>
-        <p className="text-slate-500 text-sm mb-6 leading-relaxed">
+        <h3 className={`text-xl font-black mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Chưa chọn lớp học phần</h3>
+        <p className={`text-sm mb-6 leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
           Vui lòng chọn một lớp học phần phụ trách để bắt đầu tải lên và thẩm định báo cáo đồ án.
         </p>
         <button 
@@ -111,6 +147,9 @@ export default function UploadScreen() {
     );
   }
 
+  const hasIdle = fileItems.some(item => item.status === 'idle');
+  const hasFinished = fileItems.some(item => item.status === 'success');
+
   return (
     // ... (Giữ nguyên phần giao diện return như cũ)
     <div className="w-full max-w-3xl mx-auto mt-8">
@@ -121,8 +160,8 @@ export default function UploadScreen() {
         </p>
       </div>
       {error && (
-        <div className="flex items-center gap-2 mb-6 p-4 bg-red-50 text-red-600 font-bold rounded-xl border border-red-100">
-          <AlertCircle size={20} /> {error}
+        <div className="flex items-center gap-2 mb-6 p-4 bg-red-50 text-red-600 font-bold rounded-xl border border-red-100 text-sm">
+          <AlertCircle size={18} className="shrink-0" /> {error}
         </div>
       )}
     </div>
