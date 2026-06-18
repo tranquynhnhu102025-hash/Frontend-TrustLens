@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="600" viewBox="0 0 620 600"
+     role="img" aria-labelledby="title desc">
+  <title id="title">TrustLens stacked logo</title>
+  <desc id="desc">Stacked TrustLens logo for square and portrait placements.</desc>
+
+  <defs>
+    <linearGradient id="brandGradient" x1="40" y1="40" x2="300" y2="300" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6EA8FF"/>
+      <stop offset="1" stop-color="#42E0C0"/>
+    </linearGradient>
+    <linearGradient id="wordGradient" x1="0" y1="0" x2="360" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6EA8FF"/>
+      <stop offset="1" stop-color="#42E0C0"/>
+    </linearGradient>
+  </defs>
+
+  <g transform="translate(150 20) scale(1)">
+    <path d="M220 220 L282 282" fill="none" stroke="url(#brandGradient)" stroke-width="28" stroke-linecap="round"/>
+    <circle cx="150" cy="150" r="94" fill="#0F1B2D" stroke="url(#brandGradient)" stroke-width="24"/>
+    <path d="M150 88 L204 108 V162
+             C204 201 183 225 150 241
+             C117 225 96 201 96 162 V108 Z"
+          fill="#132540" stroke="#F4F7FB" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M122 133 H178 M122 155 H165"
+          fill="none" stroke="#A9B7C9" stroke-width="8" stroke-linecap="round"/>
+    <path d="M120 181 L141 201 L181 160"
+          fill="none" stroke="#42E0C0" stroke-width="12"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <text x="84" y="430" font-family="Inter, Segoe UI, Arial, sans-serif"
+        font-size="102" font-weight="750" letter-spacing="-4" fill="#F4F7FB">Trust</text>
+  <text x="330" y="430" font-family="Inter, Segoe UI, Arial, sans-serif"
+        font-size="102" font-weight="750" letter-spacing="-4" fill="url(#wordGradient)">Lens</text>
+  <text x="80" y="485" font-family="Inter, Segoe UI, Arial, sans-serif"
+        font-size="22" font-weight="650" letter-spacing="4.2" fill="#A9B7C9">
+    ACADEMIC REFERENCE INTELLIGENCE
+  </text>
+</svg>

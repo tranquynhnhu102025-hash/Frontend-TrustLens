@@ -4,13 +4,14 @@ export interface Course {
   name: string;
   students: number;
   date: string;
+  assignment_id?: string;
 }
 
 // DỮ LIỆU GIẢ LẬP (MOCK DATA)
 let mockClasses: Course[] = [
-  { id: 'INT4050', name: 'Đồ án Tốt nghiệp - Khóa 2022', students: 45, date: '15/06/2026' },
-  { id: 'INT3307', name: 'Phát triển Hệ thống Thông tin Enterprise', students: 38, date: '20/06/2026' },
-  { id: 'INT3110', name: 'Kỹ thuật phần mềm nâng cao', students: 42, date: '18/06/2026' }
+  { id: 'INT4050', name: 'Đồ án Tốt nghiệp - Khóa 2022', students: 45, date: '15/06/2026', assignment_id: 'INT4050' },
+  { id: 'INT3307', name: 'Phát triển Hệ thống Thông tin Enterprise', students: 38, date: '20/06/2026', assignment_id: 'INT3307' },
+  { id: 'INT3110', name: 'Kỹ thuật phần mềm nâng cao', students: 42, date: '18/06/2026', assignment_id: 'INT3110' }
 ];
 
 export const classService = {
@@ -32,7 +33,8 @@ export const classService = {
           id: newCode.toUpperCase(),
           name: newName,
           students: 0,
-          date: '31/12/2026'
+          date: '31/12/2026',
+          assignment_id: newCode.toUpperCase()
         };
         mockClasses.push(newClass);
         resolve(newClass);
