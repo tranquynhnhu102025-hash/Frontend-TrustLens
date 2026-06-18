@@ -15,6 +15,13 @@ export let MOCK_CLASSES: Course[] = [
 ];
 
 // Dữ liệu báo cáo mẫu khớp với cấu trúc JSON chuẩn của Backend API
+// Dữ liệu lịch sử các lần chấm điểm của đồ án
+export const MOCK_REVISIONS = [
+  { id: "mock-report-uuid-revision-1", revision_number: 1, created_at: "2026-06-19T01:10:00Z", report_trust_score: 75, scoring_preset_code: "IT_GENERAL", scoring_preset_version: 1 },
+  { id: "mock-report-uuid-1", revision_number: 2, created_at: "2026-06-19T01:30:00Z", report_trust_score: 78, scoring_preset_code: "IT_GENERAL", scoring_preset_version: 1 }
+];
+
+// Dữ liệu báo cáo mẫu khớp với cấu trúc JSON chuẩn của Backend API P1
 export const MOCK_REPORT = {
   report_id: "mock-report-uuid-1",
   submission_id: "mock-sub-uuid-1",
@@ -23,6 +30,11 @@ export const MOCK_REPORT = {
   report_trust_score: 78,
   confidence_score: 0.82,
   overall_label: "needs_review",
+  revision_number: 2,
+  scoring_preset_code: "IT_GENERAL",
+  scoring_preset_version: 1,
+  scoring_preset_name: "CNTT tổng quát",
+  created_at: "2026-06-19T01:30:00Z",
   summary: {
     total_citations: 24,
     verified: 18,
@@ -45,14 +57,70 @@ export const MOCK_REPORT = {
     ]
   },
   component_summary: {
-    c1_metadata_completeness: 8.4,
-    c2_metadata_verification: 16.2,
-    c3_source_credibility: 15.6,
-    c4_relevance: 15.0,
-    c5_recency: 7.8,
-    c6_citation_quality: 8.0,
-    c7_source_diversity: 3.8,
-    c8_academic_risk_integrity: 4.2
+    c1_metadata_completeness: {
+      score: 8.4,
+      max_score: 10,
+      reason_code: "METADATA_COMPLETE",
+      explanation: "Thông tin mô tả của danh mục tài liệu tham khảo đạt độ hoàn thiện cao, hầu hết đều có đầy đủ tác giả, tiêu đề, năm xuất bản và nơi công bố.",
+      evidence: { completeness_ratio: 0.94 },
+      recommendation: "Bổ sung DOI hoặc URL cho các bài báo hội thảo còn thiếu để tăng tính liên kết."
+    },
+    c2_metadata_verification: {
+      score: 16.2,
+      max_score: 20,
+      reason_code: "METADATA_VERIFIED_PARTIAL",
+      explanation: "Hầu hết các tài liệu đã đối sánh chính xác với cơ sở dữ liệu CrossRef/OpenAlex. Một số tài liệu bị lệch năm xuất bản nhẹ so với cơ sở dữ liệu gốc.",
+      evidence: { verified_ratio: 0.82, year_mismatches: 3 },
+      recommendation: "Hiệu chỉnh lại năm xuất bản của 3 tài liệu bị gắn cờ cảnh báo lệch năm."
+    },
+    c3_source_credibility: {
+      score: 15.6,
+      max_score: 20,
+      reason_code: "SOURCE_CREDIBLE_WELL_KNOWN",
+      explanation: "Đa số tài liệu trích dẫn thuộc danh mục tạp chí uy tín thuộc IEEE, ACM, Springer. Phát hiện 1 nguồn tài liệu từ blog cá nhân có độ tin cậy thấp.",
+      evidence: { peer_reviewed_ratio: 0.88, blogs_detected: 1 },
+      recommendation: "Hạn chế trích dẫn từ blog cá nhân trừ khi tác giả là chuyên gia đầu ngành được thừa nhận."
+    },
+    c4_relevance: {
+      score: 15.0,
+      max_score: 20,
+      reason_code: "RELEVANCE_HIGH",
+      explanation: "Mức độ tương đồng ngữ nghĩa vector giữa nội dung trích dẫn và chủ đề chính của đồ án tốt nghiệp đạt mức cao.",
+      evidence: { average_semantic_similarity: 0.76 },
+      recommendation: "Duy trì hướng trích dẫn hiện tại. Có thể bổ sung thêm tài liệu liên quan trực tiếp đến thuật toán chính."
+    },
+    c5_recency: {
+      score: 7.8,
+      max_score: 10,
+      reason_code: "RECENCY_ACCEPTABLE",
+      explanation: "Phần lớn tài liệu được xuất bản trong vòng 5 năm gần đây. Tuy nhiên, phát hiện một vài tài liệu cũ (>10 năm) trong lĩnh vực công nghệ thông tin.",
+      evidence: { average_age_years: 4.2, outdated_citations_count: 2 },
+      recommendation: "Cập nhật các tài liệu quá cũ bằng các công trình nghiên cứu mới hơn (từ năm 2021 đến nay)."
+    },
+    c6_citation_quality: {
+      score: 8.0,
+      max_score: 10,
+      reason_code: "STYLE_APA_MINOR_ERRORS",
+      explanation: "Quy cách định dạng trích dẫn bám sát chuẩn APA 7th. Phát hiện một số lỗi nhỏ liên quan đến cách viết hoa tiêu đề hoặc thiếu dấu chấm câu cuối dòng.",
+      evidence: { format_compliance_score: 0.85, style_violations: 2 },
+      recommendation: "Rà soát lại định dạng dấu ngoặc đơn và viết hoa tiêu đề theo đúng cẩm nang hướng dẫn APA 7th."
+    },
+    c7_source_diversity: {
+      score: 3.8,
+      max_score: 5,
+      reason_code: "DIVERSITY_GOOD",
+      explanation: "Danh mục trích dẫn thể hiện độ đa dạng nguồn tốt khi phân phối đều qua nhiều nhà xuất bản, hội thảo và tạp chí khoa học khác nhau.",
+      evidence: { publisher_diversity_entropy: 1.84 },
+      recommendation: "Tiếp tục phát huy. Tránh tập trung quá nhiều trích dẫn vào cùng một nhóm nghiên cứu hoặc một tác giả duy nhất."
+    },
+    c8_academic_risk_integrity: {
+      score: 4.2,
+      max_score: 5,
+      reason_code: "ACADEMIC_RISK_LOW",
+      explanation: "Mức độ rủi ro học thuật thấp. Phát hiện 1 tài liệu nằm trong danh sách tạp chí trục lợi/săn mồi (predatory watch) cần lưu ý.",
+      evidence: { predatory_journals_count: 1 },
+      recommendation: "Xác minh lại độ tin cậy của bài viết khoa học thuộc tạp chí săn mồi bị cảnh báo."
+    }
   },
   citations: [
     {

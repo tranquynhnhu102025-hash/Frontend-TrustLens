@@ -5,6 +5,7 @@ import {
   Loader2, CheckCircle2, ArrowLeft, Trash2, Eye 
 } from 'lucide-react';
 import { useNavigate, useLocation, useOutletContext } from 'react-router-dom';
+import { classService, Course } from '../../services/classService';
 
 interface FileItem {
   id: string;
@@ -28,26 +29,42 @@ export default function UploadScreen() {
   const [fileItems, setFileItems] = useState<FileItem[]>([]);
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(false);
-  const [currentClass, setCurrentClass] = useState<any>(null);
+  const [currentClass, setCurrentClass] = useState<Course | null>(null);
+  const [classesList, setClassesList] = useState<Course[]>([]);
+  const [loadingClasses, setLoadingClasses] = useState(true);
 
   useEffect(() => {
-    if (selectedClass) {
-      localStorage.setItem('selectedClass', JSON.stringify(selectedClass));
-      setCurrentClass(selectedClass);
-    } else {
-      const savedClass = localStorage.getItem('selectedClass');
-      if (savedClass) {
-        try {
-          setCurrentClass(JSON.parse(savedClass));
-        } catch (e) {
-          console.error("Lỗi đọc dữ liệu lớp học:", e);
-          navigate('/classes');
+    const loadClasses = async () => {
+      setLoadingClasses(true);
+      try {
+        const data = await classService.getClasses();
+        setClassesList(data);
+        
+        if (selectedClass) {
+          localStorage.setItem('selectedClass', JSON.stringify(selectedClass));
+          setCurrentClass(selectedClass);
+        } else {
+          const savedClass = localStorage.getItem('selectedClass');
+          if (savedClass) {
+            try {
+              const parsed = JSON.parse(savedClass);
+              const exists = data.find(c => c.id === parsed.id);
+              setCurrentClass(exists || data[0] || null);
+            } catch (e) {
+              setCurrentClass(data[0] || null);
+            }
+          } else {
+            setCurrentClass(data[0] || null);
+          }
         }
-      } else {
-        navigate('/classes');
+      } catch (error) {
+        console.error("Lỗi khi tải danh sách lớp học:", error);
+      } finally {
+        setLoadingClasses(false);
       }
-    }
-  }, [selectedClass, navigate]);
+    };
+    loadClasses();
+  }, [selectedClass]);
 
   const handleFileDrop = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = e.target.files;
@@ -103,8 +120,17 @@ export default function UploadScreen() {
     );
   };
 
+  const handleClassChange = (classId: string) => {
+    const found = classesList.find(c => c.id === classId);
+    if (found) {
+      localStorage.setItem('selectedClass', JSON.stringify(found));
+      setCurrentClass(found);
+      setError('');
+    }
+  };
+
   const handleUpload = async () => {
-    if (fileItems.length === 0) return;
+    if (fileItems.length === 0 || !currentClass) return;
 
     const idleItems = fileItems.filter(item => item.status === 'idle');
     const missingLabel = idleItems.some(item => !item.ownerLabel.trim());
@@ -131,7 +157,7 @@ export default function UploadScreen() {
 
       try {
         const res = await uploadService.uploadSubmission(
-          currentClass.assignment_id || currentClass.id, 
+          currentClass!.assignment_id || currentClass!.id, 
           item.ownerLabel.trim(), 
           item.file
         );
@@ -163,15 +189,24 @@ export default function UploadScreen() {
     }
 
     setProcessing(false);
-  }; 
+  };
 
-  if (!selectedClass && !currentClass) {
+  if (loadingClasses && !currentClass) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3">
+        <Loader2 size={32} className="text-zinc-905 dark:text-white animate-spin" />
+        <p className="text-zinc-500 dark:text-zinc-400 font-semibold text-xs">Đang tải danh sách lớp học...</p>
+      </div>
+    );
+  }
+
+  if (!currentClass) {
     return (
       <div className="w-full max-w-md mx-auto mt-16 p-8 border border-zinc-200 dark:border-zinc-900 bg-white dark:bg-zinc-950 rounded-lg text-center animate-fade-in shadow-sm">
-        <AlertCircle size={36} className="text-zinc-400 dark:text-zinc-550 mx-auto mb-4" />
-        <h3 className="text-sm font-bold mb-1 text-zinc-900 dark:text-white">Chưa chọn lớp học phần</h3>
+        <AlertCircle size={36} className="text-zinc-400 dark:text-zinc-555 mx-auto mb-4" />
+        <h3 className="text-sm font-bold mb-1 text-zinc-900 dark:text-white">Chưa cấu hình lớp học phần</h3>
         <p className="text-xs mb-5 leading-relaxed text-zinc-500 font-medium">
-          Vui lòng chọn một lớp học phần phụ trách để bắt đầu tải lên và thẩm định báo cáo đồ án.
+          Vui lòng tạo một lớp học phần phụ trách để bắt đầu tải lên báo cáo.
         </p>
         <button 
           onClick={() => navigate('/classes')}
@@ -185,15 +220,25 @@ export default function UploadScreen() {
 
   const hasIdle = fileItems.some(item => item.status === 'idle');
   const hasFinished = fileItems.some(item => item.status === 'success');
-  const displayClassName = selectedClass?.name || currentClass?.name || 'Đồ án Tốt nghiệp';
 
   return (
     <div className="w-full max-w-4xl mx-auto mt-4 space-y-6">
       <div className="text-center border-b border-zinc-150 dark:border-zinc-900 pb-5">
         <h2 className="text-xl font-bold text-zinc-900 dark:text-white">Tải lên bài báo cáo</h2>
-        <p className="text-xs font-semibold text-zinc-500 mt-1">
-          Lớp học phần: <span className="text-zinc-800 dark:text-zinc-350 underline">{displayClassName}</span>
-        </p>
+        <div className="text-xs font-semibold text-zinc-550 dark:text-zinc-500 mt-2 flex items-center justify-center gap-1.5">
+          Lớp học phần: 
+          <select 
+            value={currentClass?.id || ''}
+            onChange={(e) => handleClassChange(e.target.value)}
+            className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1 text-xs font-bold text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-700 transition-colors cursor-pointer"
+          >
+            {classesList.map((cls) => (
+              <option key={cls.id} value={cls.id}>
+                {cls.id} - {cls.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {error && (
