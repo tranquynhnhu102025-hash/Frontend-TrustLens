@@ -1,4 +1,4 @@
-import uploadService from '../../services/uploadService';
+import uploadService from "../../services/uploadService";
 import { useState } from 'react';
 import { Send, AlertCircle, UploadCloud, X, FileText, Loader2, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -42,7 +42,7 @@ export default function UploadScreen({ selectedClass }: any) {
     setProgress(10);
 
     try {
-      // 1. Upload file
+    
       const res = await uploadService.uploadSubmission(selectedClass.assignment_id, 'User_Name', file);
       const submissionId = res.id || res.submission?.id;
       setProgress(30);
@@ -71,7 +71,7 @@ export default function UploadScreen({ selectedClass }: any) {
       const errorMessage = err.response?.data?.message || 'Lỗi xử lý hệ thống. Vui lòng thử lại!';
       setError(errorMessage);
     }
-  }; // <--- Đã đóng ngoặc đúng chỗ này!
+  }; 
 
   return (
     <div className="w-full max-w-3xl mx-auto mt-8">
