@@ -14,14 +14,17 @@ export default function UploadScreen() {
   // TẠO BIẾN CHỨA LỚP HỌC
   const [currentClass, setCurrentClass] = useState<any>(null);
 
-  // VỪA VÀO TRANG LÀ TỰ ĐỘNG ĐI LẤY THÔNG TIN LỚP HỌC TỪ LOCALSTORAGE
+// 18. VỪA VÀO TRANG LÀ TỰ ĐỘNG ĐI LẤY THÔNG TIN LỚP HỌC TỪ LOCALSTORAGE
   useEffect(() => {
     const savedClass = localStorage.getItem('selectedClass');
     if (savedClass) {
-      setCurrentClass(JSON.parse(savedClass));
+      try {
+        setCurrentClass(JSON.parse(savedClass));
+      } catch (e) {
+        console.error("Lỗi đọc dữ liệu lớp học:", e);
+      }
     }
   }, []);
-
   const handleFileDrop = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     setError('');
