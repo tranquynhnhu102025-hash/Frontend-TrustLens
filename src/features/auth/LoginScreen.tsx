@@ -12,6 +12,8 @@ export default function LoginScreen() {
 
  const [error, setError] = useState(''); // Thêm dòng này để chứa thông báo lỗi nếu có
 
+ const logoUrl = "/public/Symbol/TrustLens_Symbol_Light.svg";
+
   const handleLogin = async () => {
     setLoading(true);
     setError(''); // Xóa lỗi cũ (nếu có) trước khi thử lại
@@ -36,11 +38,9 @@ export default function LoginScreen() {
     <div className="flex flex-col items-center justify-center min-h-[75vh]">
       <div className="bg-white p-8 rounded-2xl shadow-minimal-md w-full max-w-sm border border-slate-100">
         <div className="flex justify-center mb-6">
-          <div className="bg-blue-50 text-blue-600 p-3.5 rounded-xl border border-blue-100">
-            <FileText size={30} />
-          </div>
+          <img src="/Symbol/TrustLens_Symbol_Navy.svg" alt="TrustLens Logo" className="h-10 w-auto" />
         </div>        
-        <h2 className="text-xl font-black text-center text-slate-900 mb-1.5">Hệ thống TrustLens</h2>
+        <h2 className="text-xl font-bold text-center text-slate-900 mb-1.5">Hệ thống TrustLens</h2>
         <p className="text-center text-slate-500 text-xs mb-8 font-medium">Xác thực danh mục tài liệu đồ án công nghệ thông tin</p>       
         
         <div className="space-y-4">

@@ -17,14 +17,8 @@ export default function Sidebar() {
   return (
     <div className="w-full bg-white border-r border-slate-200/60 text-slate-800 flex flex-col h-full shadow-minimal-sm">
       {/* Phần Logo */}
-      <Link to='/' className="p-6 flex items-center gap-3 border-b border-slate-100">
-        <div className="bg-blue-50 text-blue-600 p-2 rounded-xl border border-blue-100">
-          <FileText size={22} />
-        </div>
-        <div>
-          <h1 className="text-lg font-black tracking-wide text-slate-900">TrustLens</h1>
-          <p className="text-[9px] text-slate-400 font-bold tracking-wider uppercase">Hệ thống thẩm định</p>
-        </div>
+      <Link to='/' className="p-6 flex items-center justify-center border-b border-slate-100/60">
+        <img src="/Horizontal/TrustLens_Horizontal_Dark.svg" alt="TrustLens Logo" className="h-7 w-auto" />
       </Link>
 
       {/* Menu chính */}
@@ -37,9 +31,9 @@ export default function Sidebar() {
               <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all font-bold text-sm border ${
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all font-semibold text-sm border ${
                   isActive 
-                    ? 'bg-slate-50 border-slate-200/60 text-blue-600 shadow-minimal-sm' 
+                    ? 'bg-slate-50 border-slate-200/60 text-blue-600 shadow-minimal-sm font-bold' 
                     : 'text-slate-500 border-transparent hover:bg-slate-50 hover:text-slate-900'
                 }`}
               >
@@ -61,7 +55,7 @@ export default function Sidebar() {
             Q
           </div>
           <div className="text-left overflow-hidden">
-            <p className="font-bold text-xs text-slate-800 truncate">Trần Quỳnh Như</p>
+            <p className="font-semibold text-xs text-slate-800 truncate">Trần Quỳnh Như</p>
             <p className="text-[10px] font-medium text-slate-400 mt-0.5">Giảng viên phụ trách</p>
           </div>
         </div>
@@ -72,7 +66,7 @@ export default function Sidebar() {
             localStorage.removeItem('refresh_token');
             navigate('/login');
           }}
-          className="w-full flex items-center justify-center gap-1.5 py-2 text-rose-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors text-xs font-bold"
+          className="w-full flex items-center justify-center gap-1.5 py-2 text-rose-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors text-xs font-semibold"
         >
           <LogOut size={14} /> Đăng xuất
         </button>
