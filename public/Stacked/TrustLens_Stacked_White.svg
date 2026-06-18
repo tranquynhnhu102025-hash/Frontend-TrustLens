@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="600" viewBox="0 0 620 600"
+     role="img" aria-labelledby="title desc">
+  <title id="title">TrustLens stacked logo</title>
+  <desc id="desc">Stacked TrustLens logo for square and portrait placements.</desc>
+
+  <g transform="translate(150 20) scale(1)">
+    <path d="M220 220 L282 282" fill="none" stroke="#FFFFFF" stroke-width="28" stroke-linecap="round"/>
+    <circle cx="150" cy="150" r="94" fill="none" stroke="#FFFFFF" stroke-width="24"/>
+    <path d="M150 88 L204 108 V162
+             C204 201 183 225 150 241
+             C117 225 96 201 96 162 V108 Z"
+          fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M122 133 H178 M122 155 H165"
+          fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round"/>
+    <path d="M120 181 L141 201 L181 160"
+          fill="none" stroke="#FFFFFF" stroke-width="12"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <text x="84" y="430" font-family="Inter, Segoe UI, Arial, sans-serif"
+        font-size="102" font-weight="750" letter-spacing="-4" fill="#FFFFFF">Trust</text>
+  <text x="330" y="430" font-family="Inter, Segoe UI, Arial, sans-serif"
+        font-size="102" font-weight="750" letter-spacing="-4" fill="#FFFFFF">Lens</text>
+  <text x="80" y="485" font-family="Inter, Segoe UI, Arial, sans-serif"
+        font-size="22" font-weight="650" letter-spacing="4.2" fill="#FFFFFF">
+    ACADEMIC REFERENCE INTELLIGENCE
+  </text>
+</svg>
