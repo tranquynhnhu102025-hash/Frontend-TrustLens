@@ -4,23 +4,43 @@ import {
   FileText, ShieldCheck, AlertTriangle, ShieldAlert, 
   ArrowUpRight, Clock, CheckCircle2, ChevronRight 
 } from 'lucide-react';
+// 1. GỌI SERVICE VÀO (Nhớ kiểm tra lại đường dẫn file này cho chuẩn nhé)
+import dashboardService from '../../services/dashboardService';
 
 export default function DashboardScreen() {
   const navigate = useNavigate();
 
-  const summaryData = {
+  // 2. DÙNG STATE ĐỂ CHỨA DỮ LIỆU
+  // Tạm thời để số cũ làm mặc định để giao diện vẫn hiện đẹp trong lúc chờ API
+  const [summaryData, setSummaryData] = useState({
     totalSubmissions: 156,
     passed: 112,
     warnings: 34,
     critical: 10,
-  };
+  });
 
-  const recentActivities = [
+  const [recentActivities, setRecentActivities] = useState([
     { id: 'SUB-101', student: 'Nguyễn Văn A', class: 'INT4050', time: '10 phút trước', score: 85, status: 'pass' },
     { id: 'SUB-102', student: 'Trần Thị B', class: 'INT3307', time: '1 giờ trước', score: 55, status: 'warning' },
     { id: 'SUB-103', student: 'Lê Hoàng C', class: 'INT4050', time: '3 giờ trước', score: 32, status: 'fail' },
     { id: 'SUB-104', student: 'Phạm Văn D', class: 'INT3110', time: 'Hôm qua', score: 92, status: 'pass' },
-  ];
+  ]);
+
+  // 3. DÙNG EFFECT ĐỂ KÉO DỮ LIỆU TỪ HỆ THỐNG KHI VỪA MỞ TRANG
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        // KHI NÀO BACKEND XONG, NHƯ CHỈ CẦN MỞ KHÓA (XÓA DẤU //) Ở 3 DÒNG DƯỚI LÀ XONG:
+        // const realData = await dashboardService.getDashboardData();
+        // setSummaryData(realData.summary);
+        // setRecentActivities(realData.activities);
+      } catch (error) {
+        console.error("Lỗi khi tải dữ liệu Dashboard:", error);
+      }
+    };
+
+    fetchDashboardData();
+  }, []); // Ngoặc vuông rỗng đảm bảo nó chỉ tự động tải 1 lần lúc mở trang
 
   return (
     <div className="w-full animate-fade-in">
