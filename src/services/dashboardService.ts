@@ -20,26 +20,16 @@ const dashboardService = {
     if (import.meta.env.VITE_USE_MOCK === 'true') {
       return MOCK_SUMMARY;
     }
-    try {
-      const res = await axiosClient.get('/dashboard/summary');
-      return res.data;
-    } catch (error) {
-      console.warn("Gọi API /dashboard/summary thất bại. Dùng dữ liệu mock dự phòng:", error);
-      return MOCK_SUMMARY;
-    }
+    const res = await axiosClient.get('/dashboard/summary');
+    return res.data;
   },
 
   getRecentActivities: async () => {
     if (import.meta.env.VITE_USE_MOCK === 'true') {
       return MOCK_ACTIVITIES;
     }
-    try {
-      const res = await axiosClient.get('/dashboard/recent-activities');
-      return res.data;
-    } catch (error) {
-      console.warn("Gọi API /dashboard/recent-activities thất bại. Dùng dữ liệu mock dự phòng:", error);
-      return MOCK_ACTIVITIES;
-    }
+    const res = await axiosClient.get('/dashboard/recent-activities');
+    return res.data;
   },
 };
 
