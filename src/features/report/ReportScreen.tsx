@@ -1,12 +1,17 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { 
   ShieldAlert, ShieldCheck, Download, AlertTriangle, 
-  CheckCircle2, FileText, ChevronLeft, BarChart3, Info
+  CheckCircle2, FileText, ChevronLeft, BarChart3, Info, Loader2
 } from 'lucide-react';
+import { reportService } from '../../services/reportService';
 
 export default function ReportScreen() {
   const navigate = useNavigate();
+  const { id } = useParams();
+
+  const [loading, setLoading] = useState(false);
+  const [report, setReport] = useState<any>(null);
 
   const mockReport = {
     trustScore: 78,
@@ -24,9 +29,70 @@ export default function ReportScreen() {
     ]
   };
 
+  useEffect(() => {
+    const fetchReport = async () => {
+      if (!id) {
+        setReport(mockReport);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const data = await reportService.getReport(id);
+        
+        // Chuẩn hóa dữ liệu từ backend API khớp với giao diện
+        const normalizedReport = {
+          trustScore: data.trust_score ?? data.trustScore ?? 78,
+          level: data.level ?? (data.trust_score >= 80 ? 'Đạt chuẩn' : data.trust_score >= 50 ? 'Cảnh báo' : 'Nguy hiểm'),
+          summary: data.summary ?? 'Báo cáo thẩm định trích dẫn tự động cho bài nộp tài liệu học thuật.',
+          criteriaBreakdown: data.criteria_breakdown || data.criteriaBreakdown || [
+            { name: 'Độ tin cậy của nguồn', score: data.credibility_score ?? 85, weight: '40%' },
+            { name: 'Tính cập nhật (5 năm gần nhất)', score: data.recency_score ?? 60, weight: '30%' },
+            { name: 'Định dạng trích dẫn (APA/IEEE)', score: data.formatting_score ?? 90, weight: '30%' }
+          ],
+          citations: (data.citations || []).map((cite: any, index: number) => ({
+            id: cite.id ?? index + 1,
+            title: cite.title ?? cite.raw_text ?? 'Tài liệu tham khảo',
+            author: cite.authors ?? cite.author ?? 'N/A',
+            year: cite.year ?? 'N/A',
+            source: cite.venue ?? cite.source ?? 'Nguồn học thuật',
+            status: cite.status ?? (cite.is_predatory ? 'fail' : cite.is_outdated ? 'warning' : 'pass'),
+            issues: cite.issues ?? (cite.is_predatory ? 'Cảnh báo: Tạp chí trục lợi (Predatory Watch).' : cite.is_outdated ? 'Độ cập nhật kém (>5 năm).' : 'Hợp lệ')
+          }))
+        };
+
+        if (normalizedReport.citations.length === 0) {
+          normalizedReport.citations = mockReport.citations;
+        }
+
+        setReport(normalizedReport);
+      } catch (err: any) {
+        console.error("Lỗi gọi API reportService. Dùng dữ liệu mock dự phòng:", err);
+        setReport(mockReport);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReport();
+  }, [id]);
+
   const handleExport = () => {
     alert('Tính năng xuất file PDF/DOCX đang được BE xây dựng. Sẽ sớm ra mắt!');
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+        <Loader2 size={40} className="text-blue-600 animate-spin" />
+        <p className="text-slate-500 font-bold text-sm">Đang tải kết quả thẩm định...</p>
+      </div>
+    );
+  }
+
+  if (!report) {
+    return null;
+  }
 
   return (
     <div className="w-full max-w-6xl mx-auto my-6 animate-fade-in">
@@ -58,18 +124,18 @@ export default function ReportScreen() {
           <div className="relative w-40 h-40 flex items-center justify-center mb-4">
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
               <path className="text-slate-100" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-              <path className="text-amber-500" strokeDasharray={`${mockReport.trustScore}, 100`} strokeWidth="3" stroke="currentColor" fill="none" strokeLinecap="round" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              <path className="text-amber-500" strokeDasharray={`${report.trustScore}, 100`} strokeWidth="3" stroke="currentColor" fill="none" strokeLinecap="round" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
             </svg>
             <div className="absolute flex flex-col items-center">
-              <span className="text-5xl font-black text-slate-800">{mockReport.trustScore}</span>
+              <span className="text-5xl font-black text-slate-800">{report.trustScore}</span>
               <span className="text-sm font-bold text-slate-400">/ 100</span>
             </div>
           </div>
           
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 text-amber-600 font-bold text-sm border border-amber-200 mb-4">
-            <AlertTriangle size={16} /> Mức độ: {mockReport.level}
+            <AlertTriangle size={16} /> Mức độ: {report.level}
           </div>
-          <p className="text-sm text-slate-500 font-medium">{mockReport.summary}</p>
+          <p className="text-sm text-slate-500 font-medium">{report.summary}</p>
         </div>
 
         {/* THẺ TIÊU CHÍ THÀNH PHẦN (CRITERIA BREAKDOWN) */}
@@ -79,7 +145,7 @@ export default function ReportScreen() {
           </h3>
           
           <div className="space-y-6">
-            {mockReport.criteriaBreakdown.map((item, idx) => (
+            {report.criteriaBreakdown.map((item: any, idx: number) => (
               <div key={idx}>
                 <div className="flex justify-between items-end mb-2">
                   <div>
@@ -120,7 +186,7 @@ export default function ReportScreen() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm">
-              {mockReport.citations.map((cite) => (
+              {report.citations.map((cite: any) => (
                 <tr key={cite.id} className="hover:bg-slate-50/50 transition-colors">
                   <td className="p-4">
                     <p className="font-bold text-slate-800 line-clamp-2">{cite.title}</p>

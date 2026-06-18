@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="230" viewBox="0 0 860 230"
+     role="img" aria-labelledby="title desc">
+  <title id="title">TrustLens wordmark</title>
+  <desc id="desc">TrustLens wordmark without symbol.</desc>
+
+  <defs>
+    <linearGradient id="brandGradient" x1="40" y1="40" x2="300" y2="300" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2F6BFF"/>
+      <stop offset="1" stop-color="#10BFA5"/>
+    </linearGradient>
+    <linearGradient id="wordGradient" x1="0" y1="0" x2="360" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2F6BFF"/>
+      <stop offset="1" stop-color="#10BFA5"/>
+    </linearGradient>
+  </defs>
+
+  <text x="35" y="155" font-family="Inter, Segoe UI, Arial, sans-serif"
+        font-size="132" font-weight="750" letter-spacing="-5" fill="#0B1F3A">Trust</text>
+  <text x="356" y="155" font-family="Inter, Segoe UI, Arial, sans-serif"
+        font-size="132" font-weight="750" letter-spacing="-5" fill="url(#wordGradient)">Lens</text>
+</svg>

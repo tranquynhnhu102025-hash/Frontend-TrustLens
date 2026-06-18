@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320"
+     role="img" aria-labelledby="title desc">
+  <title id="title">TrustLens symbol</title>
+  <desc id="desc">TrustLens lens, shield and verification symbol without wordmark.</desc>
+
+  <g transform="translate(0 0) scale(1)">
+    <path d="M220 220 L282 282" fill="none" stroke="#0B1F3A" stroke-width="28" stroke-linecap="round"/>
+    <circle cx="150" cy="150" r="94" fill="none" stroke="#0B1F3A" stroke-width="24"/>
+    <path d="M150 88 L204 108 V162
+             C204 201 183 225 150 241
+             C117 225 96 201 96 162 V108 Z"
+          fill="none" stroke="#0B1F3A" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M122 133 H178 M122 155 H165"
+          fill="none" stroke="#0B1F3A" stroke-width="8" stroke-linecap="round"/>
+    <path d="M120 181 L141 201 L181 160"
+          fill="none" stroke="#0B1F3A" stroke-width="12"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+</svg>

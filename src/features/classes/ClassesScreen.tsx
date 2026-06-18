@@ -1,37 +1,45 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Users, Calendar, ChevronRight, BookOpen, Save } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { classService, Course } from '../../services/classService';
 
-export default function ClassesScreen({ setSelectedClass }: any) {
+export default function ClassesScreen() {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   
   // 1. KHO CHỨA DỮ LIỆU
-  const [classes, setClasses] = useState([
-    { id: 'INT4050', name: 'Đồ án Tốt nghiệp - Khóa 2022', students: 45, date: '15/06/2026' },
-    { id: 'INT3307', name: 'Phát triển Hệ thống Thông tin Enterprise', students: 38, date: '20/06/2026' },
-    { id: 'INT3110', name: 'Kỹ thuật phần mềm nâng cao', students: 42, date: '18/06/2026' }
-  ]);
+  const [classes, setClasses] = useState<Course[]>([]);
 
   // 2. BỘ NHỚ TẠM
   const [newCode, setNewCode] = useState('');
   const [newName, setNewName] = useState('');
 
-  // 3. HÀNH ĐỘNG
-  const handleAddClass = () => {
+  // 3. TẢI DỮ LIỆU LỚP HỌC
+  useEffect(() => {
+    const fetchClasses = async () => {
+      try {
+        const data = await classService.getClasses();
+        setClasses(data);
+      } catch (error) {
+        console.error("Lỗi khi tải danh sách lớp học:", error);
+      }
+    };
+    fetchClasses();
+  }, []);
+
+  // 4. HÀNH ĐỘNG THÊM LỚP
+  const handleAddClass = async () => {
     if (!newCode || !newName) return; 
     
-    const newClass = {
-      id: newCode.toUpperCase(), 
-      name: newName,
-      students: 0, 
-      date: '31/12/2026' 
-    };
-
-    setClasses([...classes, newClass]); 
-    setShowModal(false); 
-    setNewCode(''); 
-    setNewName('');
+    try {
+      const newClass = await classService.createClass(newCode, newName);
+      setClasses([...classes, newClass]); 
+      setShowModal(false); 
+      setNewCode(''); 
+      setNewName('');
+    } catch (error) {
+      console.error("Lỗi khi tạo lớp học:", error);
+    }
   };
 
   return (
@@ -55,8 +63,7 @@ export default function ClassesScreen({ setSelectedClass }: any) {
           <div 
             key={index}
             onClick={() => {
-              setSelectedClass(cls);
-              navigate('/upload');
+              navigate('/upload', { state: { selectedClass: cls } });
             }}
             className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-blue-300 transition-all cursor-pointer group"
           >
