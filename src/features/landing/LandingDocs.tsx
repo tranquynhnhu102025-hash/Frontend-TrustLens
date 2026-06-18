@@ -28,39 +28,34 @@ export default function LandingDocs() {
   ];
 
   return (
-    <div className={`w-full py-16 px-6 relative overflow-hidden transition-colors duration-300 ${
-      theme === 'dark' ? 'bg-slate-950' : 'bg-slate-50'
+    <div className={`w-full py-16 px-6 relative overflow-hidden transition-colors duration-200 ${
+      theme === 'dark' ? 'bg-zinc-950' : 'bg-zinc-50'
     }`}>
-      {/* Background decoration */}
-      <div className={`absolute top-1/2 left-0 w-96 h-96 rounded-full blur-[128px] pointer-events-none transition-all duration-300 ${
-        theme === 'dark' ? 'bg-indigo-500/5' : 'bg-indigo-500/2'
-      }`}></div>
-
-      <div className="max-w-4xl mx-auto space-y-16">
+      <div className="max-w-4xl mx-auto space-y-12">
         {/* Title */}
-        <div className="text-center space-y-4">
-          <h2 className={`text-3xl sm:text-5xl font-black tracking-tight transition-colors ${
-            theme === 'dark' ? 'text-white' : 'text-slate-900'
+        <div className="text-center space-y-3">
+          <h2 className={`text-2xl sm:text-4xl font-bold tracking-tight transition-colors ${
+            theme === 'dark' ? 'text-white' : 'text-zinc-900'
           }`}>
             Tài liệu hướng dẫn & FAQ
           </h2>
-          <p className={`text-sm sm:text-base max-w-xl mx-auto font-medium transition-colors ${
-            theme === 'dark' ? 'text-slate-400' : 'text-slate-655'
+          <p className={`text-xs sm:text-sm max-w-xl mx-auto font-medium transition-colors ${
+            theme === 'dark' ? 'text-zinc-450' : 'text-zinc-500'
           }`}>
             Hướng dẫn chuẩn bị tài liệu báo cáo và các câu hỏi thường gặp khi sử dụng TrustLens.
           </p>
         </div>
 
         {/* 1. QUICK START */}
-        <div className={`rounded-3xl border p-8 space-y-6 transition-all duration-300 ${
+        <div className={`rounded-xl border p-6 space-y-6 transition-colors duration-150 ${
           theme === 'dark' 
-            ? 'bg-slate-900/40 border-slate-900' 
-            : 'bg-white border-slate-200 shadow-sm shadow-slate-100'
+            ? 'bg-zinc-900/10 border-zinc-900' 
+            : 'bg-white border-zinc-200 shadow-sm'
         }`}>
-          <h3 className={`text-lg font-black flex items-center gap-2 ${
-            theme === 'dark' ? 'text-white' : 'text-slate-900'
+          <h3 className={`text-sm font-bold flex items-center gap-2 ${
+            theme === 'dark' ? 'text-white' : 'text-zinc-900'
           }`}>
-            <BookOpen size={20} className="text-blue-500" /> Hướng dẫn nhanh cho Sinh viên
+            <BookOpen size={16} className="text-zinc-500" /> Hướng dẫn nhanh cho Sinh viên
           </h3>
 
           <div className="space-y-4">
@@ -81,15 +76,15 @@ export default function LandingDocs() {
                 desc: "Sau khi quét, xem danh sách tài liệu tham khảo. Kiểm tra các mục được tô màu vàng (Cảnh báo cập nhật/Sai định dạng) hoặc màu đỏ (Trích dẫn ảo/Nguồn lừa đảo) để tiến hành sửa đổi."
               }
             ].map((item, idx) => (
-              <div key={idx} className="flex gap-4 items-start">
-                <div className={`font-bold border px-2.5 py-1 rounded-xl text-xs transition-colors ${
+              <div key={idx} className="flex gap-3 items-start text-xs">
+                <div className={`font-bold border w-6 h-6 rounded flex items-center justify-center text-[10px] transition-colors ${
                   theme === 'dark' 
-                    ? 'bg-slate-950 text-blue-400 border-slate-850' 
-                    : 'bg-slate-100 text-blue-600 border-slate-200 shadow-inner'
+                    ? 'bg-zinc-950 text-zinc-300 border-zinc-850' 
+                    : 'bg-zinc-100 text-zinc-700 border-zinc-200'
                 }`}>{item.step}</div>
-                <div>
-                  <h4 className={`text-sm font-bold ${theme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>{item.title}</h4>
-                  <p className={`text-xs mt-1 leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+                <div className="space-y-1">
+                  <h4 className={`font-bold ${theme === 'dark' ? 'text-zinc-200' : 'text-zinc-800'}`}>{item.title}</h4>
+                  <p className={`leading-relaxed ${theme === 'dark' ? 'text-zinc-400' : 'text-zinc-650'}`}>
                     {item.desc}
                   </p>
                 </div>
@@ -100,30 +95,30 @@ export default function LandingDocs() {
 
         {/* 2. FAQ */}
         <div className="space-y-6">
-          <h3 className={`text-lg font-black flex items-center gap-2 ${
-            theme === 'dark' ? 'text-white' : 'text-slate-900'
+          <h3 className={`text-sm font-bold flex items-center gap-2 ${
+            theme === 'dark' ? 'text-white' : 'text-zinc-900'
           }`}>
-            <HelpCircle size={20} className="text-indigo-500" /> Câu hỏi thường gặp
+            <HelpCircle size={16} className="text-zinc-500" /> Câu hỏi thường gặp
           </h3>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {faqs.map((faq, idx) => (
               <div 
                 key={idx}
-                className={`border rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer ${
+                className={`border rounded-lg overflow-hidden transition-colors duration-150 cursor-pointer ${
                   theme === 'dark' 
-                    ? 'bg-slate-900/40 border-slate-900 hover:border-slate-850' 
-                    : 'bg-white border-slate-200 hover:border-slate-350 shadow-sm shadow-slate-100'
+                    ? 'bg-zinc-900/10 border-zinc-900 hover:border-zinc-800' 
+                    : 'bg-white border-zinc-200 hover:border-zinc-300 shadow-sm'
                 }`}
                 onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
               >
-                <div className="p-5 flex justify-between items-center select-none">
-                  <h4 className={`text-sm font-bold ${theme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>{faq.q}</h4>
-                  {openFaq === idx ? <ChevronUp size={16} className="text-slate-500" /> : <ChevronDown size={16} className="text-slate-500" />}
+                <div className="p-4 flex justify-between items-center select-none text-xs">
+                  <h4 className={`font-bold ${theme === 'dark' ? 'text-zinc-200' : 'text-zinc-850'}`}>{faq.q}</h4>
+                  {openFaq === idx ? <ChevronUp size={14} className="text-zinc-500" /> : <ChevronDown size={14} className="text-zinc-500" />}
                 </div>
                 {openFaq === idx && (
-                  <div className={`px-5 pb-5 border-t pt-4 text-xs leading-relaxed font-medium transition-colors ${
-                    theme === 'dark' ? 'border-slate-950 text-slate-400' : 'border-slate-100 text-slate-600'
+                  <div className={`px-4 pb-4 border-t pt-3 text-xs leading-relaxed font-medium transition-colors ${
+                    theme === 'dark' ? 'border-zinc-900 text-zinc-400' : 'border-zinc-100 text-zinc-600'
                   }`}>
                     {faq.a}
                   </div>
@@ -136,3 +131,4 @@ export default function LandingDocs() {
     </div>
   );
 }
+

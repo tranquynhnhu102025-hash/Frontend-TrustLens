@@ -1,7 +1,7 @@
 import uploadService from "../../services/uploadService";
 import { useState, useEffect } from 'react';
 import { 
-  Send, AlertCircle, UploadCloud, X, FileText, 
+  Send, AlertCircle, UploadCloud, FileText, 
   Loader2, CheckCircle2, ArrowLeft, Trash2, Eye 
 } from 'lucide-react';
 import { useNavigate, useLocation, useOutletContext } from 'react-router-dom';
@@ -30,7 +30,6 @@ export default function UploadScreen() {
   const [processing, setProcessing] = useState(false);
   const [currentClass, setCurrentClass] = useState<any>(null);
 
-  // Sync selected class with localStorage and state
   useEffect(() => {
     if (selectedClass) {
       localStorage.setItem('selectedClass', JSON.stringify(selectedClass));
@@ -62,19 +61,16 @@ export default function UploadScreen() {
     for (let i = 0; i < selectedFiles.length; i++) {
       const selectedFile = selectedFiles[i];
 
-      // Kiểm tra định dạng tệp
       if (!validTypes.includes(selectedFile.type)) {
         setError('Có tệp định dạng không hợp lệ. Chỉ chấp nhận file .PDF hoặc .DOCX!');
         continue;
       } 
 
-      // Kiểm tra dung lượng (tối đa 20MB)
       if (selectedFile.size > 20 * 1024 * 1024) {
         setError('Có tệp kích thước quá lớn. Giới hạn tối đa là 20MB!');
         continue;
       }
 
-      // Tránh trùng lặp tệp trùng tên trong hàng đợi hiện tại
       if (fileItems.some(item => item.file.name === selectedFile.name)) {
         continue;
       }
@@ -126,7 +122,6 @@ export default function UploadScreen() {
 
       updateItem(item.id, { status: 'uploading', progress: 10, error: undefined });
 
-      // Nếu ở chế độ MOCK
       if (import.meta.env.VITE_USE_MOCK === 'true') {
         try {
           await new Promise(r => setTimeout(r, 600));
@@ -143,9 +138,7 @@ export default function UploadScreen() {
         continue;
       }
 
-      // Ở chế độ Backend
       try {
-        // 1. Tải lên tệp
         const res = await uploadService.uploadSubmission(
           currentClass.assignment_id || currentClass.id, 
           item.ownerLabel.trim(), 
@@ -154,22 +147,18 @@ export default function UploadScreen() {
         const submissionId = res.id || res.submission?.id;
         updateItem(item.id, { progress: 30 });
 
-        // 2. Chạy luồng phân tích văn bản thô
         // @ts-ignore
         await uploadService.analyzeSubmission(submissionId);
         updateItem(item.id, { progress: 50 });
         
-        // 3. Phát hiện danh sách tài liệu tham khảo
         // @ts-ignore
         await uploadService.detectReferences(submissionId);
         updateItem(item.id, { progress: 70 });
         
-        // 4. Bóc tách chi tiết từng trích dẫn
         // @ts-ignore
         await uploadService.parseCitations(submissionId);
         updateItem(item.id, { progress: 85 });
         
-        // 5. Đối chiếu API chéo metadata
         // @ts-ignore
         await uploadService.verifyMetadata(submissionId);
         
@@ -186,17 +175,17 @@ export default function UploadScreen() {
 
   if (!selectedClass && !currentClass) {
     return (
-      <div className="w-full max-w-md mx-auto mt-16 p-8 border border-slate-100 bg-white rounded-2xl text-center animate-fade-in shadow-minimal-sm">
-        <AlertCircle size={40} className="text-amber-500 mx-auto mb-4" />
-        <h3 className="text-lg font-black mb-1.5 text-slate-950">Chưa chọn lớp học phần</h3>
-        <p className="text-xs mb-6 leading-relaxed text-slate-500 font-medium">
+      <div className="w-full max-w-md mx-auto mt-16 p-8 border border-zinc-200 dark:border-zinc-900 bg-white dark:bg-zinc-950 rounded-lg text-center animate-fade-in shadow-sm">
+        <AlertCircle size={36} className="text-zinc-400 dark:text-zinc-550 mx-auto mb-4" />
+        <h3 className="text-sm font-bold mb-1 text-zinc-900 dark:text-white">Chưa chọn lớp học phần</h3>
+        <p className="text-xs mb-5 leading-relaxed text-zinc-500 font-medium">
           Vui lòng chọn một lớp học phần phụ trách để bắt đầu tải lên và thẩm định báo cáo đồ án.
         </p>
         <button 
           onClick={() => navigate('/classes')}
-          className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl transition-all shadow-minimal-sm text-xs"
+          className="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-850 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-black font-bold px-4 py-2 rounded-lg transition-colors text-xs"
         >
-          <ArrowLeft size={14} /> Đi tới quản lý lớp học
+          <ArrowLeft size={13} /> Đi tới quản lý lớp học
         </button>
       </div>
     );
@@ -207,31 +196,29 @@ export default function UploadScreen() {
   const displayClassName = selectedClass?.name || currentClass?.name || 'Đồ án Tốt nghiệp';
 
   return (
-    <div className="w-full max-w-4xl mx-auto mt-6">
-      <div className="mb-8 text-center">
-        <h2 className="text-2xl font-black text-slate-900 mb-1.5">Tải lên bài báo cáo</h2>
-        <p className="text-sm font-medium text-slate-500">
-          Lớp học phần: <span className="text-blue-600 font-bold">{displayClassName}</span>
+    <div className="w-full max-w-4xl mx-auto mt-4 space-y-6">
+      <div className="text-center border-b border-zinc-150 dark:border-zinc-900 pb-5">
+        <h2 className="text-xl font-bold text-zinc-900 dark:text-white">Tải lên bài báo cáo</h2>
+        <p className="text-xs font-semibold text-zinc-500 mt-1">
+          Lớp học phần: <span className="text-zinc-800 dark:text-zinc-350 underline">{displayClassName}</span>
         </p>
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 mb-6 p-4 bg-red-50 text-red-600 font-bold rounded-xl border border-red-100 text-xs">
-          <AlertCircle size={16} className="shrink-0" /> {error}
+        <div className="flex items-center gap-1.5 p-3.5 bg-red-50 dark:bg-red-950/20 text-red-650 dark:text-red-400 font-semibold rounded-lg border border-red-200 dark:border-red-900/50 text-xs">
+          <AlertCircle size={14} className="shrink-0" /> {error}
         </div>
       )}
 
       {/* DROPZONE AREA */}
-      <div className="p-6 border border-slate-100 bg-white rounded-2xl shadow-minimal-sm">
-        <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer transition-all bg-slate-50/50 hover:bg-slate-50 hover:border-blue-500/60 group">
-          <div className="flex flex-col items-center justify-center pt-5 pb-6">
-            <div className="p-2.5 rounded-xl border border-slate-100 bg-white shadow-minimal-sm mb-3 group-hover:scale-105 transition-transform">
-              <UploadCloud size={24} className="text-blue-600" />
-            </div>
-            <p className="mb-1 text-xs font-bold text-slate-600">
-              <span className="font-bold text-blue-600">Nhấp để chọn file</span> hoặc kéo thả file vào đây
+      <div className="p-5 border border-zinc-200 dark:border-zinc-900 bg-white dark:bg-zinc-950 rounded-lg shadow-sm">
+        <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-zinc-200 dark:border-zinc-850 rounded-lg cursor-pointer transition-colors bg-zinc-50/50 dark:bg-zinc-900/10 hover:bg-zinc-50 dark:hover:bg-zinc-900/30 hover:border-zinc-400 dark:hover:border-zinc-700 group">
+          <div className="flex flex-col items-center justify-center pt-4 pb-5">
+            <UploadCloud size={20} className="text-zinc-400 dark:text-zinc-500 mb-2 group-hover:scale-105 transition-transform" />
+            <p className="mb-0.5 text-xs font-semibold text-zinc-650 dark:text-zinc-350">
+              <span className="font-bold text-zinc-900 dark:text-white">Nhấp để chọn file</span> hoặc kéo thả file vào đây
             </p>
-            <p className="text-[10px] text-slate-400 font-medium tracking-wide">
+            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-medium">
               Chấp nhận PDF hoặc DOCX (Tối đa 20MB/tệp)
             </p>
           </div>
@@ -240,70 +227,70 @@ export default function UploadScreen() {
 
         {/* FILE LIST QUEUE */}
         {fileItems.length > 0 && (
-          <div className="mt-8 space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">
+          <div className="mt-6 space-y-3">
+            <h3 className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 px-1">
               Hàng đợi tải lên ({fileItems.length} tệp)
             </h3>
             
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               {fileItems.map((item) => (
                 <div 
                   key={item.id} 
-                  className="p-4 border border-slate-100 bg-white rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all shadow-minimal-sm"
+                  className="p-3.5 border border-zinc-200 dark:border-zinc-900 bg-white dark:bg-zinc-950 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm"
                 >
                   {/* File Metadata */}
                   <div className="flex items-center gap-3 overflow-hidden min-w-[200px] max-w-[300px]">
-                    <div className={`p-2.5 rounded-xl text-white shrink-0 ${item.file.name.endsWith('.pdf') ? 'bg-rose-500/90' : 'bg-blue-650'}`}>
-                      <FileText size={18} />
+                    <div className="p-2 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-lg shrink-0">
+                      <FileText size={15} />
                     </div>
                     <div className="truncate">
-                      <p className="text-xs font-bold truncate text-slate-800">{item.file.name}</p>
-                      <p className="text-[10px] font-bold text-slate-400 mt-0.5">{(item.file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                      <p className="text-xs font-bold truncate text-zinc-800 dark:text-zinc-200">{item.file.name}</p>
+                      <p className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 mt-0.5">{(item.file.size / (1024 * 1024)).toFixed(2)} MB</p>
                     </div>
                   </div>
 
                   {/* Student / Group Label Input */}
-                  <div className="flex-1 min-w-[180px]">
+                  <div className="flex-1 min-w-[160px]">
                     {item.status === 'idle' || item.status === 'failed' ? (
                       <input 
                         type="text" 
                         required
                         value={item.ownerLabel}
                         onChange={(e) => updateOwnerLabel(item.id, e.target.value)}
-                        placeholder="Tên sinh viên / Mã nhóm" 
-                        className="w-full px-3 py-2 border border-slate-200 bg-slate-50/50 rounded-xl text-xs font-bold transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:bg-white text-slate-800 placeholder:text-slate-400"
+                        placeholder="Sinh viên / Mã nhóm thực hiện" 
+                        className="w-full px-3 py-1.5 border border-zinc-200 dark:border-zinc-850 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg text-xs font-semibold transition-colors focus:outline-none focus:bg-white dark:focus:bg-zinc-950 focus:border-zinc-400 dark:focus:border-zinc-700 text-zinc-800 dark:text-zinc-200"
                         disabled={processing}
                       />
                     ) : (
-                      <div className="text-xs font-bold px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl text-slate-500">
-                        Sinh viên: <span className="text-slate-700">{item.ownerLabel}</span>
+                      <div className="text-xs font-semibold px-3 py-1.5 bg-zinc-50 dark:bg-zinc-900/30 border border-zinc-150 dark:border-zinc-900 rounded-lg text-zinc-550 dark:text-zinc-400">
+                        Sinh viên: <span className="font-bold text-zinc-700 dark:text-zinc-300">{item.ownerLabel}</span>
                       </div>
                     )}
                   </div>
 
                   {/* Progress & Status Indicators */}
-                  <div className="flex items-center gap-4 min-w-[150px] justify-end">
+                  <div className="flex items-center gap-3.5 min-w-[140px] justify-end">
                     {item.status === 'uploading' && (
                       <div className="w-full text-right space-y-1">
-                        <div className="flex justify-between text-[10px] font-bold text-blue-500">
+                        <div className="flex justify-between text-[9px] font-bold text-zinc-500">
                           <span>Đang xử lý</span>
                           <span>{item.progress}%</span>
                         </div>
-                        <div className="w-24 h-1.5 rounded-full overflow-hidden ml-auto bg-slate-100">
-                          <div className="bg-blue-600 h-1.5 transition-all duration-300" style={{ width: `${item.progress}%` }}></div>
+                        <div className="w-20 h-1 bg-zinc-100 dark:bg-zinc-900 rounded-full overflow-hidden ml-auto">
+                          <div className="bg-zinc-900 dark:bg-white h-1 transition-all duration-300" style={{ width: `${item.progress}%` }}></div>
                         </div>
                       </div>
                     )}
 
                     {item.status === 'success' && (
-                      <span className="flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 font-bold text-xs rounded-lg border border-green-150">
-                        <CheckCircle2 size={13} /> Hoàn tất
+                      <span className="inline-flex px-2 py-0.5 bg-green-50/50 dark:bg-green-950/20 text-green-700 dark:text-green-400 font-bold text-[10px] rounded border border-green-150 dark:border-green-900/50 gap-1 items-center">
+                        <CheckCircle2 size={11} /> Hoàn tất
                       </span>
                     )}
 
                     {item.status === 'failed' && (
-                      <span className="flex items-center gap-1.5 px-2.5 py-1 bg-rose-50 text-rose-700 font-bold text-xs rounded-lg border border-rose-150" title={item.error}>
-                        <AlertCircle size={13} /> Thất bại
+                      <span className="inline-flex px-2 py-0.5 bg-rose-50/50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 font-bold text-[10px] rounded border border-rose-150 dark:border-rose-900/50 gap-1 items-center" title={item.error}>
+                        <AlertCircle size={11} /> Thất bại
                       </span>
                     )}
 
@@ -312,10 +299,10 @@ export default function UploadScreen() {
                       {item.status === 'success' && item.submissionId && (
                         <button
                           onClick={() => navigate(`/report/${item.submissionId}`)}
-                          className="p-2 bg-blue-50 border border-blue-100 text-blue-600 hover:bg-blue-100 rounded-xl transition-all shadow-minimal-sm"
+                          className="p-1.5 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-lg transition-colors"
                           title="Xem báo cáo thẩm định"
                         >
-                          <Eye size={14} />
+                          <Eye size={12} />
                         </button>
                       )}
                       
@@ -323,10 +310,10 @@ export default function UploadScreen() {
                         <button
                           onClick={() => removeFile(item.id)}
                           disabled={processing}
-                          className="p-2 bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all shadow-minimal-sm"
-                          title="Xóa tệp này"
+                          className="p-1.5 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 text-zinc-400 hover:text-red-650 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors"
+                          title="Xóa tệp"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={12} />
                         </button>
                       )}
                     </div>
@@ -338,11 +325,11 @@ export default function UploadScreen() {
         )}
 
         {/* BOTTOM ACTION BUTTONS */}
-        <div className="flex justify-between items-center mt-6 pt-5 border-t border-slate-100">
+        <div className="flex justify-between items-center mt-6 pt-4 border-t border-zinc-150 dark:border-zinc-900">
           <button
             onClick={() => setFileItems([])}
             disabled={fileItems.length === 0 || processing}
-            className="px-4 py-2 font-bold text-xs border border-slate-200 text-slate-500 hover:bg-slate-50 rounded-xl transition-all disabled:opacity-40"
+            className="px-3.5 py-1.5 font-semibold text-xs border border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-lg transition-colors disabled:opacity-40"
           >
             Xóa hàng đợi
           </button>
@@ -350,14 +337,14 @@ export default function UploadScreen() {
           <button 
             onClick={handleUpload}
             disabled={fileItems.length === 0 || processing || !hasIdle}
-            className="flex items-center gap-1.5 px-6 py-2.5 font-bold text-xs bg-blue-600 text-white hover:bg-blue-700 rounded-xl transition-all shadow-minimal-sm disabled:opacity-50 disabled:cursor-not-allowed group"
+            className="flex items-center gap-1.5 px-4.5 py-2 font-bold text-xs bg-zinc-900 hover:bg-zinc-850 dark:bg-white dark:hover:bg-zinc-105 text-white dark:text-black rounded-lg transition-colors shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {processing ? (
-              <><Loader2 size={14} className="animate-spin" /> Đang phân tích...</>
+              <><Loader2 size={12} className="animate-spin" /> Đang phân tích...</>
             ) : hasFinished && !hasIdle ? (
-              <><CheckCircle2 size={14} /> Đã thẩm định xong</>
+              <><CheckCircle2 size={12} /> Đã thẩm định xong</>
             ) : (
-              <>Bắt đầu kiểm duyệt <Send size={13} className="group-hover:translate-x-0.5 transition-transform" /></>
+              <>Bắt đầu kiểm duyệt <Send size={11} /></>
             )}
           </button>
         </div>

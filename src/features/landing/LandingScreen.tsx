@@ -1,7 +1,5 @@
 import { useNavigate, useOutletContext } from 'react-router-dom';
-import { 
-  FileText, ArrowRight, Sparkles, ChevronRight, AlertCircle 
-} from 'lucide-react';
+import { ArrowRight, Sparkles, ChevronRight } from 'lucide-react';
 
 export default function LandingScreen() {
   const navigate = useNavigate();
@@ -9,55 +7,51 @@ export default function LandingScreen() {
   const { theme } = useOutletContext<{ theme: 'light' | 'dark' }>();
 
   return (
-    <div className={`w-full transition-colors duration-300 overflow-hidden relative ${
-      theme === 'dark' ? 'bg-slate-950' : 'bg-slate-50'
+    <div className={`w-full transition-colors duration-200 overflow-hidden relative ${
+      theme === 'dark' ? 'bg-zinc-950' : 'bg-zinc-50'
     }`}>
-      {/* GLOW EFFECT BACKGROUNDS */}
-      <div className={`absolute top-20 left-1/4 w-96 h-96 rounded-full blur-[128px] pointer-events-none transition-all duration-300 ${
-        theme === 'dark' ? 'bg-blue-500/10' : 'bg-blue-500/5'
-      }`}></div>
-      <div className={`absolute top-80 right-1/4 w-96 h-96 rounded-full blur-[128px] pointer-events-none transition-all duration-300 ${
-        theme === 'dark' ? 'bg-indigo-500/10' : 'bg-indigo-500/5'
-      }`}></div>
-
       {/* 1. HERO SECTION */}
-      <section className="relative max-w-6xl mx-auto px-6 pt-20 pb-24 text-center space-y-8">
-        <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full font-bold text-xs tracking-wide animate-pulse border transition-colors ${
+      <section className="relative max-w-5xl mx-auto px-6 pt-20 pb-20 text-center space-y-6">
+        <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md font-semibold text-[10px] tracking-widest uppercase border transition-colors ${
           theme === 'dark' 
-            ? 'bg-slate-900 border-slate-850 text-blue-400' 
-            : 'bg-blue-50 border-blue-100 text-blue-600'
+            ? 'bg-zinc-900 border-zinc-800 text-zinc-400' 
+            : 'bg-white border-zinc-200 text-zinc-500'
         }`}>
-          <Sparkles size={12} /> Phiên bản Học thuật TrustLens v1.5
+          <Sparkles size={11} className="text-zinc-500" /> Phiên bản Học thuật TrustLens v1.5
         </div>
 
-        <h2 className={`text-4xl sm:text-6xl font-black tracking-tight max-w-4xl mx-auto leading-[1.1] transition-colors ${
-          theme === 'dark' ? 'text-white' : 'text-slate-900'
+        <h2 className={`text-3xl sm:text-5xl font-extrabold tracking-tight max-w-3xl mx-auto leading-tight transition-colors ${
+          theme === 'dark' ? 'text-white' : 'text-zinc-900'
         }`}>
           Thẩm định sự hội tụ học thuật của{' '}
-          <span className="bg-gradient-to-r from-blue-550 via-indigo-550 to-purple-550 bg-clip-text text-transparent">
+          <span className="underline decoration-1 underline-offset-4">
             Tài liệu tham khảo
           </span>
         </h2>
 
-        <p className={`font-medium text-base sm:text-lg max-w-2xl mx-auto leading-relaxed transition-colors ${
-          theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+        <p className={`font-normal text-sm sm:text-base max-w-xl mx-auto leading-relaxed transition-colors ${
+          theme === 'dark' ? 'text-zinc-400' : 'text-zinc-500'
         }`}>
           Nền tảng tự động trích xuất, đối chiếu chéo metadata với cơ sở dữ liệu quốc tế để tính toán mức độ tin cậy và sự phù hợp của danh mục trích dẫn trong báo cáo khoa học.
         </p>
 
-        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4">
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 pt-4">
           <button
             onClick={() => navigate(token ? '/dashboard' : '/login')}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold px-8 py-4 rounded-2xl shadow-xl shadow-blue-500/20 hover:shadow-blue-500/30 transition-all duration-300 group"
+            className={`w-full sm:w-auto flex items-center justify-center gap-1.5 font-bold px-6 py-3 rounded-lg transition-colors text-xs ${
+              theme === 'dark'
+                ? 'bg-white hover:bg-zinc-100 text-black'
+                : 'bg-zinc-900 hover:bg-zinc-850 text-white'
+            }`}
           >
-            Bắt đầu thẩm định ngay <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            Bắt đầu thẩm định <ArrowRight size={14} />
           </button>
           <button
             onClick={() => navigate('/features')}
-            className={`w-full sm:w-auto flex items-center justify-center gap-2 border font-bold px-8 py-4 rounded-2xl transition-all duration-300 ${
+            className={`w-full sm:w-auto flex items-center justify-center gap-1.5 border font-semibold px-6 py-3 rounded-lg transition-colors text-xs ${
               theme === 'dark' 
-                ? 'bg-slate-900 hover:bg-slate-800 border-slate-800 text-slate-300' 
-                : 'bg-white hover:bg-slate-100 border-slate-200 text-slate-700 shadow-sm'
+                ? 'bg-zinc-900 hover:bg-zinc-800 border-zinc-800 text-zinc-300' 
+                : 'bg-white hover:bg-zinc-50 border-zinc-200 text-zinc-700'
             }`}
           >
             Tìm hiểu chi tiết
@@ -65,54 +59,53 @@ export default function LandingScreen() {
         </div>
 
         {/* SIMULATED PLATFORM PREVIEW */}
-        <div className="pt-12 relative max-w-4xl mx-auto group">
-          <div className={`absolute inset-0 rounded-[32px] blur-2xl opacity-50 group-hover:opacity-75 transition-all duration-500 ${
-            theme === 'dark' ? 'bg-gradient-to-b from-blue-500/20 to-transparent' : 'bg-gradient-to-b from-blue-500/5 to-transparent'
-          }`}></div>
-          <div className={`relative border rounded-3xl p-6 shadow-2xl overflow-hidden transition-all duration-300 ${
+        <div className="pt-12 relative max-w-3xl mx-auto">
+          <div className={`border rounded-xl p-5 shadow-sm overflow-hidden transition-all duration-200 ${
             theme === 'dark' 
-              ? 'bg-slate-900/50 backdrop-blur-xl border-slate-800' 
-              : 'bg-white border-slate-200 shadow-slate-200/50'
+              ? 'bg-zinc-900/40 border-zinc-850' 
+              : 'bg-white border-zinc-200'
           }`}>
             {/* Window bar */}
-            <div className={`flex justify-between items-center border-b pb-4 mb-6 ${
-              theme === 'dark' ? 'border-slate-800/80' : 'border-slate-105'
+            <div className={`flex justify-between items-center border-b pb-3 mb-5 ${
+              theme === 'dark' ? 'border-zinc-800' : 'border-zinc-100'
             }`}>
               <div className="flex gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-rose-500"></span>
-                <span className="w-3 h-3 rounded-full bg-amber-500"></span>
-                <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-700"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-700"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-700"></span>
               </div>
-              <span className="text-xs text-slate-500 font-mono">trustlens-dashboard-mockup.tsx</span>
-              <div className="w-8"></div>
+              <span className="text-[10px] text-zinc-400 font-mono">dashboard_preview.tsx</span>
+              <div className="w-6"></div>
             </div>
 
             {/* Dashboard Mockup Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-              <div className={`p-4 rounded-2xl border transition-colors ${
-                theme === 'dark' ? 'bg-slate-950/60 border-slate-800/65' : 'bg-slate-50 border-slate-100'
+              <div className={`p-4 rounded-lg border transition-colors ${
+                theme === 'dark' ? 'bg-zinc-950/60 border-zinc-850' : 'bg-zinc-50 border-zinc-150'
               }`}>
-                <span className="text-[10px] font-bold text-slate-500 uppercase">Trust Score trung bình</span>
-                <div className={`text-2xl font-black mt-1 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                  78.5 <span className="text-xs text-amber-500 font-medium">/ 100</span>
+                <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Trust Score trung bình</span>
+                <div className={`text-xl font-bold mt-1.5 ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>
+                  78.5 <span className="text-xs text-zinc-400 font-normal">/ 100</span>
                 </div>
-                <div className={`h-1.5 rounded-full mt-3 overflow-hidden ${theme === 'dark' ? 'bg-slate-850' : 'bg-slate-200'}`}>
-                  <div className="bg-gradient-to-r from-blue-500 to-indigo-500 h-1.5 w-[78%]"></div>
+                <div className={`h-1 rounded-full mt-3 overflow-hidden ${theme === 'dark' ? 'bg-zinc-850' : 'bg-zinc-200'}`}>
+                  <div className="bg-zinc-800 dark:bg-white h-1 w-[78%]"></div>
                 </div>
               </div>
-              <div className={`p-4 rounded-2xl border transition-colors ${
-                theme === 'dark' ? 'bg-slate-950/60 border-slate-800/65' : 'bg-slate-50 border-slate-100'
+              
+              <div className={`p-4 rounded-lg border transition-colors ${
+                theme === 'dark' ? 'bg-zinc-950/60 border-zinc-850' : 'bg-zinc-50 border-zinc-150'
               }`}>
-                <span className="text-[10px] font-bold text-slate-500 uppercase">Tài liệu đã quét</span>
-                <div className={`text-2xl font-black mt-1 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>1,402 bài</div>
-                <span className="text-[10px] text-green-500 font-bold block mt-3">↑ 12% so với tháng trước</span>
+                <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Tài liệu đã quét</span>
+                <div className={`text-xl font-bold mt-1.5 ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>1,402 bài</div>
+                <span className="text-[9px] text-zinc-500 font-semibold block mt-3">↑ 12% so với tháng trước</span>
               </div>
-              <div className={`p-4 rounded-2xl border transition-colors ${
-                theme === 'dark' ? 'bg-slate-950/60 border-slate-800/65' : 'bg-slate-50 border-slate-100'
+
+              <div className={`p-4 rounded-lg border transition-colors ${
+                theme === 'dark' ? 'bg-zinc-950/60 border-zinc-850' : 'bg-zinc-50 border-zinc-150'
               }`}>
-                <span className="text-[10px] font-bold text-slate-500 uppercase">Độ phủ API đối chiếu</span>
-                <div className={`text-2xl font-black mt-1 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>100% sạch</div>
-                <span className={`text-[10px] font-bold block mt-3 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Độ phủ API đối chiếu</span>
+                <div className={`text-xl font-bold mt-1.5 ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>100% sạch</div>
+                <span className={`text-[9px] font-semibold block mt-3 ${theme === 'dark' ? 'text-zinc-450' : 'text-zinc-500'}`}>
                   CrossRef, OpenAlex, Semantic
                 </span>
               </div>
@@ -122,113 +115,113 @@ export default function LandingScreen() {
       </section>
 
       {/* 2. CORE STATISTICS */}
-      <section className={`border-y py-16 px-6 transition-all duration-300 ${
+      <section className={`border-y py-12 px-6 transition-all duration-200 ${
         theme === 'dark' 
-          ? 'bg-slate-900/20 border-slate-900/60' 
-          : 'bg-slate-100/50 border-slate-200/60'
+          ? 'bg-zinc-900/10 border-zinc-900' 
+          : 'bg-zinc-100/30 border-zinc-200'
       }`}>
-        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           <div className="space-y-1">
-            <h3 className={`text-3xl sm:text-4xl font-black ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>0.5s</h3>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Thời gian trích xuất</p>
+            <h3 className={`text-2xl sm:text-3xl font-extrabold ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>0.5s</h3>
+            <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Thời gian trích xuất</p>
           </div>
           <div className="space-y-1">
-            <h3 className="text-3xl sm:text-4xl font-black text-blue-500">120M+</h3>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Metadata đối chiếu</p>
+            <h3 className={`text-2xl sm:text-3xl font-extrabold ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>120M+</h3>
+            <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Metadata đối chiếu</p>
           </div>
           <div className="space-y-1">
-            <h3 className="text-3xl sm:text-4xl font-black text-indigo-500">5 tiêu chí</h3>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Ma trận đánh giá</p>
+            <h3 className={`text-2xl sm:text-3xl font-extrabold ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>5 tiêu chí</h3>
+            <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Ma trận đánh giá</p>
           </div>
           <div className="space-y-1">
-            <h3 className={`text-3xl sm:text-4xl font-black ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>100%</h3>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Tự động hóa</p>
+            <h3 className={`text-2xl sm:text-3xl font-extrabold ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>100%</h3>
+            <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Tự động hóa</p>
           </div>
         </div>
       </section>
 
       {/* 3. HOW IT WORKS */}
-      <section className="max-w-6xl mx-auto px-6 py-24 space-y-16">
-        <div className="text-center space-y-4">
-          <h3 className={`text-2xl sm:text-3xl font-black ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-            Quy trình thẩm định 4 bước trực quan
+      <section className="max-w-5xl mx-auto px-6 py-20 space-y-12">
+        <div className="text-center space-y-3">
+          <h3 className={`text-xl sm:text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>
+            Quy trình thẩm định trực quan
           </h3>
-          <p className={`text-sm max-w-md mx-auto ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+          <p className={`text-xs max-w-sm mx-auto font-medium ${theme === 'dark' ? 'text-zinc-455' : 'text-zinc-500'}`}>
             Hệ thống hóa quy trình thẩm định phức tạp thành các bước thao tác nhanh chóng và chính xác.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {[
             {
               step: "01",
               title: "Tải lên bài báo cáo",
-              desc: "Kéo thả tập tin PDF/DOCX đồ án tốt nghiệp cần thẩm định vào hệ thống.",
-              color: "bg-blue-600/10 border-blue-500/20 text-blue-500"
+              desc: "Kéo thả tập tin PDF/DOCX đồ án tốt nghiệp cần thẩm định vào hệ thống."
             },
             {
               step: "02",
               title: "Trích xuất danh mục",
-              desc: "Sử dụng mô hình GROBID để bóc tách tự động danh sách tài liệu tham khảo thô.",
-              color: "bg-indigo-600/10 border-indigo-500/20 text-indigo-500"
+              desc: "Sử dụng mô hình GROBID để bóc tách tự động danh sách tài liệu tham khảo thô."
             },
             {
               step: "03",
-              title: "Đối chiếu API Quốc tế",
-              desc: "Kết nối trực tiếp hệ thống CrossRef, Semantic Scholar, OpenAlex đối sánh DOI.",
-              color: "bg-purple-600/10 border-purple-500/20 text-purple-500"
+              title: "Đối chiếu API",
+              desc: "Kết nối trực tiếp hệ thống CrossRef, Semantic Scholar, OpenAlex đối sánh DOI."
             },
             {
               step: "04",
-              title: "Xuất báo cáo & Điểm số",
-              desc: "Tính toán Trust Score dựa trên 5 tiêu chuẩn vàng và xuất báo cáo kết luận.",
-              color: "bg-emerald-600/10 border-emerald-500/20 text-emerald-500"
+              title: "Xuất báo cáo",
+              desc: "Tính toán Trust Score dựa trên 5 tiêu chuẩn vàng và xuất báo cáo kết luận."
             }
           ].map((item, idx) => (
             <div 
               key={idx}
-              className={`p-6 rounded-3xl border transition-all duration-300 relative space-y-4 ${
+              className={`p-5 rounded-lg border transition-all duration-150 space-y-4 ${
                 theme === 'dark' 
-                  ? 'bg-slate-900/40 border-slate-900 hover:border-slate-800' 
-                  : 'bg-white border-slate-200 hover:border-blue-300 hover:shadow-lg shadow-sm'
+                  ? 'bg-zinc-900/30 border-zinc-900 hover:border-zinc-800' 
+                  : 'bg-white border-zinc-150 hover:border-zinc-300 shadow-sm'
               }`}
             >
-              <div className={`w-10 h-10 rounded-2xl border flex items-center justify-center font-black text-sm ${item.color}`}>
+              <div className={`w-8 h-8 rounded border flex items-center justify-center font-bold text-xs ${
+                theme === 'dark' ? 'bg-zinc-950 border-zinc-850 text-zinc-300' : 'bg-zinc-100 border-zinc-200 text-zinc-700'
+              }`}>
                 {item.step}
               </div>
-              <h4 className={`text-base font-black ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{item.title}</h4>
-              <p className={`text-xs leading-relaxed font-medium ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>{item.desc}</p>
+              <h4 className={`text-xs font-bold uppercase tracking-wider ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>{item.title}</h4>
+              <p className={`text-xs leading-relaxed font-medium ${theme === 'dark' ? 'text-zinc-400' : 'text-zinc-500'}`}>{item.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* 4. CALL TO ACTION (CTA) */}
-      <section className="max-w-4xl mx-auto px-6 pb-24">
-        <div className={`border rounded-[32px] p-8 md:p-12 text-center space-y-6 relative overflow-hidden transition-all duration-300 ${
+      <section className="max-w-4xl mx-auto px-6 pb-20">
+        <div className={`border rounded-xl p-8 md:p-10 text-center space-y-4 transition-all duration-200 ${
           theme === 'dark' 
-            ? 'bg-gradient-to-r from-blue-900/30 to-indigo-900/30 border-blue-500/10' 
-            : 'bg-gradient-to-r from-blue-500/5 to-indigo-500/5 border-blue-200 shadow-md shadow-slate-100'
+            ? 'bg-zinc-900/30 border-zinc-900' 
+            : 'bg-white border-zinc-150 shadow-sm'
         }`}>
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[96px]"></div>
-          <h3 className={`text-2xl sm:text-3xl font-black ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+          <h3 className={`text-xl sm:text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>
             Nâng tầm tính chính trực trong học thuật
           </h3>
-          <p className={`text-sm max-w-md mx-auto leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+          <p className={`text-xs max-w-sm mx-auto leading-relaxed ${theme === 'dark' ? 'text-zinc-400' : 'text-zinc-500'}`}>
             Giúp giảng viên tối ưu thời gian chấm điểm và sinh viên tự rà soát tài liệu trích dẫn khoa học nhanh chóng.
           </p>
-          <button
-            onClick={() => navigate('/login')}
-            className={`font-bold px-8 py-3.5 rounded-xl shadow-lg transition-all active:scale-95 text-sm inline-flex items-center gap-1.5 ${
-              theme === 'dark' 
-                ? 'bg-white hover:bg-slate-100 text-slate-950 shadow-white/5' 
-                : 'bg-slate-900 hover:bg-slate-800 text-white shadow-slate-950/20'
-            }`}
-          >
-            Đăng nhập hệ thống ngay <ChevronRight size={16} />
-          </button>
+          <div className="pt-2">
+            <button
+              onClick={() => navigate('/login')}
+              className={`font-semibold px-5 py-2.5 rounded-lg text-xs inline-flex items-center gap-1 transition-colors ${
+                theme === 'dark' 
+                  ? 'bg-white hover:bg-zinc-100 text-black' 
+                  : 'bg-zinc-900 hover:bg-zinc-800 text-white'
+              }`}
+            >
+              Đăng nhập hệ thống <ChevronRight size={14} />
+            </button>
+          </div>
         </div>
       </section>
     </div>
   );
 }
+
