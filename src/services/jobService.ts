@@ -57,10 +57,21 @@ export const jobService = {
     return response.data;
   },
 
-  retryJob: async (jobId: string): Promise<{ job_id: string; status: string }> => {
+  retryJob: async (jobId: string, mode = 'full', reason = ''): Promise<{ job_id: string; status: string }> => {
     if (import.meta.env.VITE_USE_MOCK === 'true' || jobId.startsWith('mock-')) {
       const newJobId = `mock-job-${Math.random().toString(36).substring(2, 9)}`;
-      mockJobStates[newJobId] = 0;
+      
+      // Giả lập điểm bắt đầu tùy theo loại retry
+      let startIndex = 0;
+      if (mode === 'scoring_only') {
+        startIndex = 7; // Scoring (80%)
+      } else if (mode === 'metadata_only') {
+        startIndex = 6; // Verifying metadata (65%)
+      } else if (mode === 'report_only') {
+        startIndex = 8; // Building report (90%)
+      }
+      mockJobStates[newJobId] = startIndex;
+
       return new Promise((resolve) => {
         setTimeout(() => {
           resolve({
@@ -71,7 +82,10 @@ export const jobService = {
       });
     }
 
-    const response = await axiosClient.post(`/jobs/${jobId}/retry`);
+    const response = await axiosClient.post(`/jobs/${jobId}/retry`, {
+      mode,
+      reason
+    });
     return response.data;
   }
 };
