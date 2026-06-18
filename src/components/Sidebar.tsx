@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { LayoutDashboard, BookOpen, Shield, Settings, LogOut, FileText, UploadCloud } from 'lucide-react';
 
 export default function Sidebar() {
@@ -17,7 +17,7 @@ export default function Sidebar() {
   return (
     <div className="w-full bg-[#0B1B3D] text-white flex flex-col h-full">
       {/* Phần Logo */}
-      <div className="p-6 flex items-center gap-3">
+      <Link to='/' className="p-6 flex items-center gap-3">
         <div className="bg-blue-600 p-2 rounded-lg">
           <FileText className="text-white" size={24} />
         </div>
@@ -25,7 +25,7 @@ export default function Sidebar() {
           <h1 className="text-xl font-black tracking-wider">TRUSTLENS</h1>
           <p className="text-[10px] text-blue-300 font-bold tracking-widest uppercase">Admin Panel</p>
         </div>
-      </div>
+      </Link>
 
       {/* Menu chính */}
       <div className="flex-1 px-4 mt-6">
@@ -69,7 +69,7 @@ export default function Sidebar() {
         <button 
           onClick={() => {
             localStorage.removeItem('token'); 
-            navigate('/login');
+            navigate('/');
           }}
           className="w-full flex items-center justify-center gap-2 py-2 text-rose-400 hover:text-rose-300 hover:bg-rose-400/10 rounded-lg transition-colors text-sm font-bold"
         >

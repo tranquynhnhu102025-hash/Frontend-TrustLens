@@ -2,13 +2,18 @@ import uploadService from "../../services/uploadService";
 
 import { useState, useEffect } from 'react'; // Tui thêm useEffect ở đây nha
 import { Send, AlertCircle, UploadCloud, X, FileText, Loader2, CheckCircle2, ArrowLeft } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useOutletContext } from 'react-router-dom';
+
 
 
 export default function UploadScreen() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { theme } = useOutletContext<{ theme: 'light' | 'dark' }>();
+  
+  // Lấy theme an toàn từ context hoặc localStorage làm dự phòng
+  const { theme: contextTheme } = useOutletContext<{ theme?: 'light' | 'dark' }>() || {};
+  const theme = contextTheme || localStorage.getItem('theme') || 'dark';
+  
   const selectedClass = location.state?.selectedClass;
 
   const [fileItems, setFileItems] = useState<FileItem[]>([]);
@@ -125,7 +130,7 @@ export default function UploadScreen() {
     setProcessing(false);
   }; 
 
-  if (!selectedClass) {
+  if (!selectedClass && !currentClass) {
     return (
       <div className={`w-full max-w-md mx-auto mt-16 p-8 border rounded-3xl text-center animate-fade-in transition-colors duration-300 ${
         theme === 'dark' 
@@ -149,6 +154,7 @@ export default function UploadScreen() {
 
   const hasIdle = fileItems.some(item => item.status === 'idle');
   const hasFinished = fileItems.some(item => item.status === 'success');
+  const displayClassName = selectedClass?.name || currentClass?.name || 'Đồ án Tốt nghiệp';
 
   return (
     // ... (Giữ nguyên phần giao diện return như cũ)
