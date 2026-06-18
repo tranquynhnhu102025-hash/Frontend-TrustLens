@@ -8,10 +8,9 @@ import {
 export default function ReportScreen() {
   const navigate = useNavigate();
 
-  // Dữ liệu Mock (Giả lập) bám sát cấu trúc của Backend khi chưa có API thật
   const mockReport = {
     trustScore: 78,
-    level: 'Cảnh báo', // Pass, Warning, Fail
+    level: 'Cảnh báo', 
     summary: 'Tài liệu có độ tin cậy ở mức khá. Tuy nhiên phát hiện một số trích dẫn từ nguồn không chính thống và thiếu định dạng chuẩn.',
     criteriaBreakdown: [
       { name: 'Độ tin cậy của nguồn', score: 85, weight: '40%' },
@@ -26,7 +25,6 @@ export default function ReportScreen() {
   };
 
   const handleExport = () => {
-    // Chờ BE hỗ trợ endpoint GET /api/reports/{id}/export?format=pdf
     alert('Tính năng xuất file PDF/DOCX đang được BE xây dựng. Sẽ sớm ra mắt!');
   };
 

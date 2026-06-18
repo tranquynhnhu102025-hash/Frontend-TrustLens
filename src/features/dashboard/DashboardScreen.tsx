@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FileText, ShieldCheck, AlertTriangle, ShieldAlert, 
@@ -8,7 +8,6 @@ import {
 export default function DashboardScreen() {
   const navigate = useNavigate();
 
-  // Dữ liệu giả lập (Mock data) chờ API GET /dashboard/summary của Trúc
   const summaryData = {
     totalSubmissions: 156,
     passed: 112,

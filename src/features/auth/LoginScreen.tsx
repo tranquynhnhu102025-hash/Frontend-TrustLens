@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Loader2 } from 'lucide-react';
+import authService from '../../services/authService';
 
 export default function LoginScreen() {
   const navigate = useNavigate();
@@ -9,14 +10,26 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('123456');
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
+ const [error, setError] = useState(''); // Thêm dòng này để chứa thông báo lỗi nếu có
+
+  const handleLogin = async () => {
     setLoading(true);
-    
-    // GIẢ LẬP ĐĂNG NHẬP MOCK DATA CHO DEMO
-    setTimeout(() => {
+    setError(''); // Xóa lỗi cũ (nếu có) trước khi thử lại
+
+    try {
+      // Gọi API đăng nhập thật
+      const response = await authService.login(email, password);
+
+      if (response.access_token) {
+        // Thành công thì nhảy qua màn hình lớp học
+        navigate('/classes');
+      }
+    } catch (err: any) {
+      // Bắt lỗi (VD: sai mật khẩu) và in ra màn hình
+      setError(err.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại!');
+    } finally {
       setLoading(false);
-      navigate('/classes');
-    }, 1000); // Quay đều 1 giây rồi nhảy trang
+    }
   };
 
   return (
@@ -64,6 +77,11 @@ export default function LoginScreen() {
               onClick={() => navigate('/register')}
               className="text-blue-600 font-bold hover:underline"
             >
+              {error && (
+  <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-sm font-bold rounded-lg text-center">
+    {error}
+  </div>
+)}
               Đăng ký ngay
             </button>
           </p>

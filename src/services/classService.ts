@@ -22,12 +22,9 @@ export const classService = {
         resolve(mockClasses);
       }, 500);
     });
-    // GHI CHÚ CHO TRÚC SAU NÀY SỬA THÀNH:
-    // const response = await axiosClient.get('/courses');
-    // return response.data;
+
   },
 
-  // Thêm lớp mới
   createClass: async (newCode: string, newName: string): Promise<Course> => {
     return new Promise((resolve) => {
       setTimeout(() => {

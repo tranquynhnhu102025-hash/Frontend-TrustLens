@@ -1,179 +1,114 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { UserPlus, Loader2, ArrowLeft, ShieldCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import authService from '../../services/authService';
+import { Loader2, AlertCircle } from 'lucide-react';
 
 export default function RegisterScreen() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  // Gom tất cả dữ liệu vào 1 object cho dễ quản lý
   const [formData, setFormData] = useState({
-    fullName: '',
-    idNumber: '', // Mã số SV hoặc GV
-    role: 'student',
-    faculty: 'Khoa Công nghệ Thông tin',
-    major: '',
+    full_name: '',
     email: '',
-    phone: '',
     password: '',
-    confirmPassword: ''
+    confirm_password: ''
   });
+  
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleRegister = () => {
-    // Kiểm tra sơ bộ
-    if (formData.password !== formData.confirmPassword) {
+  // ĐÂY LÀ PHẦN XỬ LÝ RESPONSE TỪ SERVER MÀ TRÚC YÊU CẦU NÈ
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (formData.password !== formData.confirm_password) {
       setError('Mật khẩu xác nhận không khớp!');
       return;
     }
-    if (!formData.email.includes('@ntt.edu.vn') && !formData.email.includes('@student.ntt.edu.vn')) {
-      setError('Vui lòng sử dụng email do nhà trường cấp (@ntt.edu.vn)');
-      return;
-    }
 
-    setError('');
-    setLoading(true);
-    
-    // Giả lập xử lý đăng ký
-    setTimeout(() => {
-      setLoading(false);
-      alert('Đăng ký tài khoản thành công! Vui lòng chờ Admin duyệt.');
-      navigate('/');
-    }, 1500);
+    setIsLoading(true);
+
+    try {
+      // 1. Ném dữ liệu lên Server
+      const response = await authService.register({
+        full_name: formData.full_name,
+        email: formData.email,
+        password: formData.password
+      });
+      
+      // 2. Server phản hồi thành công -> Báo thành công và chuyển về Login
+      if (response) {
+        alert('Đăng ký thành công! Vui lòng đăng nhập.');
+        navigate('/login');
+      }
+    } catch (err: any) {
+      // 3. Xử lý response lỗi từ Server (VD: Trùng email) và in ra chữ đỏ
+      setError(err.response?.data?.message || 'Đăng ký thất bại. Vui lòng kiểm tra lại!');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-10 px-4 animate-fade-in bg-slate-50">
-      <div className="bg-white p-8 md:p-10 rounded-3xl shadow-xl w-full max-w-3xl border border-slate-100 relative">
+    <div className="flex flex-col items-center justify-center min-h-[75vh]">
+      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100">
+        <h2 className="text-2xl font-black text-center text-slate-800 mb-6">Tạo tài khoản mới</h2>
         
-        {/* Nút quay lại */}
-        <button 
-          onClick={() => navigate('/')}
-          className="absolute top-6 left-6 text-slate-400 hover:text-blue-600 transition-colors flex items-center gap-1 font-bold text-sm"
-        >
-          <ArrowLeft size={18} /> Quay lại
-        </button>
-
-        <div className="flex flex-col items-center mb-8 mt-4">
-          <div className="bg-blue-600 text-white p-4 rounded-2xl shadow-lg shadow-blue-200 mb-4">
-            <UserPlus size={36} />
-          </div>
-          <h2 className="text-3xl font-black text-slate-800 mb-2">Tạo tài khoản học thuật</h2>
-          <p className="text-slate-500 font-medium text-center">
-            Điền đầy đủ thông tin để tham gia hệ thống kiểm duyệt TrustLens
-          </p>
-        </div>       
-
+        {/* Khung màu đỏ hiện response lỗi từ Server */}
         {error && (
-          <div className="mb-6 p-3 bg-rose-50 text-rose-600 text-sm font-bold rounded-xl border border-rose-100 flex items-center justify-center gap-2">
-            <ShieldCheck size={18} /> {error}
+          <div className="flex items-center gap-2 p-3 mb-4 text-sm font-bold text-red-600 bg-red-50 rounded-lg border border-red-200">
+            <AlertCircle size={18} /> {error}
           </div>
         )}
-        
-        {/* FORM ĐĂNG KÝ CHI TIẾT (LƯỚI 2 CỘT) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
-          
-          {/* Hàng 1 */}
-          <div className="md:col-span-2">
-            <label className="block text-sm font-bold text-slate-700 mb-1.5">Họ và Tên đầy đủ</label>
+
+        <form onSubmit={handleRegister} className="space-y-4">
+          <div>
+            <label className="block text-sm font-bold text-slate-700 mb-1">Họ và Tên</label>
             <input 
-              name="fullName" value={formData.fullName} onChange={handleChange}
-              type="text" placeholder="VD: Trần Quỳnh Như"
-              className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-800 transition-all" 
+              type="text" name="full_name" required
+              onChange={handleChange}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-600 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-slate-700 mb-1">Email</label>
+            <input 
+              type="email" name="email" required
+              onChange={handleChange}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-600 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-slate-700 mb-1">Mật khẩu</label>
+            <input 
+              type="password" name="password" required minLength={6}
+              onChange={handleChange}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-600 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-slate-700 mb-1">Xác nhận mật khẩu</label>
+            <input 
+              type="password" name="confirm_password" required minLength={6}
+              onChange={handleChange}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-600 focus:outline-none"
             />
           </div>
 
-          {/* Hàng 2 */}
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1.5">Vai trò trong trường</label>
-            <select 
-              name="role" value={formData.role} onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-800 transition-all"
-            >
-              <option value="student">Sinh viên</option>
-              <option value="lecturer">Giảng viên / Kiểm duyệt viên</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1.5">Mã số định danh (MSSV/MSGV)</label>
-            <input 
-              name="idNumber" value={formData.idNumber} onChange={handleChange}
-              type="text" placeholder="VD: 2400008936"
-              className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-800 transition-all uppercase" 
-            />
-          </div>
+          <button 
+            type="submit" disabled={isLoading}
+            className="w-full py-3.5 mt-2 font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition flex justify-center items-center gap-2"
+          >
+            {isLoading ? <Loader2 size={20} className="animate-spin" /> : 'Đăng ký ngay'}
+          </button>
+        </form>
 
-          {/* Hàng 3 */}
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1.5">Khoa trực thuộc</label>
-            <select 
-              name="faculty" value={formData.faculty} onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-800 transition-all"
-            >
-              <option>Khoa Công nghệ Thông tin</option>
-              <option>Khoa Kinh tế Quản trị</option>
-              <option>Khoa Ngoại ngữ</option>
-              <option>Khoa Dược</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1.5">Chuyên ngành</label>
-            <input 
-              name="major" value={formData.major} onChange={handleChange}
-              type="text" placeholder="VD: Kỹ thuật phần mềm"
-              className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-800 transition-all" 
-            />
-          </div>
-
-          {/* Hàng 4 */}
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1.5">Email học thuật</label>
-            <input 
-              name="email" value={formData.email} onChange={handleChange}
-              type="email" placeholder="quynhnhu@ntt.edu.vn"
-              className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-800 transition-all" 
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1.5">Số điện thoại liên hệ</label>
-            <input 
-              name="phone" value={formData.phone} onChange={handleChange}
-              type="tel" placeholder="0909 xxx xxx"
-              className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-800 transition-all" 
-            />
-          </div>
-
-          {/* Hàng 5 */}
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1.5">Mật khẩu bảo mật</label>
-            <input 
-              name="password" value={formData.password} onChange={handleChange}
-              type="password" placeholder="Tối thiểu 8 ký tự"
-              className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-800 transition-all" 
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1.5">Xác nhận mật khẩu</label>
-            <input 
-              name="confirmPassword" value={formData.confirmPassword} onChange={handleChange}
-              type="password" placeholder="Nhập lại mật khẩu"
-              className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-800 transition-all" 
-            />
-          </div>
-        </div>
-
-        <button 
-          onClick={handleRegister}
-          disabled={loading}
-          className="w-full flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-blue-200 disabled:opacity-70 text-lg"
-        >
-          {loading ? <Loader2 size={24} className="animate-spin" /> : 'Hoàn tất đăng ký tài khoản'}
-        </button>
-
+        <p className="mt-6 text-center text-slate-600 text-sm font-medium">
+          Đã có tài khoản? <Link to="/login" className="text-blue-600 font-bold hover:underline">Đăng nhập</Link>
+        </p>
       </div>
     </div>
   );
