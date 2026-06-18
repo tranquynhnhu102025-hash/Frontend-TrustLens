@@ -65,10 +65,10 @@ export default function ClassesScreen() {
             onClick={() => {
               navigate('/upload', { state: { selectedClass: cls } });
             }}
-            className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-blue-300 transition-all cursor-pointer group"
+            className="bg-white p-6 rounded-2xl border border-slate-100 shadow-minimal-sm hover:shadow-minimal-md hover:border-blue-500 transition-all cursor-pointer group"
           >
-            <div className="text-sm font-bold text-blue-600 mb-2">{cls.id}</div>
-            <h3 className="text-lg font-black text-slate-800 mb-6 group-hover:text-blue-700 transition-colors line-clamp-2">{cls.name}</h3>
+            <div className="text-xs font-bold text-blue-600 mb-2 uppercase tracking-wide">{cls.id}</div>
+            <h3 className="text-lg font-black text-slate-800 mb-6 group-hover:text-blue-600 transition-colors line-clamp-2">{cls.name}</h3>
             
             <div className="flex items-center justify-between text-xs font-bold text-slate-400">
               <div className="flex items-center gap-4">
@@ -81,60 +81,57 @@ export default function ClassesScreen() {
         ))}
       </div>
 
-      {/* BẢNG POPUP KÍNH MỜ (GLASSMORPHISM) */}
+      {/* BẢNG POPUP TỐI GIẢN */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/30 backdrop-blur-md" onClick={() => setShowModal(false)}></div>
+          <div className="absolute inset-0 bg-slate-900/10 backdrop-blur-sm" onClick={() => setShowModal(false)}></div>
           
-          <div className="absolute w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 translate-x-20 -translate-y-20 pointer-events-none"></div>
-          <div className="absolute w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-[100px] opacity-40 -translate-x-20 translate-y-20 pointer-events-none"></div>
-
-          <div className="relative z-10 bg-white/80 backdrop-blur-xl rounded-[32px] p-8 w-full max-w-md shadow-2xl border border-white/50">
-            <div className="flex items-center gap-4 mb-8 border-b border-slate-200/50 pb-5">
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-3 rounded-2xl shadow-lg shadow-blue-200">
-                <BookOpen size={24} />
+          <div className="relative z-10 bg-white border border-slate-150 rounded-2xl p-6 w-full max-w-md shadow-minimal-md">
+            <div className="flex items-center gap-3.5 mb-6 border-b border-slate-100 pb-4">
+              <div className="bg-blue-50 text-blue-600 p-2.5 rounded-xl border border-blue-100">
+                <BookOpen size={20} />
               </div>
               <div>
-                <h3 className="text-xl font-black text-slate-900">Thêm lớp học phần</h3>
+                <h3 className="text-lg font-black text-slate-900">Thêm lớp học phần</h3>
               </div>
             </div>
             
-            <div className="space-y-5 mb-8">
+            <div className="space-y-4 mb-6">
               <div>
-                <label className="block text-sm font-bold text-slate-800 mb-2">Mã học phần</label>
+                <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Mã học phần</label>
                 <input 
                   value={newCode}
                   onChange={(e) => setNewCode(e.target.value)} 
                   type="text" 
                   placeholder="VD: INT4050" 
-                  className="w-full px-5 py-3.5 border border-slate-200/80 bg-white/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-900 uppercase placeholder:font-medium placeholder:text-slate-400 placeholder:normal-case shadow-inner transition-all" 
+                  className="w-full px-4 py-2.5 border border-slate-200 bg-slate-50/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:bg-white font-bold text-slate-900 uppercase placeholder:font-medium placeholder:text-slate-400 placeholder:normal-case transition-all text-sm" 
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-800 mb-2">Tên đồ án / môn học</label>
+                <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Tên đồ án / môn học</label>
                 <input 
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)} 
                   type="text" 
                   placeholder="VD: Đồ án Tốt nghiệp" 
-                  className="w-full px-5 py-3.5 border border-slate-200/80 bg-white/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-900 placeholder:font-medium placeholder:text-slate-400 shadow-inner transition-all" 
+                  className="w-full px-4 py-2.5 border border-slate-200 bg-slate-50/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:bg-white font-bold text-slate-900 placeholder:font-medium placeholder:text-slate-400 transition-all text-sm" 
                 />
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 pt-2">
+            <div className="flex justify-end gap-2 pt-2">
               <button 
                 onClick={() => setShowModal(false)} 
-                className="px-6 py-3 font-bold text-slate-600 hover:bg-white/80 rounded-2xl transition-all"
+                className="px-5 py-2.5 font-bold text-xs text-slate-500 hover:bg-slate-50 rounded-xl transition-all"
               >
                 Hủy bỏ
               </button>
               <button 
                 onClick={handleAddClass}
                 disabled={!newCode || !newName}
-                className="flex items-center gap-2 px-6 py-3 font-bold bg-blue-600 text-white hover:bg-blue-700 rounded-2xl transition-all shadow-lg shadow-blue-200 disabled:opacity-50 disabled:cursor-not-allowed group"
+                className="flex items-center gap-1.5 px-5 py-2.5 font-bold text-xs bg-blue-600 text-white hover:bg-blue-700 rounded-xl transition-all shadow-minimal-sm disabled:opacity-50 disabled:cursor-not-allowed group"
               >
-                <Save size={18} className="group-hover:scale-110 transition-transform" />
+                <Save size={14} className="group-hover:scale-105 transition-transform" />
                 Tạo lớp học
               </button>
             </div>

@@ -15,35 +15,35 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="w-full bg-[#0B1B3D] text-white flex flex-col h-full">
+    <div className="w-full bg-white border-r border-slate-200/60 text-slate-800 flex flex-col h-full shadow-minimal-sm">
       {/* Phần Logo */}
-      <Link to='/' className="p-6 flex items-center gap-3">
-        <div className="bg-blue-600 p-2 rounded-lg">
-          <FileText className="text-white" size={24} />
+      <Link to='/' className="p-6 flex items-center gap-3 border-b border-slate-100">
+        <div className="bg-blue-50 text-blue-600 p-2 rounded-xl border border-blue-100">
+          <FileText size={22} />
         </div>
         <div>
-          <h1 className="text-xl font-black tracking-wider">TRUSTLENS</h1>
-          <p className="text-[10px] text-blue-300 font-bold tracking-widest uppercase">Admin Panel</p>
+          <h1 className="text-lg font-black tracking-wide text-slate-900">TrustLens</h1>
+          <p className="text-[9px] text-slate-400 font-bold tracking-wider uppercase">Hệ thống thẩm định</p>
         </div>
       </Link>
 
       {/* Menu chính */}
       <div className="flex-1 px-4 mt-6">
-        <p className="text-xs font-bold text-slate-400 mb-4 px-2 uppercase tracking-wider">Menu chính</p>
-        <nav className="space-y-2">
+        <p className="text-[10px] font-bold text-slate-400 mb-4 px-2 uppercase tracking-widest">Danh mục</p>
+        <nav className="space-y-1.5">
           {menuItems.map((item) => {
             const isActive = location.pathname.includes(item.path);
             return (
               <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold ${
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all font-bold text-sm border ${
                   isActive 
-                    ? 'bg-blue-600/30 border border-blue-500/50 text-blue-400' 
-                    : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'
+                    ? 'bg-slate-50 border-slate-200/60 text-blue-600 shadow-minimal-sm' 
+                    : 'text-slate-500 border-transparent hover:bg-slate-50 hover:text-slate-900'
                 }`}
               >
-                <item.icon size={20} />
+                <item.icon size={18} className={isActive ? 'text-blue-600' : 'text-slate-400'} />
                 {item.name}
               </button>
             );
@@ -52,28 +52,29 @@ export default function Sidebar() {
       </div>
 
       {/* Phần Tài khoản nằm im ở đáy màn hình */}
-      <div className="p-3 m-4 bg-slate-800/50 rounded-2xl border border-slate-700/50 mt-auto">
+      <div className="p-3 m-4 bg-slate-50/50 rounded-2xl border border-slate-200/60 mt-auto">
         <div 
-          className="flex items-center gap-3 mb-3 cursor-pointer hover:bg-slate-700/50 p-2 rounded-xl transition-all" 
+          className="flex items-center gap-3 mb-2.5 cursor-pointer hover:bg-slate-100/50 p-2 rounded-xl transition-all" 
           onClick={() => navigate('/profile')}
         >
-          <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center font-bold text-lg text-white shrink-0">
-            N
+          <div className="w-9 h-9 bg-blue-50 border border-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm shrink-0">
+            Q
           </div>
           <div className="text-left overflow-hidden">
-            <p className="font-bold text-sm text-white truncate">Trần Quỳnh Như</p>
-            <p className="text-xs text-slate-400">Sinh viên</p>
+            <p className="font-bold text-xs text-slate-800 truncate">Trần Quỳnh Như</p>
+            <p className="text-[10px] font-medium text-slate-400 mt-0.5">Giảng viên phụ trách</p>
           </div>
         </div>
         
         <button 
           onClick={() => {
-            localStorage.removeItem('token'); 
-            navigate('/');
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            navigate('/login');
           }}
-          className="w-full flex items-center justify-center gap-2 py-2 text-rose-400 hover:text-rose-300 hover:bg-rose-400/10 rounded-lg transition-colors text-sm font-bold"
+          className="w-full flex items-center justify-center gap-1.5 py-2 text-rose-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors text-xs font-bold"
         >
-          <LogOut size={18} /> Đăng xuất
+          <LogOut size={14} /> Đăng xuất
         </button>
       </div>
     </div>

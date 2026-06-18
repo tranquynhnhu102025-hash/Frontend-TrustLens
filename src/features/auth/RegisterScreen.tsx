@@ -54,59 +54,59 @@ export default function RegisterScreen() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[75vh]">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100">
-        <h2 className="text-2xl font-black text-center text-slate-800 mb-6">Tạo tài khoản mới</h2>
+      <div className="bg-white p-8 rounded-2xl shadow-minimal-md w-full max-w-sm border border-slate-100">
+        <h2 className="text-xl font-black text-center text-slate-900 mb-6">Tạo tài khoản mới</h2>
         
         {/* Khung màu đỏ hiện response lỗi từ Server */}
         {error && (
-          <div className="flex items-center gap-2 p-3 mb-4 text-sm font-bold text-red-600 bg-red-50 rounded-lg border border-red-200">
-            <AlertCircle size={18} /> {error}
+          <div className="flex items-center gap-2 p-3 mb-4 text-xs font-bold text-red-600 bg-red-50 rounded-lg border border-red-200">
+            <AlertCircle size={16} className="shrink-0" /> {error}
           </div>
         )}
 
         <form onSubmit={handleRegister} className="space-y-4">
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1">Họ và Tên</label>
+            <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Họ và Tên</label>
             <input 
               type="text" name="full_name" required
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-600 focus:outline-none"
+              className="w-full px-4 py-2.5 rounded-xl bg-slate-50/50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:bg-white font-medium text-slate-800 text-sm transition-all"
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1">Email</label>
+            <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Email</label>
             <input 
               type="email" name="email" required
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-600 focus:outline-none"
+              className="w-full px-4 py-2.5 rounded-xl bg-slate-50/50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:bg-white font-medium text-slate-800 text-sm transition-all"
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1">Mật khẩu</label>
+            <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Mật khẩu</label>
             <input 
               type="password" name="password" required minLength={6}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-600 focus:outline-none"
+              className="w-full px-4 py-2.5 rounded-xl bg-slate-50/50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:bg-white font-medium text-slate-800 text-sm transition-all"
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1">Xác nhận mật khẩu</label>
+            <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Xác nhận mật khẩu</label>
             <input 
               type="password" name="confirm_password" required minLength={6}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-600 focus:outline-none"
+              className="w-full px-4 py-2.5 rounded-xl bg-slate-50/50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:bg-white font-medium text-slate-800 text-sm transition-all"
             />
           </div>
 
           <button 
             type="submit" disabled={isLoading}
-            className="w-full py-3.5 mt-2 font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition flex justify-center items-center gap-2"
+            className="w-full py-3 mt-2 font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition flex justify-center items-center gap-2 shadow-minimal-sm text-sm"
           >
-            {isLoading ? <Loader2 size={20} className="animate-spin" /> : 'Đăng ký ngay'}
+            {isLoading ? <Loader2 size={18} className="animate-spin" /> : 'Đăng ký ngay'}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-slate-600 text-sm font-medium">
+        <p className="mt-6 text-center text-slate-400 text-xs font-medium">
           Đã có tài khoản? <Link to="/login" className="text-blue-600 font-bold hover:underline">Đăng nhập</Link>
         </p>
       </div>

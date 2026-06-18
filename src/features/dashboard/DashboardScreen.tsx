@@ -59,46 +59,42 @@ export default function DashboardScreen() {
 
       {/* 4 THẺ KPI (KPI CARDS) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 bg-blue-50 w-24 h-24 rounded-full transition-transform group-hover:scale-110"></div>
-          <div className="text-blue-600 bg-blue-100 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 relative z-10">
-            <FileText size={24} />
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 flex flex-col shadow-minimal-sm group">
+          <div className="text-slate-500 bg-slate-50 border border-slate-100 w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-colors group-hover:bg-blue-50 group-hover:text-blue-600 group-hover:border-blue-100">
+            <FileText size={20} />
           </div>
-          <p className="text-sm font-bold text-slate-500 mb-1 relative z-10">Tổng số tài liệu</p>
-          <h3 className="text-3xl font-black text-slate-800 relative z-10">{summaryData.totalSubmissions}</h3>
+          <p className="text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Tổng số tài liệu</p>
+          <h3 className="text-2xl font-black text-slate-800">{summaryData.totalSubmissions}</h3>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 bg-green-50 w-24 h-24 rounded-full transition-transform group-hover:scale-110"></div>
-          <div className="text-green-600 bg-green-100 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 relative z-10">
-            <ShieldCheck size={24} />
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 flex flex-col shadow-minimal-sm group">
+          <div className="text-slate-500 bg-slate-50 border border-slate-100 w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-colors group-hover:bg-green-50 group-hover:text-green-600 group-hover:border-green-100">
+            <ShieldCheck size={20} />
           </div>
-          <p className="text-sm font-bold text-slate-500 mb-1 relative z-10">Đạt chuẩn (Hợp lệ)</p>
-          <h3 className="text-3xl font-black text-slate-800 relative z-10">{summaryData.passed}</h3>
+          <p className="text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Đạt chuẩn (Hợp lệ)</p>
+          <h3 className="text-2xl font-black text-slate-800">{summaryData.passed}</h3>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 bg-amber-50 w-24 h-24 rounded-full transition-transform group-hover:scale-110"></div>
-          <div className="text-amber-600 bg-amber-100 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 relative z-10">
-            <AlertTriangle size={24} />
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 flex flex-col shadow-minimal-sm group">
+          <div className="text-slate-500 bg-slate-50 border border-slate-100 w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-colors group-hover:bg-amber-50 group-hover:text-amber-600 group-hover:border-amber-100">
+            <AlertTriangle size={20} />
           </div>
-          <p className="text-sm font-bold text-slate-500 mb-1 relative z-10">Cần xem xét</p>
-          <h3 className="text-3xl font-black text-slate-800 relative z-10">{summaryData.warnings}</h3>
+          <p className="text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Cần xem xét</p>
+          <h3 className="text-2xl font-black text-slate-800">{summaryData.warnings}</h3>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 bg-rose-50 w-24 h-24 rounded-full transition-transform group-hover:scale-110"></div>
-          <div className="text-rose-600 bg-rose-100 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 relative z-10">
-            <ShieldAlert size={24} />
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 flex flex-col shadow-minimal-sm group">
+          <div className="text-slate-500 bg-slate-50 border border-slate-100 w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-colors group-hover:bg-rose-50 group-hover:text-rose-600 group-hover:border-rose-100">
+            <ShieldAlert size={20} />
           </div>
-          <p className="text-sm font-bold text-slate-500 mb-1 relative z-10">Rủi ro cao</p>
-          <h3 className="text-3xl font-black text-slate-800 relative z-10">{summaryData.critical}</h3>
+          <p className="text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Rủi ro cao</p>
+          <h3 className="text-2xl font-black text-slate-800">{summaryData.critical}</h3>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* BIỂU ĐỒ MINI (MOCK) */}
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+        <div className="bg-white p-6 rounded-2xl shadow-minimal-sm border border-slate-100">
           <h3 className="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
             <ArrowUpRight size={20} className="text-blue-600" /> Tỉ lệ theo tuần
           </h3>
@@ -120,7 +116,7 @@ export default function DashboardScreen() {
         </div>
 
         {/* BẢNG TÀI LIỆU VỪA KIỂM DUYỆT */}
-        <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="lg:col-span-2 bg-white rounded-2xl shadow-minimal-sm border border-slate-100 overflow-hidden">
           <div className="p-6 border-b border-slate-100 flex justify-between items-center">
             <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">
               <Clock size={20} className="text-blue-600" /> Tài liệu vừa kiểm duyệt
