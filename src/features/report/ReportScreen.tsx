@@ -15,28 +15,6 @@ export default function ReportScreen() {
   const [report, setReport] = useState<any>(null);
   const [error, setError] = useState<string>('');
 
-  const mockReport = {
-    trustScore: 78,
-    confidenceScore: 0.82,
-    level: 'Cảnh báo', 
-    summary: 'Phân tích tổng cộng 24 tài liệu tham khảo: 18 nguồn đã xác minh, 3 nguồn xác minh một phần, 2 nguồn không tìm thấy. Phát hiện 2 cảnh báo nghiêm trọng.',
-    criteriaBreakdown: [
-      { name: 'Mức độ hoàn thiện Metadata (C1)', score: 8.4, max: 10 },
-      { name: 'Mức độ xác minh Metadata (C2)', score: 16.2, max: 20 },
-      { name: 'Độ tin cậy của nguồn (C3)', score: 15.6, max: 20 },
-      { name: 'Độ phù hợp chủ đề (C4)', score: 15.0, max: 20 },
-      { name: 'Tính cập nhật (C5)', score: 7.8, max: 10 },
-      { name: 'Chất lượng trích dẫn (C6)', score: 8.0, max: 10 },
-      { name: 'Đóng góp đa dạng nguồn (C7)', score: 3.8, max: 5 },
-      { name: 'Tính liêm chính học thuật (C8)', score: 4.2, max: 5 }
-    ],
-    citations: [
-      { id: 1, title: 'Attention Is All You Need', author: 'Vaswani et al.', year: 2017, source: 'arXiv', status: 'pass', issues: 'Hợp lệ - Tìm thấy đối sánh thực tế trên hệ thống CrossRef.' },
-      { id: 2, title: 'Khái niệm về Trí tuệ nhân tạo', author: 'Nguyễn Văn A', year: 2023, source: 'Blog cá nhân (WordPress)', status: 'warning', issues: 'Cảnh báo: Nguồn không thuộc hệ thống học thuật chính thống.' },
-      { id: 3, title: 'Ứng dụng AI trong giáo dục', author: 'Không rõ', year: 2010, source: 'Wikipedia', status: 'fail', issues: 'Rủi ro cao: Wikipedia không được chấp nhận làm tài liệu tham khảo. Độ cập nhật kém (>10 năm).' }
-    ]
-  };
-
   const getSummaryText = (summary: any): string => {
     if (typeof summary === 'string') return summary;
     if (!summary) return 'Báo cáo thẩm định trích dẫn tự động cho bài nộp tài liệu học thuật.';
@@ -73,30 +51,19 @@ export default function ReportScreen() {
     const fetchReport = async () => {
       setError('');
       
-      if (!id) {
-        setReport(mockReport);
-        return;
-      }
+      const reportId = id || 'mock-report-uuid-1';
 
       setLoading(true);
       try {
         let data;
-        
-        if (import.meta.env.VITE_USE_MOCK === 'true') {
-          // Trả mock với độ trễ nhân tạo
-          await new Promise(r => setTimeout(r, 600));
-          data = mockReport;
-          setReport(data);
-          return;
-        }
 
         // Thử lấy báo cáo bằng reportId trước
         try {
-          data = await reportService.getReport(id);
+          data = await reportService.getReport(reportId);
         } catch (err) {
           console.warn("Lấy báo cáo bằng reportId thất bại, thử lấy bằng submissionId...", err);
           // Fallback lấy báo cáo bằng submissionId
-          data = await reportService.getReportBySubmission(id);
+          data = await reportService.getReportBySubmission(reportId);
         }
         
         // Chuẩn hóa dữ liệu từ backend API khớp với giao diện C1-C8 mới
@@ -170,19 +137,13 @@ export default function ReportScreen() {
   }, [id]);
 
   const handleExport = async () => {
-    if (!id || exporting) return;
+    const reportId = id || 'mock-report-uuid-1';
+    if (exporting) return;
     
     setExporting(true);
     try {
-      if (import.meta.env.VITE_USE_MOCK === 'true') {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        alert('Mô phỏng xuất báo cáo PDF thành công! (Mock mode)');
-        setExporting(false);
-        return;
-      }
-
       // 1. Gửi yêu cầu khởi tạo xuất file
-      const exportRes = await reportService.exportReport(id);
+      const exportRes = await reportService.exportReport(reportId);
       const exportId = exportRes.export_id;
 
       if (!exportId) {
@@ -196,7 +157,7 @@ export default function ReportScreen() {
       const url = window.URL.createObjectURL(fileBlob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `TrustLens_Report_${id}.pdf`);
+      link.setAttribute('download', `TrustLens_Report_${reportId}.pdf`);
       document.body.appendChild(link);
       link.click();
       

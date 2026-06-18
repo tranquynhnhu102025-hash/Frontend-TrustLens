@@ -9,12 +9,7 @@ export interface Course {
   assignment_id?: string;
 }
 
-// DỮ LIỆU GIẢ LẬP (MOCK DATA)
-let mockClasses: Course[] = [
-  { id: 'INT4050', name: 'Đồ án Tốt nghiệp - Khóa 2022', students: 45, date: '15/06/2026', assignment_id: 'INT4050' },
-  { id: 'INT3307', name: 'Phát triển Hệ thống Thông tin Enterprise', students: 38, date: '20/06/2026', assignment_id: 'INT3307' },
-  { id: 'INT3110', name: 'Kỹ thuật phần mềm nâng cao', students: 42, date: '18/06/2026', assignment_id: 'INT3110' }
-];
+import { MOCK_CLASSES } from '../mocks/dummyData';
 
 export const classService = {
   // Lấy danh sách lớp
@@ -23,7 +18,7 @@ export const classService = {
       // Giả lập thời gian chờ máy chủ 0.5 giây
       return new Promise((resolve) => {
         setTimeout(() => {
-          resolve(mockClasses);
+          resolve(MOCK_CLASSES);
         }, 500);
       });
     } else {
@@ -80,7 +75,7 @@ export const classService = {
             date: '31/12/2026',
             assignment_id: newCode.toUpperCase()
           };
-          mockClasses.push(newClass);
+          MOCK_CLASSES.push(newClass);
           resolve(newClass);
         }, 500);
       });

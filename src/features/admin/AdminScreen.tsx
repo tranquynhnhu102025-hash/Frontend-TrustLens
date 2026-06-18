@@ -1,20 +1,34 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ShieldAlert, Users, Sliders, Database, 
   Activity, ArrowRight, Search, UserPlus
 } from 'lucide-react';
+import adminService, { AuditLog } from '../../services/adminService';
 
 export default function AdminScreen() {
   const navigate = useNavigate();
 
-  // Dữ liệu giả lập cho Nhật ký hệ thống (Audit Logs)
-  const auditLogs = [
-    { id: 1, action: 'Cập nhật trọng số Trust Score', user: 'Admin_Truc', time: '10 phút trước', type: 'config' },
-    { id: 2, action: 'Thêm tài khoản Giảng viên', user: 'Admin_Nhu', time: '1 giờ trước', type: 'user' },
-    { id: 3, action: 'Kết nối API IEEE Xplore', user: 'System', time: '3 giờ trước', type: 'metadata' },
-    { id: 4, action: 'Xóa bài nộp SUB-099', user: 'Admin_Truc', time: 'Hôm qua', type: 'system' },
-  ];
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchLogs = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const data = await adminService.getAuditLogs();
+        setAuditLogs(data);
+      } catch (err: any) {
+        console.error("Lỗi khi tải nhật ký hoạt động:", err);
+        setError(err.response?.data?.message || 'Không thể tải nhật ký hoạt động hệ thống.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLogs();
+  }, []);
 
   return (
     <div className="w-full animate-fade-in max-w-5xl mx-auto mt-4 space-y-6">
@@ -118,35 +132,55 @@ export default function AdminScreen() {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-150 dark:divide-zinc-900 text-xs">
-              {auditLogs.map((log) => (
-                <tr key={log.id} className="hover:bg-zinc-50/40 dark:hover:bg-zinc-900/10 transition-colors">
-                  <td className="p-4 pl-6 font-bold text-zinc-800 dark:text-zinc-200">{log.action}</td>
-                  <td className="p-4 font-bold text-zinc-650 dark:text-zinc-300">{log.user}</td>
-                  <td className="p-4 text-zinc-455 dark:text-zinc-500 font-semibold">{log.time}</td>
-                  <td className="p-4 text-center">
-                    {log.type === 'config' && (
-                      <span className="inline-flex px-2 py-0.5 bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 font-bold rounded border border-amber-150 dark:border-amber-900/50 text-[10px]">
-                        Cấu hình
-                      </span>
-                    )}
-                    {log.type === 'user' && (
-                      <span className="inline-flex px-2 py-0.5 bg-blue-50/50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 font-bold rounded border border-blue-150 dark:border-blue-900/50 text-[10px]">
-                        Tài khoản
-                      </span>
-                    )}
-                    {log.type === 'metadata' && (
-                      <span className="inline-flex px-2 py-0.5 bg-green-50/50 dark:bg-green-950/20 text-green-700 dark:text-green-400 font-bold rounded border border-green-150 dark:border-green-900/50 text-[10px]">
-                        Nguồn DL
-                      </span>
-                    )}
-                    {log.type === 'system' && (
-                      <span className="inline-flex px-2 py-0.5 bg-zinc-50/50 dark:bg-zinc-900/50 text-zinc-700 dark:text-zinc-400 font-bold rounded border border-zinc-200 dark:border-zinc-800 text-[10px]">
-                        Hệ thống
-                      </span>
-                    )}
+              {loading ? (
+                <tr>
+                  <td colSpan={4} className="p-8 text-center text-zinc-400 font-semibold text-xs">
+                    Đang tải nhật ký hoạt động...
                   </td>
                 </tr>
-              ))}
+              ) : error ? (
+                <tr>
+                  <td colSpan={4} className="p-8 text-center text-red-500 font-semibold text-xs">
+                    {error}
+                  </td>
+                </tr>
+              ) : auditLogs.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="p-8 text-center text-zinc-400 font-semibold text-xs">
+                    Không có hoạt động nào được ghi nhận.
+                  </td>
+                </tr>
+              ) : (
+                auditLogs.map((log) => (
+                  <tr key={log.id} className="hover:bg-zinc-50/40 dark:hover:bg-zinc-900/10 transition-colors">
+                    <td className="p-4 pl-6 font-bold text-zinc-800 dark:text-zinc-200">{log.action}</td>
+                    <td className="p-4 font-bold text-zinc-650 dark:text-zinc-300">{log.user}</td>
+                    <td className="p-4 text-zinc-455 dark:text-zinc-500 font-semibold">{log.time}</td>
+                    <td className="p-4 text-center">
+                      {log.type === 'config' && (
+                        <span className="inline-flex px-2 py-0.5 bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 font-bold rounded border border-amber-150 dark:border-amber-900/50 text-[10px]">
+                          Cấu hình
+                        </span>
+                      )}
+                      {log.type === 'user' && (
+                        <span className="inline-flex px-2 py-0.5 bg-blue-550/10 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 font-bold rounded border border-blue-150 dark:border-blue-900/50 text-[10px]">
+                          Tài khoản
+                        </span>
+                      )}
+                      {log.type === 'metadata' && (
+                        <span className="inline-flex px-2 py-0.5 bg-green-50/50 dark:bg-green-950/20 text-green-700 dark:text-green-400 font-bold rounded border border-green-150 dark:border-green-900/50 text-[10px]">
+                          Nguồn DL
+                        </span>
+                      )}
+                      {log.type === 'system' && (
+                        <span className="inline-flex px-2 py-0.5 bg-zinc-550/10 dark:bg-zinc-900/50 text-zinc-700 dark:text-zinc-400 font-bold rounded border border-zinc-200 dark:border-zinc-805 text-[10px]">
+                          Hệ thống
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
