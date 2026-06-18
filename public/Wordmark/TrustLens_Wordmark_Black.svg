@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="230" viewBox="0 0 860 230"
+     role="img" aria-labelledby="title desc">
+  <title id="title">TrustLens wordmark</title>
+  <desc id="desc">TrustLens wordmark without symbol.</desc>
+
+  <text x="35" y="155" font-family="Inter, Segoe UI, Arial, sans-serif"
+        font-size="132" font-weight="750" letter-spacing="-5" fill="#111827">Trust</text>
+  <text x="356" y="155" font-family="Inter, Segoe UI, Arial, sans-serif"
+        font-size="132" font-weight="750" letter-spacing="-5" fill="#111827">Lens</text>
+</svg>

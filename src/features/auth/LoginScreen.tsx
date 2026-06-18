@@ -63,6 +63,12 @@ export default function LoginScreen() {
             />
           </div>        
           
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-sm font-bold rounded-xl text-center">
+              {error}
+            </div>
+          )}
+
           <button 
             onClick={handleLogin}
             disabled={loading}
@@ -77,11 +83,6 @@ export default function LoginScreen() {
               onClick={() => navigate('/register')}
               className="text-blue-600 font-bold hover:underline"
             >
-              {error && (
-  <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-sm font-bold rounded-lg text-center">
-    {error}
-  </div>
-)}
               Đăng ký ngay
             </button>
           </p>

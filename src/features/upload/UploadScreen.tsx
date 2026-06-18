@@ -1,11 +1,14 @@
 import uploadService from "../../services/uploadService";
-import { useState, useEffect } from 'react'; // Tui thêm useEffect ở đây nha
-import { Send, AlertCircle, UploadCloud, X, FileText, Loader2, CheckCircle2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
-// Bỏ cái prop { selectedClass } đi, để nó tự lập!
+import { useState, useEffect } from 'react'; // Tui thêm useEffect ở đây nha
+import { Send, AlertCircle, UploadCloud, X, FileText, Loader2, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+
 export default function UploadScreen() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const selectedClass = location.state?.selectedClass;
+
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState('');
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'failed'>('idle');
@@ -87,6 +90,24 @@ export default function UploadScreen() {
       setError(errorMessage);
     }
   }; 
+
+  if (!selectedClass) {
+    return (
+      <div className="w-full max-w-md mx-auto mt-16 p-8 bg-white border border-slate-200 rounded-3xl shadow-lg text-center animate-fade-in">
+        <AlertCircle size={48} className="text-amber-500 mx-auto mb-4" />
+        <h3 className="text-xl font-black text-slate-800 mb-2">Chưa chọn lớp học phần</h3>
+        <p className="text-slate-500 text-sm mb-6 leading-relaxed">
+          Vui lòng chọn một lớp học phần phụ trách để bắt đầu tải lên và thẩm định báo cáo đồ án.
+        </p>
+        <button 
+          onClick={() => navigate('/classes')}
+          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-md shadow-blue-200"
+        >
+          <ArrowLeft size={18} /> Đi tới quản lý lớp học
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-3xl mx-auto mt-8">
