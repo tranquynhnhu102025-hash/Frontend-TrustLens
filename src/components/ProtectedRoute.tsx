@@ -1,8 +1,13 @@
-import { Navigate } from 'react-router-dom';
-import { JSX } from 'react/jsx-runtime';
+import { Navigate, Outlet } from 'react-router-dom';
 
-export const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-  const token = localStorage.getItem('jwt_token');
-  if (!token) return <Navigate to="/login" />;
-  return children;
-};
+export default function ProtectedRoute() {
+  const token = localStorage.getItem('access_token');
+
+  // Nếu không có vé -> Đá thẳng về trang Login
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Nếu có vé -> Cho vào
+  return <Outlet />;
+}

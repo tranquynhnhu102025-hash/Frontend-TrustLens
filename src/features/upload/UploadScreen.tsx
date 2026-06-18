@@ -1,5 +1,4 @@
-import { uploadService } from '../../services/uploadService';
-import { reportService } from '../../services/reportService';
+import uploadService from '../../services/uploadService';
 import { useState } from 'react';
 import { Send, AlertCircle, UploadCloud, X, FileText, Loader2, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -8,26 +7,21 @@ export default function UploadScreen({ selectedClass }: any) {
   const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState('');
-  
-  // Trạng thái mô phỏng quá trình Upload (uploading, success, failed)
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'failed'>('idle');
   const [progress, setProgress] = useState(0);
 
-  // Validate: Chỉ nhận PDF/DOCX và giới hạn size
   const handleFileDrop = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     setError('');
     
     if (!selectedFile) return;
 
-    // Kiểm tra định dạng (Chỉ PDF hoặc DOCX)
     const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
     if (!validTypes.includes(selectedFile.type)) {
       setError('Định dạng không hợp lệ. Chỉ chấp nhận file .PDF hoặc .DOCX!');
       return;
-    }
+    } 
 
-    // Kiểm tra kích thước (Giả sử tối đa 20MB)
     if (selectedFile.size > 20 * 1024 * 1024) {
       setError('File quá lớn. Kích thước tối đa cho phép là 20MB!');
       return;
@@ -36,40 +30,48 @@ export default function UploadScreen({ selectedClass }: any) {
     setFile(selectedFile);
     setUploadStatus('idle');
     setProgress(0);
-  }
+  };
 
-const handleUpload = async () => {
-  if (!file) return;
+  const handleUpload = async () => {
+    if (!file || !selectedClass?.assignment_id) {
+      setError('Vui lòng chọn lớp học hợp lệ!');
+      return;
+    }
 
-  setUploadStatus('uploading');
-  setProgress(10); // Bắt đầu upload
+    setUploadStatus('uploading');
+    setProgress(10);
 
-  try {
-    // 1. Gọi API Upload thật
-    const res = await uploadService.uploadFile(file, 'assignment-id-của-bạn');
-    const submissionId = res.data.submissionId; 
-    setProgress(40);
+    try {
+      // 1. Upload file
+      const res = await uploadService.uploadSubmission(selectedClass.assignment_id, 'User_Name', file);
+      const submissionId = res.id || res.submission?.id;
+      setProgress(30);
 
-    // 2. Bắt đầu vòng lặp kiểm tra trạng thái từ BE
-    const interval = setInterval(async () => {
-      const statusRes: any = await reportService.getJobStatus(submissionId);
-      if (statusRes.status === 'COMPLETED') {
-        clearInterval(interval);
-        setProgress(100);
-        setUploadStatus('success');
-        setTimeout(() => navigate(`/report/${submissionId}`), 1000);
-      } else if (statusRes.status === 'FAILED') {
-        clearInterval(interval);
-        setUploadStatus('failed');
-        setError('Hệ thống không thể phân tích file này!');
-      }
-    }, 3000); 
+    
+      // @ts-ignore
+      await uploadService.analyzeSubmission(submissionId);
+      setProgress(50);
+      
+      // @ts-ignore
+      await uploadService.detectReferences(submissionId);
+      setProgress(70);
+      
+      // @ts-ignore
+      await uploadService.parseCitations(submissionId);
+      setProgress(85);
+      
+      // @ts-ignore
+      await uploadService.verifyMetadata(submissionId);
+      setProgress(100);
 
-  } catch (err) {
-    setUploadStatus('failed');
-    setError('Lỗi kết nối tới server. Vui lòng thử lại!');
-  }
-};
+      setUploadStatus('success');
+      setTimeout(() => navigate(`/report/${submissionId}`), 1000);
+   } catch (err: any) {
+      setUploadStatus('failed');
+      const errorMessage = err.response?.data?.message || 'Lỗi xử lý hệ thống. Vui lòng thử lại!';
+      setError(errorMessage);
+    }
+  }; // <--- Đã đóng ngoặc đúng chỗ này!
 
   return (
     <div className="w-full max-w-3xl mx-auto mt-8">
@@ -87,8 +89,6 @@ const handleUpload = async () => {
       )}
 
       <div className="bg-white p-8 md:p-10 rounded-3xl shadow-xl border border-slate-100">
-        
-        {/* KHU VỰC KÉO THẢ TẢI FILE */}
         {!file ? (
           <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-slate-300 border-dashed rounded-2xl cursor-pointer bg-slate-50 hover:bg-blue-50 transition-all hover:border-blue-400 group">
             <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -102,12 +102,7 @@ const handleUpload = async () => {
                 Hỗ trợ PDF, DOCX (Tối đa 20MB)
               </p>
             </div>
-            <input 
-              type="file" 
-              className="hidden" 
-              accept=".pdf,.docx"
-              onChange={handleFileDrop} 
-            />
+            <input type="file" className="hidden" accept=".pdf,.docx" onChange={handleFileDrop} />
           </label>
         ) : (
           <div className="p-6 bg-slate-50 border border-slate-200 rounded-2xl">
@@ -121,18 +116,13 @@ const handleUpload = async () => {
                   <p className="text-sm font-bold text-slate-400 mt-0.5">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
                 </div>
               </div>
-              
               {uploadStatus === 'idle' && (
-                <button 
-                  onClick={() => setFile(null)} 
-                  className="p-2 bg-white text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all shadow-sm shrink-0"
-                >
+                <button onClick={() => setFile(null)} className="p-2 bg-white text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all shadow-sm shrink-0">
                   <X size={20} />
                 </button>
               )}
             </div>
 
-            {/* THANH PROGRESS BAR MƯỢT MÀ */}
             {uploadStatus !== 'idle' && (
               <div className="mt-4">
                 <div className="flex justify-between text-xs font-bold mb-1.5">
@@ -142,10 +132,7 @@ const handleUpload = async () => {
                   <span className="text-slate-600">{progress}%</span>
                 </div>
                 <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
-                  <div 
-                    className={`h-2.5 rounded-full transition-all duration-300 ease-out ${uploadStatus === 'success' ? 'bg-green-500' : 'bg-blue-600'}`}
-                    style={{ width: `${progress}%` }}
-                  ></div>
+                  <div className={`h-2.5 rounded-full transition-all duration-300 ease-out ${uploadStatus === 'success' ? 'bg-green-500' : 'bg-blue-600'}`} style={{ width: `${progress}%` }}></div>
                 </div>
               </div>
             )}
