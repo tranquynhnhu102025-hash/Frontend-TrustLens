@@ -4,6 +4,7 @@ import LoginScreen from './features/auth/LoginScreen';
 import RegisterScreen from './features/auth/RegisterScreen';
 import UploadScreen from './features/upload/UploadScreen';
 import ClassesScreen from './features/classes/ClassesScreen';
+import ClassDetailScreen from './features/classes/ClassDetailScreen';
 import DashboardPage from './features/dashboard/DashboardScreen';
 import Layout from './features/Layout/Layout';
 import ProfileScreen from './features/auth/ProfileScreen';
@@ -42,6 +43,7 @@ export default function App() {
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/classes" element={<ClassesScreen />} />
+            <Route path="/class/:id" element={<ClassDetailScreen />} />
             <Route path="/upload" element={<UploadScreen />} />
             <Route path="/settings" element={<SettingsScreen />} />
             <Route path="/admin" element={<AdminScreen />} />

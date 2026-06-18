@@ -9,7 +9,8 @@ export interface Course {
   assignment_id?: string;
 }
 
-import { MOCK_CLASSES } from '../mocks/dummyData';
+import { MOCK_CLASSES, MOCK_SUBMISSIONS, Submission } from '../mocks/dummyData';
+export type { Submission };
 
 export const classService = {
   // Lấy danh sách lớp
@@ -123,5 +124,19 @@ export const classService = {
         assignment_id: assignmentId
       };
     }
+  },
+
+  // Lấy danh sách bài nộp đã upload của lớp
+  getSubmissionsByClass: async (classId: string): Promise<Submission[]> => {
+    if (import.meta.env.VITE_USE_MOCK === 'true' || classId.startsWith('mock-')) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const filtered = MOCK_SUBMISSIONS.filter(sub => sub.classId === classId);
+          resolve(filtered);
+        }, 400);
+      });
+    }
+    const response = await axiosClient.get(`/classes/${classId}/submissions`);
+    return response.data;
   }
 };
