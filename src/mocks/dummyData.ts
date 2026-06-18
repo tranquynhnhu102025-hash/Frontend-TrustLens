@@ -177,3 +177,23 @@ export const MOCK_USER = {
   email: 'quynhnhu@nttu.edu.vn',
   role: 'lecturer'
 };
+
+// Kiểu dữ liệu bài nộp (file đã upload)
+export interface Submission {
+  id: string;
+  studentName: string;
+  fileName: string;
+  date: string;
+  trustScore: number;
+  status: 'pass' | 'warning' | 'fail';
+  classId: string;
+}
+
+// Danh sách các bài nộp (file báo cáo đã tải lên) giả lập theo từng lớp học
+export const MOCK_SUBMISSIONS: Submission[] = [
+  { id: 'mock-report-uuid-1', studentName: 'Trần Quỳnh Như', fileName: 'Do_an_Tot_nghiep_C#.pdf', date: '15/06/2026', trustScore: 78, status: 'warning', classId: 'INT4050' },
+  { id: 'mock-sub-1', studentName: 'Nguyễn Văn A', fileName: 'Bao_cao_tot_nghiep_V1.pdf', date: '15/06/2026', trustScore: 85, status: 'pass', classId: 'INT4050' },
+  { id: 'mock-sub-2', studentName: 'Trần Thị B', fileName: 'Enterprise_Architecture_Final.pdf', date: '12/06/2026', trustScore: 55, status: 'warning', classId: 'INT3307' },
+  { id: 'mock-sub-3', studentName: 'Lê Hoàng C', fileName: 'Do_an_Web_Enterprise.docx', date: '14/06/2026', trustScore: 32, status: 'fail', classId: 'INT4050' },
+  { id: 'mock-sub-4', studentName: 'Phạm Văn D', fileName: 'Software_Design_Patterns.pdf', date: '11/06/2026', trustScore: 92, status: 'pass', classId: 'INT3110' },
+];

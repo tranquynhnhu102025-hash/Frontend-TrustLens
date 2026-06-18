@@ -58,7 +58,7 @@ export default function ClassesScreen() {
           <div 
             key={index}
             onClick={() => {
-              navigate('/upload', { state: { selectedClass: cls } });
+              navigate(`/class/${cls.id}`);
             }}
             className="bg-white dark:bg-zinc-950 p-5 rounded-lg border border-zinc-200 dark:border-zinc-900 shadow-sm hover:border-zinc-400 dark:hover:border-zinc-700 transition-colors cursor-pointer group flex flex-col justify-between"
           >
