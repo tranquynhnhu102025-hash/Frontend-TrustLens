@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Tạo trạm xe gọi API
 const axiosClient = axios.create({
-  baseURL: 'http://localhost:8000/api', 
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -35,7 +35,7 @@ axiosClient.interceptors.response.use(
           return Promise.reject(error);
         }
 
-        const response = await axios.post('http://localhost:8000/api/auth/refresh', {
+        const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/refresh`, {
           refresh_token: refreshToken
         });
 
