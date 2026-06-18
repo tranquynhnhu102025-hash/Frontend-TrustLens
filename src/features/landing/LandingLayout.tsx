@@ -7,6 +7,7 @@ export default function LandingLayout() {
   const navigate = useNavigate();
   const token = localStorage.getItem('access_token');
 
+  
   // Khởi tạo theme từ localStorage, mặc định là 'dark'
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     return (localStorage.getItem('theme') as 'light' | 'dark') || 'dark';
@@ -50,7 +51,7 @@ export default function LandingLayout() {
               TRUST<span className="bg-gradient-to-r from-blue-550 to-indigo-550 bg-clip-text text-transparent">LENS</span>
             </h1>
             <span className={`text-[9px] font-bold tracking-wider uppercase ${
-              theme === 'dark' ? 'text-slate-500' : 'text-slate-400'
+              theme === 'light' ? 'text-slate-500' : 'text-slate-400'
             }`}>Academic Verification</span>
           </div>
         </Link>
@@ -145,14 +146,6 @@ export default function LandingLayout() {
             </div>
           </div>
 
-          <div>
-            <h4 className={`text-xs font-black uppercase tracking-widest mb-4 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>Hợp tác khoa học</h4>
-            <div className={`space-y-3 text-xs font-medium ${theme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}>
-              <p>Trường Đại học Nguyễn Tất Thành (NTTU)</p>
-              <p>Trường Đại học Xây dựng Hà Nội (HUCE)</p>
-              <p>MTEC Lab - 2026</p>
-            </div>
-          </div>
 
           <div>
             <h4 className={`text-xs font-black uppercase tracking-widest mb-4 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>Liên hệ hỗ trợ</h4>

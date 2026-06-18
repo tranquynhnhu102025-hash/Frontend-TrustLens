@@ -1,32 +1,39 @@
 import uploadService from "../../services/uploadService";
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react'; // Tui thêm useEffect ở đây nha
 import { Send, AlertCircle, UploadCloud, X, FileText, Loader2, CheckCircle2, ArrowLeft } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useOutletContext } from 'react-router-dom';
+
 
 export default function UploadScreen() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { theme } = useOutletContext<{ theme: 'light' | 'dark' }>();
+  
+  // Lấy theme an toàn từ context hoặc localStorage làm dự phòng
+  const { theme: contextTheme } = useOutletContext<{ theme?: 'light' | 'dark' }>() || {};
+  const theme = contextTheme || localStorage.getItem('theme') || 'dark';
+  
   const selectedClass = location.state?.selectedClass;
 
   const [fileItems, setFileItems] = useState<FileItem[]>([]);
   const [error, setError] = useState('');
-  const [processing, setProcessing] = useState(false);
-
-  // TẠO BIẾN CHỨA LỚP HỌC
+  const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'failed'>('idle');
+  const [progress, setProgress] = useState(0);
   const [currentClass, setCurrentClass] = useState<any>(null);
 
-// 18. VỪA VÀO TRANG LÀ TỰ ĐỘNG ĐI LẤY THÔNG TIN LỚP HỌC TỪ LOCALSTORAGE
   useEffect(() => {
     const savedClass = localStorage.getItem('selectedClass');
-    if (savedClass) {
+    if (!savedClass) {
+      navigate('/classes'); 
+    } else {
       try {
         setCurrentClass(JSON.parse(savedClass));
       } catch (e) {
-        console.error("Lỗi đọc dữ liệu lớp học:", e);
+        navigate('/classes');
       }
     }
-  }, []);
+  }, [navigate]);
+
   const handleFileDrop = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = e.target.files;
     setError('');
@@ -85,8 +92,8 @@ export default function UploadScreen() {
   };
 
   const handleUpload = async () => {
-    if (!file || !selectedClass?.assignment_id) {
-      setError('Vui lòng chọn lớp học hợp lệ!');
+    if (!file || !currentClass?.id) {
+      setError('Lỗi dữ liệu lớp học. Vui lòng quay lại trang danh sách lớp!');
       return;
     }
 
@@ -94,24 +101,17 @@ export default function UploadScreen() {
     setProgress(10);
 
     try {
-    
-      const res = await uploadService.uploadSubmission(selectedClass.assignment_id, 'User_Name', file);
+      // Gửi đúng ID lớp đã chọn
+      const res = await uploadService.uploadSubmission(currentClass.id, 'Tran_Quynh_Nhu', file);
       const submissionId = res.id || res.submission?.id;
-      setProgress(30);
-
-    
+      
+      setProgress(40);
       // @ts-ignore
       await uploadService.analyzeSubmission(submissionId);
-      setProgress(50);
-      
+      setProgress(60);
       // @ts-ignore
       await uploadService.detectReferences(submissionId);
-      setProgress(70);
-      
-      // @ts-ignore
-      await uploadService.parseCitations(submissionId);
-      setProgress(85);
-      
+      setProgress(80);
       // @ts-ignore
       await uploadService.verifyMetadata(submissionId);
       setProgress(100);
@@ -120,14 +120,15 @@ export default function UploadScreen() {
       setTimeout(() => navigate(`/report/${submissionId}`), 1000);
    } catch (err: any) {
       setUploadStatus('failed');
-      const errorMessage = err.response?.data?.message || 'Lỗi xử lý hệ thống. Vui lòng thử lại!';
+      // Đây là chỗ hiện lỗi thực sự từ Backend
+      const errorMessage = err.response?.data?.message || 'Lỗi không xác định. Vui lòng kiểm tra lại nội dung file!';
       setError(errorMessage);
     }
 
     setProcessing(false);
   }; 
 
-  if (!selectedClass) {
+  if (!selectedClass && !currentClass) {
     return (
       <div className={`w-full max-w-md mx-auto mt-16 p-8 border rounded-3xl text-center animate-fade-in transition-colors duration-300 ${
         theme === 'dark' 
@@ -151,13 +152,14 @@ export default function UploadScreen() {
 
   const hasIdle = fileItems.some(item => item.status === 'idle');
   const hasFinished = fileItems.some(item => item.status === 'success');
+  const displayClassName = selectedClass?.name || currentClass?.name || 'Đồ án Tốt nghiệp';
 
   return (
     <div className="w-full max-w-4xl mx-auto mt-6">
       <div className="mb-8 text-center">
         <h2 className="text-3xl font-black text-slate-800 mb-2">Tải lên bài báo cáo</h2>
         <p className="text-slate-500 font-medium">
-          Lớp học phần: <span className="text-blue-600 font-bold">{selectedClass?.name || 'Đồ án Tốt nghiệp'}</span>
+          Lớp học phần: <span className="text-blue-600 font-bold">{currentClass?.name || 'Đang tải...'}</span>
         </p>
       </div>
 

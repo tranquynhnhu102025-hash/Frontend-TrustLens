@@ -30,10 +30,10 @@ export default function DashboardScreen() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // KHI NÀO BACKEND XONG, NHƯ CHỈ CẦN MỞ KHÓA (XÓA DẤU //) Ở 3 DÒNG DƯỚI LÀ XONG:
-        // const realData = await dashboardService.getDashboardData();
-        // setSummaryData(realData.summary);
-        // setRecentActivities(realData.activities);
+        const summary = await dashboardService.getSummary();
+        const activities = await dashboardService.getRecentActivities();
+        setSummaryData(summary);
+        setRecentActivities(activities);
       } catch (error) {
         console.error("Lỗi khi tải dữ liệu Dashboard:", error);
       }
