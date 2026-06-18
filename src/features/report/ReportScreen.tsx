@@ -83,9 +83,9 @@ export default function ReportScreen() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
-        <Loader2 size={40} className="text-blue-600 animate-spin" />
-        <p className="text-slate-500 font-bold text-sm">Đang tải kết quả thẩm định...</p>
+      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3">
+        <Loader2 size={32} className="text-zinc-900 dark:text-white animate-spin" />
+        <p className="text-zinc-500 dark:text-zinc-400 font-semibold text-xs">Đang tải kết quả thẩm định...</p>
       </div>
     );
   }
@@ -95,119 +95,150 @@ export default function ReportScreen() {
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto my-6 animate-fade-in">
+    <div className="w-full max-w-5xl mx-auto mt-4 space-y-6 animate-fade-in">
       {/* HEADER QUAY LẠI & NÚT EXPORT */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <button 
-          onClick={() => navigate('/classes')}
-          className="flex items-center gap-2 text-slate-500 hover:text-blue-600 font-bold transition-colors group"
-        >
-          <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" /> 
-          Trở về trang quản lý
-        </button>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-150 dark:border-zinc-900 pb-5">
+        <div>
+          <button 
+            onClick={() => navigate('/classes')}
+            className="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 font-semibold text-xs transition-colors group"
+          >
+            <ChevronLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" /> 
+            Trở về trang quản lý lớp học
+          </button>
+          <h2 className="text-xl font-bold text-zinc-900 dark:text-white mt-1.5">Kết quả thẩm định tài liệu</h2>
+        </div>
         <button 
           onClick={handleExport}
-          className="flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-slate-200 text-slate-700 hover:border-blue-600 hover:text-blue-600 font-bold rounded-xl transition-all shadow-sm"
+          className="flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-350 hover:bg-zinc-50 dark:hover:bg-zinc-900 font-semibold text-xs rounded-lg transition-colors shadow-sm"
         >
-          <Download size={18} /> Xuất báo cáo (PDF)
+          <Download size={14} /> Xuất báo cáo (PDF)
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* THẺ TRUST SCORE (FE-08) */}
-        <div className="bg-white p-8 rounded-3xl shadow-lg border border-slate-100 flex flex-col items-center justify-center text-center relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-2 bg-amber-500"></div>
-          <h3 className="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
-            <BarChart3 size={20} className="text-amber-500" /> Trust Score
+        <div className="bg-white dark:bg-zinc-950 p-6 rounded-lg border border-zinc-200 dark:border-zinc-900 flex flex-col items-center justify-center text-center relative shadow-sm">
+          <h3 className="text-xs font-bold text-zinc-850 dark:text-zinc-200 uppercase tracking-wider mb-5 flex items-center gap-1.5">
+            <BarChart3 size={15} className="text-zinc-500" /> Trust Score
           </h3>
           
-          <div className="relative w-40 h-40 flex items-center justify-center mb-4">
+          <div className="relative w-36 h-36 flex items-center justify-center mb-4">
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-              <path className="text-slate-100" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-              <path className="text-amber-500" strokeDasharray={`${report.trustScore}, 100`} strokeWidth="3" stroke="currentColor" fill="none" strokeLinecap="round" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              <path className="text-zinc-100 dark:text-zinc-850" strokeWidth="2" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              <path 
+                className={report.trustScore >= 80 ? 'text-green-600 dark:text-green-550' : report.trustScore >= 50 ? 'text-amber-600 dark:text-amber-550' : 'text-rose-600 dark:text-rose-550'} 
+                strokeDasharray={`${report.trustScore}, 100`} 
+                strokeWidth="2" 
+                stroke="currentColor" 
+                fill="none" 
+                strokeLinecap="round" 
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
+              />
             </svg>
             <div className="absolute flex flex-col items-center">
-              <span className="text-5xl font-black text-slate-800">{report.trustScore}</span>
-              <span className="text-sm font-bold text-slate-400">/ 100</span>
+              <span className="text-4xl font-bold text-zinc-850 dark:text-white">{report.trustScore}</span>
+              <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500">/ 100</span>
             </div>
           </div>
           
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 text-amber-600 font-bold text-sm border border-amber-200 mb-4">
-            <AlertTriangle size={16} /> Mức độ: {report.level}
+          <div className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded border text-[10px] font-bold mb-4 ${
+            report.trustScore >= 80 
+              ? 'bg-green-50/50 dark:bg-green-950/20 text-green-700 dark:text-green-400 border-green-150 dark:border-green-900/50' 
+              : report.trustScore >= 50 
+                ? 'bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border-amber-150 dark:border-amber-900/50' 
+                : 'bg-rose-50/50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 border-rose-150 dark:border-rose-900/50'
+          }`}>
+            {report.trustScore >= 80 ? <ShieldCheck size={12} /> : report.trustScore >= 50 ? <AlertTriangle size={12} /> : <ShieldAlert size={12} />}
+            Mức độ: {report.level}
           </div>
-          <p className="text-sm text-slate-500 font-medium">{report.summary}</p>
+          <p className="text-[10px] text-zinc-500 dark:text-zinc-450 font-bold leading-relaxed">{report.summary}</p>
         </div>
 
         {/* THẺ TIÊU CHÍ THÀNH PHẦN (CRITERIA BREAKDOWN) */}
-        <div className="lg:col-span-2 bg-white p-8 rounded-3xl shadow-lg border border-slate-100">
-          <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
-            <ShieldCheck size={24} className="text-blue-600" /> Điểm thành phần đánh giá
-          </h3>
-          
-          <div className="space-y-6">
-            {report.criteriaBreakdown.map((item: any, idx: number) => (
-              <div key={idx}>
-                <div className="flex justify-between items-end mb-2">
-                  <div>
-                    <span className="font-bold text-slate-700">{item.name}</span>
-                    <span className="text-xs font-bold text-slate-400 ml-2 bg-slate-100 px-2 py-0.5 rounded-md">Trọng số: {item.weight}</span>
+        <div className="lg:col-span-2 bg-white dark:bg-zinc-950 p-6 rounded-lg border border-zinc-200 dark:border-zinc-900 shadow-sm flex flex-col justify-between">
+          <div className="w-full">
+            <h3 className="text-xs font-bold text-zinc-850 dark:text-zinc-200 uppercase tracking-wider mb-5 flex items-center gap-1.5">
+              <ShieldCheck size={16} className="text-zinc-500" /> Điểm thành phần đánh giá
+            </h3>
+            
+            <div className="space-y-5">
+              {report.criteriaBreakdown.map((item: any, idx: number) => (
+                <div key={idx}>
+                  <div className="flex justify-between items-end mb-1.5">
+                    <div>
+                      <span className="font-bold text-zinc-700 dark:text-zinc-300 text-xs">{item.name}</span>
+                      <span className="text-[9px] font-bold text-zinc-450 dark:text-zinc-550 ml-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-850 px-1.5 py-0.5 rounded">Trọng số: {item.weight}</span>
+                    </div>
+                    <span className="font-bold text-zinc-805 dark:text-zinc-200 text-xs">{item.score}/100</span>
                   </div>
-                  <span className="font-black text-slate-800">{item.score}/100</span>
+                  <div className="w-full bg-zinc-100 dark:bg-zinc-900 rounded-full h-1.5">
+                    <div 
+                      className={`h-1.5 rounded-full ${item.score >= 80 ? 'bg-green-600 dark:bg-green-500' : item.score >= 60 ? 'bg-amber-600 dark:bg-amber-500' : 'bg-rose-600 dark:bg-rose-500'}`} 
+                      style={{ width: `${item.score}%` }}
+                    ></div>
+                  </div>
                 </div>
-                <div className="w-full bg-slate-100 rounded-full h-2.5">
-                  <div 
-                    className={`h-2.5 rounded-full ${item.score >= 80 ? 'bg-green-500' : item.score >= 60 ? 'bg-amber-500' : 'bg-rose-500'}`} 
-                    style={{ width: `${item.score}%` }}
-                  ></div>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       {/* BẢNG CHI TIẾT TRÍCH DẪN (FE-09) */}
-      <div className="bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden">
-        <div className="p-6 md:p-8 border-b border-slate-100">
-          <h3 className="text-xl font-black text-slate-800 flex items-center gap-2">
-            <FileText size={24} className="text-blue-600" /> Chi tiết danh mục tài liệu tham khảo
+      <div className="bg-white dark:bg-zinc-950 rounded-lg border border-zinc-200 dark:border-zinc-900 overflow-hidden shadow-sm">
+        <div className="p-5 border-b border-zinc-150 dark:border-zinc-900">
+          <h3 className="text-xs font-bold text-zinc-850 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
+            <FileText size={16} className="text-zinc-500" /> Chi tiết danh mục tài liệu tham khảo
           </h3>
-          <p className="text-sm text-slate-500 font-medium mt-1">Hệ thống bôi đỏ các trích dẫn có vấn đề để giảng viên rà soát.</p>
+          <p className="text-[11px] text-zinc-550 dark:text-zinc-500 font-semibold mt-1">Hệ thống phân tích và chỉ ra các nguồn trích dẫn cần lưu ý.</p>
         </div>
         
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50 text-slate-500 text-sm uppercase tracking-wider">
-                <th className="p-4 font-black w-1/3">Tài liệu / Tác giả</th>
-                <th className="p-4 font-black">Năm / Nguồn</th>
-                <th className="p-4 font-black">Cảnh báo hệ thống</th>
-                <th className="p-4 font-black text-center">Trạng thái</th>
+              <tr className="bg-zinc-50/50 dark:bg-zinc-900/30 text-zinc-500 dark:text-zinc-400 text-[10px] uppercase tracking-wider font-bold border-b border-zinc-150 dark:border-zinc-900">
+                <th className="p-4 pl-6 w-1/3">Tài liệu / Tác giả</th>
+                <th className="p-4">Năm / Nguồn</th>
+                <th className="p-4">Cảnh báo hệ thống</th>
+                <th className="p-4 text-center">Trạng thái</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-sm">
+            <tbody className="divide-y divide-zinc-150 dark:divide-zinc-900 text-[11px]">
               {report.citations.map((cite: any) => (
-                <tr key={cite.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="p-4">
-                    <p className="font-bold text-slate-800 line-clamp-2">{cite.title}</p>
-                    <p className="font-medium text-slate-500 mt-1">{cite.author}</p>
+                <tr key={cite.id} className="hover:bg-zinc-50/40 dark:hover:bg-zinc-900/10 transition-colors">
+                  <td className="p-4 pl-6">
+                    <p className="font-bold text-zinc-800 dark:text-zinc-250 line-clamp-2">{cite.title}</p>
+                    <p className="font-semibold text-zinc-400 dark:text-zinc-550 mt-1">{cite.author}</p>
                   </td>
                   <td className="p-4">
-                    <p className="font-bold text-slate-700">{cite.year}</p>
-                    <p className="font-medium text-slate-500 mt-1">{cite.source}</p>
+                    <p className="font-bold text-zinc-700 dark:text-zinc-350">{cite.year}</p>
+                    <p className="font-semibold text-zinc-400 dark:text-zinc-550 mt-1">{cite.source}</p>
                   </td>
                   <td className="p-4">
-                    <div className="flex items-start gap-2">
-                      {cite.status !== 'pass' && <Info size={16} className={`mt-0.5 shrink-0 ${cite.status === 'warning' ? 'text-amber-500' : 'text-rose-500'}`} />}
-                      <span className={`font-medium ${cite.status === 'pass' ? 'text-slate-400' : 'text-slate-700'}`}>
+                    <div className="flex items-start gap-1.5">
+                      {cite.status !== 'pass' && <Info size={13} className={`mt-0.5 shrink-0 ${cite.status === 'warning' ? 'text-amber-600 dark:text-amber-500' : 'text-rose-600 dark:text-rose-500'}`} />}
+                      <span className={`font-semibold ${cite.status === 'pass' ? 'text-zinc-400 dark:text-zinc-500' : 'text-zinc-650 dark:text-zinc-455'}`}>
                         {cite.issues}
                       </span>
                     </div>
                   </td>
                   <td className="p-4 text-center">
-                    {cite.status === 'pass' && <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 font-bold rounded-lg border border-green-200"><CheckCircle2 size={14} /> Hợp lệ</span>}
-                    {cite.status === 'warning' && <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-700 font-bold rounded-lg border border-amber-200"><AlertTriangle size={14} /> Chú ý</span>}
-                    {cite.status === 'fail' && <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-50 text-rose-700 font-bold rounded-lg border border-rose-200"><ShieldAlert size={14} /> Rủi ro cao</span>}
+                    {cite.status === 'pass' && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-green-50/50 dark:bg-green-950/20 text-green-700 dark:text-green-400 font-bold rounded border border-green-150 dark:border-green-900/50 text-[10px]">
+                        <CheckCircle2 size={11} /> Hợp lệ
+                      </span>
+                    )}
+                    {cite.status === 'warning' && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 font-bold rounded border border-amber-150 dark:border-amber-900/50 text-[10px]">
+                        <AlertTriangle size={11} /> Chú ý
+                      </span>
+                    )}
+                    {cite.status === 'fail' && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-rose-50/50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 font-bold rounded border border-rose-150 dark:border-rose-900/50 text-[10px]">
+                        <ShieldAlert size={11} /> Rủi ro cao
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))}

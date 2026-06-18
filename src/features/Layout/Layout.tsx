@@ -3,8 +3,7 @@ import Sidebar from '../../components/Sidebar';
 
 export default function Layout() {
   return (
-    // Đổi min-h-screen thành h-screen và thêm overflow-hidden để cố định khung hình
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
+    <div className="flex h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 overflow-hidden">
       
       {/* Sidebar - Khóa chết chiều cao h-full */}
       <div className="w-64 flex-shrink-0 h-full">
