@@ -61,12 +61,12 @@ export default function LandingFeatures() {
             <h2 className={`text-2xl sm:text-4xl font-bold tracking-tight transition-colors ${
               theme === 'dark' ? 'text-white' : 'text-zinc-900'
             }`}>
-              Ma trận 5 tiêu chí tính toán <span className="underline decoration-1 underline-offset-4 decoration-indigo-500/50">Trust Score</span>
+              Ma trận C1-C7 tính toán <span className="underline decoration-1 underline-offset-4 decoration-indigo-500/50">Trust Score</span>
             </h2>
             <p className={`text-xs sm:text-sm max-w-xl mx-auto font-medium transition-colors ${
               theme === 'dark' ? 'text-zinc-400' : 'text-zinc-500'
             }`}>
-              Điểm số Trust Score đại diện cho mức độ tin cậy khoa học của tài liệu, được tính toán dựa trên thuật toán tích hợp 5 tiêu chí độc lập.
+              Điểm số Trust Score đại diện cho mức độ hỗ trợ thẩm định tài liệu, được tính toán dựa trên thuật toán tích hợp 7 cấu phần độc lập.
             </p>
           </div>
         </ScrollReveal>

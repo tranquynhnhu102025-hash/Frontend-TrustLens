@@ -21,7 +21,7 @@ export default function AnalyzingScreen() {
     { id: 0, title: 'Queued', desc: 'Đã nhận file, đưa vào hàng đợi xử lý', icon: <Database size={24} /> },
     { id: 1, title: 'Extracting', desc: 'Trích xuất văn bản và tài liệu tham khảo', icon: <FileSearch size={24} /> },
     { id: 2, title: 'Verifying', desc: 'Đối chiếu Metadata với cơ sở dữ liệu học thuật', icon: <Activity size={24} /> },
-    { id: 3, title: 'Scoring', desc: 'Tính toán điểm tin cậy (C1–C8)', icon: <ShieldCheck size={24} /> },
+    { id: 3, title: 'Scoring', desc: 'Tính toán điểm tin cậy (C1-C7)', icon: <ShieldCheck size={24} /> },
     { id: 4, title: 'Completed', desc: 'Hoàn tất quá trình thẩm định', icon: <CheckCircle2 size={24} /> },
   ];
 
@@ -75,7 +75,7 @@ export default function AnalyzingScreen() {
             'parsing_citations': 'Đang phân tích cú pháp trích dẫn...',
             'normalizing': 'Đang chuẩn hóa thông tin các trường trích dẫn...',
             'verifying_metadata': 'Đang đối chiếu thông tin CrossRef / OpenAlex...',
-            'scoring': 'Đang áp dụng bộ tiêu chí đánh giá C1–C8...',
+            'scoring': 'Đang áp dụng bộ tiêu chí đánh giá C1-C7...',
             'building_report': 'Đang tổng hợp điểm và biên soạn báo cáo...',
             'completed': 'Hoàn tất báo cáo thành công!'
           };

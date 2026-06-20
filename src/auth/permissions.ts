@@ -1,4 +1,6 @@
 export const PERMISSIONS = {
+  PUBLIC_LANDING_VIEW: 'public.landing_view',
+  PUBLIC_DOCS_VIEW: 'public.docs_view',
   AUTH_LOGIN: 'auth.login',
   COURSE_MANAGE: 'course.manage',
   ASSIGNMENT_MANAGE: 'assignment.manage',
@@ -15,6 +17,7 @@ export const PERMISSIONS = {
 export type PermissionCode = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
 
 export const ROLES = {
+  GUEST: 'GUEST',
   ADMIN: 'ADMIN',
   LECTURER: 'LECTURER',
   STUDENT: 'STUDENT',
@@ -23,6 +26,7 @@ export const ROLES = {
 export type RoleCode = (typeof ROLES)[keyof typeof ROLES];
 
 export const ROLE_GROUPS = {
+  PUBLIC_VISITOR: [ROLES.GUEST],
   AUTHENTICATED: [ROLES.ADMIN, ROLES.LECTURER, ROLES.STUDENT],
   ACADEMIC_STAFF: [ROLES.ADMIN, ROLES.LECTURER],
   ADMIN_ONLY: [ROLES.ADMIN],
@@ -38,6 +42,10 @@ export interface AuthUser {
 }
 
 const ROLE_PERMISSIONS: Record<string, PermissionCode[]> = {
+  GUEST: [
+    PERMISSIONS.PUBLIC_LANDING_VIEW,
+    PERMISSIONS.PUBLIC_DOCS_VIEW,
+  ],
   LECTURER: [
     PERMISSIONS.AUTH_LOGIN,
     PERMISSIONS.COURSE_MANAGE,

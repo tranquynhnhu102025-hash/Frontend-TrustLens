@@ -20,6 +20,7 @@ export default function DashboardScreen() {
   });
 
   const [recentActivities, setRecentActivities] = useState<any[]>([]);
+  const [weeklyTrend, setWeeklyTrend] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -28,6 +29,7 @@ export default function DashboardScreen() {
       try {
         const summary = await dashboardService.getSummary();
         const activities = await dashboardService.getRecentActivities();
+        const trend = await dashboardService.getWeeklyTrend();
         
         setSummaryData({
           totalSubmissions: summary.totalSubmissions ?? summary.total_submissions ?? 0,
@@ -37,6 +39,7 @@ export default function DashboardScreen() {
         });
         
         setRecentActivities(activities || []);
+        setWeeklyTrend(trend || []);
       } catch (err: any) {
         console.error("Lỗi khi tải dữ liệu Dashboard:", err);
         setError(err.response?.data?.message || 'Không thể kết nối đến máy chủ để lấy số liệu tổng quan.');
@@ -121,18 +124,30 @@ export default function DashboardScreen() {
             <ArrowUpRight size={15} className="text-zinc-500" /> Tỉ lệ theo tuần
           </h3>
           <div className="flex items-end gap-2.5 h-40 mt-2">
-            {[40, 70, 45, 90, 65, 85, 100].map((height, i) => (
+            {(weeklyTrend.length ? weeklyTrend : []).map((item, i) => {
+              const height = Math.max(4, Number(item.rate || 0));
+              return (
               <div key={i} className="flex-1 bg-zinc-100 dark:bg-zinc-900 h-full rounded flex items-end justify-center relative group">
                 <div 
                   className="w-full bg-zinc-800 dark:bg-zinc-200 rounded transition-all duration-300 group-hover:bg-zinc-900 dark:group-hover:bg-white" 
                   style={{ height: `${height}%` }}
                 ></div>
-                <span className="absolute -top-5 text-[8px] font-bold text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity">{height}%</span>
+                <span className="absolute -top-5 text-[8px] font-bold text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {item.total || 0} bài / {item.rate || 0}%
+                </span>
               </div>
-            ))}
+              );
+            })}
+            {weeklyTrend.length === 0 && (
+              <div className="w-full h-full flex items-center justify-center text-[11px] font-semibold text-zinc-400">
+                Chưa có dữ liệu trong 7 ngày gần nhất.
+              </div>
+            )}
           </div>
           <div className="flex justify-between mt-3 text-[9px] font-bold text-zinc-400 uppercase tracking-widest px-1">
-            <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+            {(weeklyTrend.length ? weeklyTrend.map((item) => item.label) : ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']).map((label, index) => (
+              <span key={`${label}-${index}`}>{label}</span>
+            ))}
           </div>
         </div>
 

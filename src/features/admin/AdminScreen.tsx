@@ -5,7 +5,15 @@ import {
   Activity, ArrowRight, Search, UserPlus,
   ChevronLeft, Loader2, Trash2, X, CheckCircle2
 } from 'lucide-react';
+import ScoringConfigHelper, {
+  DEFAULT_SCORING_WEIGHTS,
+  SCORING_CRITERIA,
+  SCORING_PRESETS,
+  WeightMap,
+} from './ScoringConfigHelper';
+import VisitorRoleHelper from './VisitorRoleHelper';
 import adminService, { AuditLog, MetadataProviderInfo, User } from '../../services/adminService';
+import { TRUST_SCORE_THRESHOLDS, TRUST_SCORE_VERSION } from '../../config/trustScoreConfig';
 
 export default function AdminScreen() {
   const navigate = useNavigate();
@@ -36,33 +44,15 @@ export default function AdminScreen() {
   const [submittingUser, setSubmittingUser] = useState(false);
 
   // States cho UI-10 Admin scoring config
-  const [weights, setWeights] = useState({
-    c1: 10,
-    c2: 20,
-    c3: 20,
-    c4: 20,
-    c5: 10,
-    c6: 10,
-    c7: 5,
-    c8: 5
-  });
+  const [weights, setWeights] = useState<WeightMap>(DEFAULT_SCORING_WEIGHTS);
   const [thresholds, setThresholds] = useState({
-    pass: 80,
-    warning: 50
+    pass: TRUST_SCORE_THRESHOLDS.reliable,
+    warning: TRUST_SCORE_THRESHOLDS.needsReview
   });
   const [presetName, setPresetName] = useState('DEFAULT');
   const [isSaving, setIsSaving] = useState(false);
 
-  const criteriaList = [
-    { key: 'c1', label: 'Mức độ hoàn thiện Metadata' },
-    { key: 'c2', label: 'Mức độ xác minh Metadata' },
-    { key: 'c3', label: 'Độ tin cậy của nguồn' },
-    { key: 'c4', label: 'Độ phù hợp chủ đề' },
-    { key: 'c5', label: 'Tính cập nhật' },
-    { key: 'c6', label: 'Chất lượng trích dẫn' },
-    { key: 'c7', label: 'Đóng góp đa dạng nguồn' },
-    { key: 'c8', label: 'Tính liêm chính học thuật' },
-  ];
+  const criteriaList = SCORING_CRITERIA;
 
   const totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
 
@@ -98,12 +88,9 @@ export default function AdminScreen() {
 
   const handleApplyPreset = (id: string) => {
     setPresetName(id);
-    if (id === 'DEFAULT') {
-      setWeights({ c1: 10, c2: 20, c3: 20, c4: 20, c5: 10, c6: 10, c7: 5, c8: 5 });
-    } else if (id === 'SOURCE_FOCUS') {
-      setWeights({ c1: 5, c2: 15, c3: 35, c4: 15, c5: 10, c6: 10, c7: 5, c8: 5 });
-    } else if (id === 'RECENCY_FOCUS') {
-      setWeights({ c1: 10, c2: 15, c3: 15, c4: 15, c5: 25, c6: 10, c7: 5, c8: 5 });
+    const preset = SCORING_PRESETS.find((item) => item.id === id);
+    if (preset) {
+      setWeights({ ...preset.weights });
     }
   };
 
@@ -117,7 +104,7 @@ export default function AdminScreen() {
 
   const handleResetScoringConfig = () => {
     handleApplyPreset('DEFAULT');
-    setThresholds({ pass: 80, warning: 50 });
+    setThresholds({ pass: TRUST_SCORE_THRESHOLDS.reliable, warning: TRUST_SCORE_THRESHOLDS.needsReview });
   };
 
   const fetchUsers = async () => {
@@ -359,7 +346,7 @@ export default function AdminScreen() {
     const circumference = 2 * Math.PI * radius; // ~219.9
     let accumulatedPercent = 0;
     
-    // Màu sắc đại diện cho C1 đến C8
+    // Màu sắc đại diện cho các cấu phần Trust Score v1.1
     const colors = [
       'stroke-blue-500',   // C1
       'stroke-indigo-500', // C2
@@ -368,7 +355,6 @@ export default function AdminScreen() {
       'stroke-rose-500',   // C5
       'stroke-amber-500',  // C6
       'stroke-teal-500',   // C7
-      'stroke-emerald-500' // C8
     ];
     
     const slices = criteriaList.map((crit, idx) => {
@@ -791,16 +777,25 @@ export default function AdminScreen() {
             
             <h2 className="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2 mt-2">
               <Sliders className="text-zinc-500" size={20} /> Cấu hình trọng số điểm tin cậy (Scoring Configuration)
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-500">
+                {TRUST_SCORE_VERSION}
+              </span>
             </h2>
-            <p className="text-zinc-550 dark:text-zinc-500 text-xs font-semibold">Thiết lập trọng số phần trăm (%) cho bộ tiêu chí đánh giá C1–C8 và cấu hình các ngưỡng phân loại nhãn cảnh báo.</p>
+            <p className="text-zinc-550 dark:text-zinc-500 text-xs font-semibold">Thiết lập trọng số phần trăm (%) cho bộ tiêu chí đánh giá C1-C7 và cấu hình các ngưỡng phân loại nhãn cảnh báo.</p>
           </div>
         </div>
 
+        <ScoringConfigHelper
+          weights={weights}
+          thresholds={thresholds}
+          totalWeight={totalWeight}
+        />
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* CỘT TRÁI: ĐIỀU CHỈNH TRỌNG SỐ C1-C8 */}
+          {/* CỘT TRÁI: ĐIỀU CHỈNH TRỌNG SỐ C1-C7 */}
           <div className="lg:col-span-2 bg-white dark:bg-zinc-950 p-6 rounded-xl border border-zinc-200 dark:border-zinc-900 shadow-sm space-y-6">
             <div className="flex justify-between items-center border-b border-zinc-150 dark:border-zinc-900 pb-3">
-              <h3 className="text-xs font-bold text-zinc-850 dark:text-zinc-200 uppercase tracking-wider">Trọng số các tiêu chí (C1–C8)</h3>
+              <h3 className="text-xs font-bold text-zinc-850 dark:text-zinc-200 uppercase tracking-wider">Trọng số các tiêu chí (C1-C7)</h3>
               <span className={`text-xs font-bold px-2 py-0.5 rounded ${
                 totalWeight === 100 ? 'bg-green-50/50 dark:bg-green-950/20 text-green-700 border border-green-200' : 'bg-rose-50/50 dark:bg-rose-955/20 text-rose-700 border border-rose-200'
               }`}>
@@ -860,11 +855,7 @@ export default function AdminScreen() {
               </h3>
               
               <div className="space-y-2">
-                {[
-                  { id: 'DEFAULT', name: 'Mẫu mặc định (Default)', desc: 'Cấu hình cân bằng cho mọi lĩnh vực học thuật.' },
-                  { id: 'SOURCE_FOCUS', name: 'Ưu tiên uy tín nguồn', desc: 'Tập trung cao vào độ uy tín tạp chí (C3) và đa dạng nguồn (C7).' },
-                  { id: 'RECENCY_FOCUS', name: 'Ưu tiên tính cập nhật', desc: 'Tập trung cao vào tính cập nhật (C5) của bài báo.' },
-                ].map((preset) => (
+                {SCORING_PRESETS.map((preset) => (
                   <button
                     key={preset.id}
                     onClick={() => handleApplyPreset(preset.id)}
@@ -1058,6 +1049,8 @@ export default function AdminScreen() {
         </div>
 
       </div>
+
+      <VisitorRoleHelper />
 
       {/* KHU VỰC NHẬT KÝ HOẠT ĐỘNG GẦN ĐÂY */}
       <div className="bg-white dark:bg-zinc-950 rounded-lg border border-zinc-200 dark:border-zinc-900 overflow-hidden shadow-sm">

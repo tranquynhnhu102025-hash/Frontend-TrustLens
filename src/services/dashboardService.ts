@@ -10,8 +10,8 @@ export const dashboardService = {
       const res = await axiosClient.get('/dashboard/summary');
       return res.data;
     } catch (e) {
-      console.warn("Backend does not support /dashboard/summary. Falling back to mock data.", e);
-      return MOCK_SUMMARY;
+      console.error("Không thể tải /dashboard/summary.", e);
+      throw e;
     }
   },
 
@@ -23,9 +23,22 @@ export const dashboardService = {
       const res = await axiosClient.get('/dashboard/recent-activities');
       return res.data;
     } catch (e) {
-      console.warn("Backend does not support /dashboard/recent-activities. Falling back to mock data.", e);
-      return MOCK_ACTIVITIES;
+      console.error("Không thể tải /dashboard/recent-activities.", e);
+      throw e;
     }
+  },
+
+  getWeeklyTrend: async () => {
+    if (import.meta.env.VITE_USE_MOCK === 'true') {
+      return [40, 70, 45, 90, 65, 85, 100].map((rate, index) => ({
+        label: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'][index],
+        total: 1,
+        passed: rate >= 80 ? 1 : 0,
+        rate,
+      }));
+    }
+    const res = await axiosClient.get('/dashboard/weekly-trend');
+    return res.data;
   },
 };
 

@@ -1,7 +1,7 @@
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { 
-  LayoutDashboard, BookOpen, Shield, Settings, LogOut, UploadCloud,
+  LayoutDashboard, BookOpen, Shield, Settings, LogOut, UploadCloud, BarChart3,
   ChevronLeft, ChevronRight 
 } from 'lucide-react';
 import {
@@ -62,6 +62,13 @@ export default function Sidebar({ isCollapsed = false, onToggle }: SidebarProps)
       icon: UploadCloud,
       roles: ROLE_GROUPS.ACADEMIC_STAFF,
       permissions: [PERMISSIONS.SUBMISSION_UPLOAD],
+    },
+    {
+      path: '/trust-score',
+      name: 'Trust Score',
+      icon: BarChart3,
+      roles: ROLE_GROUPS.ACADEMIC_STAFF,
+      permissions: [PERMISSIONS.REPORT_VIEW_OWN_SCOPE],
     },
     {
       path: '/admin',

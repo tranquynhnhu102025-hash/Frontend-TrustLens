@@ -14,6 +14,7 @@ import SettingsScreen from './features/settings/SettingsScreen';
 import AdminScreen from './features/admin/AdminScreen';
 import ReportScreen from './features/report/ReportScreen';
 import AnalyzingScreen from './features/analyzing/AnalyzingScreen';
+import TrustScoreGuideScreen from './features/trust-score/TrustScoreGuideScreen';
 
 // Import Landing Pages
 import LandingLayout from './features/landing/LandingLayout';
@@ -71,6 +72,7 @@ export default function App() {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/report" element={<ReportScreen />} />
               <Route path="/report/:id" element={<ReportScreen />} />
+              <Route path="/trust-score" element={<TrustScoreGuideScreen />} />
               <Route path="/analyzing/:jobId" element={<AnalyzingScreen />} />
             </Route>
             <Route

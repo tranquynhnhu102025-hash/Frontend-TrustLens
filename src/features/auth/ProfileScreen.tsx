@@ -6,6 +6,7 @@ import authService from '../../services/authService';
 export default function ProfileScreen() {
   const navigate = useNavigate();
   const [isSaved, setIsSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [userInfo, setUserInfo] = useState<any>(null);
 
@@ -18,9 +19,10 @@ export default function ProfileScreen() {
           email: data.email || 'N/A',
           role: data.role === 'LECTURER' || data.role === 'lecturer' ? 'Giảng viên' : data.role === 'ADMIN' || data.role === 'admin' ? 'Quản trị viên' : (data.role || 'Giảng viên'),
           studentId: data.id ? data.id.substring(0, 8).toUpperCase() : 'N/A',
-          university: 'Trường Đại học Nguyễn Tất Thành',
-          faculty: 'Khoa Công nghệ Thông tin',
-          major: 'Kỹ thuật Phần mềm',
+          university: data.university || 'Trường Đại học Nguyễn Tất Thành',
+          faculty: data.faculty || 'Khoa Công nghệ Thông tin',
+          major: data.major || 'Kỹ thuật Phần mềm',
+          notificationEnabled: data.notification_enabled !== false,
           status: data.is_active !== false ? 'Đang hoạt động' : 'Tạm khóa'
         });
       } catch (e) {
@@ -32,9 +34,40 @@ export default function ProfileScreen() {
     loadUser();
   }, []);
 
-  const handleSave = () => {
-    setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 3000);
+  const updateField = (field: string, value: any) => {
+    setUserInfo((prev: any) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const data = await authService.updateMe({
+        full_name: userInfo.fullName,
+        email: userInfo.email,
+        university: userInfo.university,
+        faculty: userInfo.faculty,
+        major: userInfo.major,
+        notification_enabled: userInfo.notificationEnabled,
+      });
+      setUserInfo((prev: any) => ({
+        ...prev,
+        fullName: data.full_name || prev.fullName,
+        email: data.email || prev.email,
+        university: data.university || prev.university,
+        faculty: data.faculty || prev.faculty,
+        major: data.major || prev.major,
+        notificationEnabled: data.notification_enabled !== false,
+      }));
+      setIsSaved(true);
+      setTimeout(() => setIsSaved(false), 3000);
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Không thể cập nhật thông tin tài khoản.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading || !userInfo) {
@@ -98,7 +131,7 @@ export default function ProfileScreen() {
                 <label className="block text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1.5">Họ và Tên</label>
                 <div className="relative">
                   <User size={14} className="absolute left-3.5 top-3.5 text-zinc-400 dark:text-zinc-550" />
-                  <input type="text" value={userInfo.fullName} readOnly className="w-full pl-10 pr-3 py-2.5 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs font-semibold text-zinc-600 dark:text-zinc-300 focus:outline-none cursor-not-allowed" />
+                  <input type="text" value={userInfo.fullName} onChange={(e) => updateField('fullName', e.target.value)} className="w-full pl-10 pr-3 py-2.5 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs font-semibold text-zinc-800 dark:text-zinc-200 focus:outline-none focus:bg-white dark:focus:bg-zinc-950 focus:border-zinc-400 dark:focus:border-zinc-700" />
                 </div>
               </div>
 
@@ -106,7 +139,7 @@ export default function ProfileScreen() {
                 <label className="block text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1.5">Email nội bộ</label>
                 <div className="relative">
                   <Mail size={14} className="absolute left-3.5 top-3.5 text-zinc-400 dark:text-zinc-550" />
-                  <input type="email" value={userInfo.email} readOnly className="w-full pl-10 pr-3 py-2.5 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs font-semibold text-zinc-600 dark:text-zinc-300 focus:outline-none cursor-not-allowed" />
+                  <input type="email" value={userInfo.email} onChange={(e) => updateField('email', e.target.value)} className="w-full pl-10 pr-3 py-2.5 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs font-semibold text-zinc-800 dark:text-zinc-200 focus:outline-none focus:bg-white dark:focus:bg-zinc-950 focus:border-zinc-400 dark:focus:border-zinc-700" />
                 </div>
               </div>
 
@@ -122,7 +155,7 @@ export default function ProfileScreen() {
                 <label className="block text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1.5">Khoa quản lý</label>
                 <div className="relative">
                   <GraduationCap size={14} className="absolute left-3.5 top-3.5 text-zinc-400 dark:text-zinc-550" />
-                  <input type="text" value={userInfo.faculty} readOnly className="w-full pl-10 pr-3 py-2.5 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs font-semibold text-zinc-600 dark:text-zinc-300 focus:outline-none cursor-not-allowed" />
+                  <input type="text" value={userInfo.faculty} onChange={(e) => updateField('faculty', e.target.value)} className="w-full pl-10 pr-3 py-2.5 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs font-semibold text-zinc-800 dark:text-zinc-200 focus:outline-none focus:bg-white dark:focus:bg-zinc-950 focus:border-zinc-400 dark:focus:border-zinc-700" />
                 </div>
               </div>
 
@@ -130,7 +163,15 @@ export default function ProfileScreen() {
                 <label className="block text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1.5">Chuyên ngành học thuật</label>
                 <div className="relative">
                   <BookOpen size={14} className="absolute left-3.5 top-3.5 text-zinc-400 dark:text-zinc-550" />
-                  <input type="text" value={userInfo.major} readOnly className="w-full pl-10 pr-3 py-2.5 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs font-semibold text-zinc-600 dark:text-zinc-300 focus:outline-none cursor-not-allowed" />
+                  <input type="text" value={userInfo.major} onChange={(e) => updateField('major', e.target.value)} className="w-full pl-10 pr-3 py-2.5 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs font-semibold text-zinc-800 dark:text-zinc-200 focus:outline-none focus:bg-white dark:focus:bg-zinc-950 focus:border-zinc-400 dark:focus:border-zinc-700" />
+                </div>
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1.5">Đơn vị / Trường</label>
+                <div className="relative">
+                  <Building2 size={14} className="absolute left-3.5 top-3.5 text-zinc-400 dark:text-zinc-550" />
+                  <input type="text" value={userInfo.university} onChange={(e) => updateField('university', e.target.value)} className="w-full pl-10 pr-3 py-2.5 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs font-semibold text-zinc-800 dark:text-zinc-200 focus:outline-none focus:bg-white dark:focus:bg-zinc-950 focus:border-zinc-400 dark:focus:border-zinc-700" />
                 </div>
               </div>
             </div>
@@ -152,7 +193,7 @@ export default function ProfileScreen() {
                   </div>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" defaultChecked className="sr-only peer" />
+                  <input type="checkbox" checked={userInfo.notificationEnabled} onChange={(e) => updateField('notificationEnabled', e.target.checked)} className="sr-only peer" />
                   <div className="w-9 h-5 bg-zinc-200 dark:bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-zinc-900 dark:peer-checked:bg-zinc-100"></div>
                 </label>
               </div>
@@ -161,8 +202,8 @@ export default function ProfileScreen() {
                 <button onClick={() => navigate('/classes')} className="px-4 py-2 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-lg transition-colors">
                   Quay lại
                 </button>
-                <button onClick={handleSave} className="px-4.5 py-2 text-xs font-bold bg-zinc-900 hover:bg-zinc-850 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-black rounded-lg transition-colors">
-                  Lưu thay đổi
+                <button onClick={handleSave} disabled={saving} className="px-4.5 py-2 text-xs font-bold bg-zinc-900 hover:bg-zinc-850 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-black rounded-lg transition-colors disabled:opacity-50">
+                  {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
                 </button>
               </div>
             </div>

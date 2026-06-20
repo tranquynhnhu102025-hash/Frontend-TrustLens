@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, FileText, ShieldCheck, AlertTriangle, 
   ShieldAlert, Search, Users, Calendar, ChevronRight, Loader2, UploadCloud,
-  CheckCircle2, Play, RefreshCw, X, AlertCircle
+  CheckCircle2, Play, RefreshCw, X, AlertCircle, Pencil, Save
 } from 'lucide-react';
 import { classService, Course, Submission } from '../../services/classService';
 import { batchService } from '../../services/batchService';
@@ -18,6 +18,10 @@ export default function ClassDetailScreen() {
   const [course, setCourse] = useState<Course | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isEditClassOpen, setIsEditClassOpen] = useState(false);
+  const [editCode, setEditCode] = useState('');
+  const [editName, setEditName] = useState('');
+  const [editTerm, setEditTerm] = useState('');
 
   // States cho tính năng Phân tích hàng loạt (P1 Batch UI)
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -135,6 +139,36 @@ export default function ClassDetailScreen() {
     } catch (err: any) {
       console.error("Lỗi retry batch:", err);
       alert("Không thể chạy lại các mục lỗi: " + (err.response?.data?.message || err.message));
+    }
+  };
+
+  const openEditClass = () => {
+    if (!course) return;
+    setEditCode(course.id || '');
+    setEditName(course.name || '');
+    setEditTerm(course.term_name || '');
+    setIsEditClassOpen(true);
+  };
+
+  const handleUpdateClass = async () => {
+    if (!course || !editCode.trim() || !editName.trim()) return;
+
+    try {
+      const updated = await classService.updateClass(course.class_uuid || course.id, {
+        class_code: editCode.trim().toUpperCase(),
+        name: editName.trim(),
+        term_name: editTerm.trim() || null,
+      });
+      setCourse({
+        ...course,
+        ...updated,
+        assignment_id: course.assignment_id,
+        students: course.students,
+      });
+      setIsEditClassOpen(false);
+    } catch (err: any) {
+      console.error("Lỗi khi cập nhật lớp:", err);
+      alert(err.response?.data?.message || "Không thể cập nhật thông tin lớp học.");
     }
   };
 
@@ -261,6 +295,12 @@ export default function ClassDetailScreen() {
             </div>
             
             <div className="flex gap-2 shadow-sm shrink-0 w-full md:w-auto">
+              <button
+                onClick={openEditClass}
+                className="flex-1 md:flex-initial bg-white dark:bg-zinc-950 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-800 font-semibold text-xs px-4 py-2.5 rounded-lg transition-all duration-200 active:scale-98 flex items-center justify-center gap-1.5"
+              >
+                <Pencil size={13} className="text-zinc-500" /> Chỉnh sửa lớp
+              </button>
               {selectedIds.length > 0 && (
                 <button
                   onClick={handleStartBatch}
@@ -670,6 +710,66 @@ export default function ClassDetailScreen() {
                   Đóng
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isEditClassOpen && course && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-zinc-950/40 backdrop-blur-xs animate-fade-in-backdrop"
+            onClick={() => setIsEditClassOpen(false)}
+          ></div>
+
+          <div className="relative z-10 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-lg p-6 w-full max-w-md shadow-lg animate-scale-up">
+            <div className="flex items-center gap-2.5 mb-5 border-b border-zinc-150 dark:border-zinc-900 pb-3">
+              <Pencil size={16} className="text-zinc-500" />
+              <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Chỉnh sửa lớp học phần</h3>
+            </div>
+
+            <div className="space-y-4 mb-5">
+              <div>
+                <label className="block text-[9px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Mã lớp học phần</label>
+                <input
+                  value={editCode}
+                  onChange={(e) => setEditCode(e.target.value)}
+                  className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg focus:outline-none focus:bg-white dark:focus:bg-zinc-955 focus:border-zinc-400 dark:focus:border-zinc-700 font-bold text-zinc-850 dark:text-zinc-200 uppercase text-xs"
+                />
+              </div>
+              <div>
+                <label className="block text-[9px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Tên lớp / môn học</label>
+                <input
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg focus:outline-none focus:bg-white dark:focus:bg-zinc-955 focus:border-zinc-400 dark:focus:border-zinc-700 font-bold text-zinc-850 dark:text-zinc-200 text-xs"
+                />
+              </div>
+              <div>
+                <label className="block text-[9px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Học kỳ / ghi chú thời gian</label>
+                <input
+                  value={editTerm}
+                  onChange={(e) => setEditTerm(e.target.value)}
+                  placeholder="VD: HK2 2025-2026"
+                  className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg focus:outline-none focus:bg-white dark:focus:bg-zinc-955 focus:border-zinc-400 dark:focus:border-zinc-700 font-bold text-zinc-850 dark:text-zinc-200 placeholder:font-normal placeholder:text-zinc-400 text-xs"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-zinc-150 dark:border-zinc-900">
+              <button
+                onClick={() => setIsEditClassOpen(false)}
+                className="px-4 py-2 font-semibold text-xs text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg transition-colors"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                onClick={handleUpdateClass}
+                disabled={!editCode.trim() || !editName.trim()}
+                className="flex items-center gap-1 px-4 py-2 font-bold text-xs bg-zinc-900 hover:bg-zinc-850 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-black rounded-lg transition-colors shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <Save size={12} /> Lưu lớp học
+              </button>
             </div>
           </div>
         </div>

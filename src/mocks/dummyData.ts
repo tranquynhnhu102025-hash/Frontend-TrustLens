@@ -1,10 +1,12 @@
 // Định nghĩa kiểu dữ liệu cho Course khớp với classService
 export interface Course {
   id: string;
+  class_uuid?: string;
   name: string;
   students: number;
   date: string;
   assignment_id?: string;
+  term_name?: string | null;
 }
 
 // Danh sách lớp học phần giả lập
@@ -26,7 +28,7 @@ export const MOCK_REPORT = {
   report_id: "mock-report-uuid-1",
   submission_id: "mock-sub-uuid-1",
   job_id: "mock-job-uuid-1",
-  scoring_config_version: "trust-score-v1.0",
+  scoring_config_version: "trust-score-v1.1",
   report_trust_score: 78,
   confidence_score: 0.82,
   overall_label: "needs_review",
@@ -66,8 +68,8 @@ export const MOCK_REPORT = {
       recommendation: "Bổ sung DOI hoặc URL cho các bài báo hội thảo còn thiếu để tăng tính liên kết."
     },
     c2_metadata_verification: {
-      score: 16.2,
-      max_score: 20,
+      score: 20.2,
+      max_score: 25,
       reason_code: "METADATA_VERIFIED_PARTIAL",
       explanation: "Hầu hết các tài liệu đã đối sánh chính xác với cơ sở dữ liệu CrossRef/OpenAlex. Một số tài liệu bị lệch năm xuất bản nhẹ so với cơ sở dữ liệu gốc.",
       evidence: { verified_ratio: 0.82, year_mismatches: 3 },
@@ -97,7 +99,7 @@ export const MOCK_REPORT = {
       evidence: { average_age_years: 4.2, outdated_citations_count: 2 },
       recommendation: "Cập nhật các tài liệu quá cũ bằng các công trình nghiên cứu mới hơn (từ năm 2021 đến nay)."
     },
-    c6_citation_quality: {
+    c6_citation_style: {
       score: 8.0,
       max_score: 10,
       reason_code: "STYLE_APA_MINOR_ERRORS",
@@ -105,21 +107,13 @@ export const MOCK_REPORT = {
       evidence: { format_compliance_score: 0.85, style_violations: 2 },
       recommendation: "Rà soát lại định dạng dấu ngoặc đơn và viết hoa tiêu đề theo đúng cẩm nang hướng dẫn APA 7th."
     },
-    c7_source_diversity: {
+    c7_duplicate_concentration: {
       score: 3.8,
       max_score: 5,
       reason_code: "DIVERSITY_GOOD",
       explanation: "Danh mục trích dẫn thể hiện độ đa dạng nguồn tốt khi phân phối đều qua nhiều nhà xuất bản, hội thảo và tạp chí khoa học khác nhau.",
       evidence: { publisher_diversity_entropy: 1.84 },
       recommendation: "Tiếp tục phát huy. Tránh tập trung quá nhiều trích dẫn vào cùng một nhóm nghiên cứu hoặc một tác giả duy nhất."
-    },
-    c8_academic_risk_integrity: {
-      score: 4.2,
-      max_score: 5,
-      reason_code: "ACADEMIC_RISK_LOW",
-      explanation: "Mức độ rủi ro học thuật thấp. Phát hiện 1 tài liệu nằm trong danh sách tạp chí trục lợi/săn mồi (predatory watch) cần lưu ý.",
-      evidence: { predatory_journals_count: 1 },
-      recommendation: "Xác minh lại độ tin cậy của bài viết khoa học thuộc tạp chí săn mồi bị cảnh báo."
     }
   },
   citations: [
@@ -136,8 +130,8 @@ export const MOCK_REPORT = {
       },
       metadata: {
         provider: "crossref",
-        match_status: "verified",
-        match_confidence: 0.98,
+        status: "VERIFIED",
+        confidence: 0.98,
         source_type: "journal"
       },
       warnings: []
@@ -155,8 +149,8 @@ export const MOCK_REPORT = {
       },
       metadata: {
         provider: null,
-        match_status: "unknown",
-        match_confidence: 0.0,
+        status: "URL_ONLY",
+        confidence: 0.35,
         source_type: "blog"
       },
       warnings: [
@@ -180,8 +174,8 @@ export const MOCK_REPORT = {
       },
       metadata: {
         provider: null,
-        match_status: "not_found",
-        match_confidence: 0.0,
+        status: "NOT_FOUND",
+        confidence: 0.0,
         source_type: "wiki"
       },
       warnings: [

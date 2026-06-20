@@ -8,6 +8,13 @@ import {
 import { reportService } from '../../services/reportService';
 import { jobService } from '../../services/jobService';
 import NumberTicker from '../../components/NumberTicker';
+import {
+  TRUST_SCORE_COMPONENTS,
+  TRUST_SCORE_VERSION,
+  getApiWeight,
+  getComponentFromSummary,
+  labelText,
+} from '../../config/trustScoreConfig';
 
 export default function ReportScreen() {
   const navigate = useNavigate();
@@ -40,7 +47,7 @@ export default function ReportScreen() {
   const [revisions, setRevisions] = useState<any[]>([]);
   const [currentRevisionId, setCurrentRevisionId] = useState<string>('');
   
-  // State cho P1 Explanation Accordion (Mở rộng C1-C8)
+  // State cho Explanation Accordion (Trust Score v1.1 C1-C7)
   const [expandedCriterionIndex, setExpandedCriterionIndex] = useState<number | null>(null);
 
   const getSummaryText = (summary: any): string => {
@@ -56,23 +63,17 @@ export default function ReportScreen() {
       `${summary.high_warnings || 0} cảnh báo mức cao.`;
   };
 
-  const getLabelText = (label: string, score: number): string => {
-    switch (label?.toLowerCase()) {
-      case 'passed':
-      case 'pass':
-      case 'verified':
-        return 'Đạt chuẩn';
-      case 'needs_review':
-      case 'warning':
-        return 'Cảnh báo';
-      case 'failed':
-      case 'fail':
-      case 'danger':
-      case 'critical':
-        return 'Nguy hiểm';
-      default:
-        return score >= 80 ? 'Đạt chuẩn' : score >= 50 ? 'Cảnh báo' : 'Nguy hiểm';
-    }
+  const buildExportFileName = (studentName: string | undefined, format: string) => {
+    const safeName = (studentName || 'Sinh_vien')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D')
+      .replace(/[^a-zA-Z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '')
+      .slice(0, 80);
+
+    return `TrustLens_Report_${safeName || 'Sinh_vien'}.${format}`;
   };
 
   // Hàm tải dữ liệu báo cáo (chấp nhận nạp theo ID bản sửa đổi khác)
@@ -83,75 +84,79 @@ export default function ReportScreen() {
     try {
       let data = await reportService.getReport(targetId);
       
-      // Chuẩn hóa dữ liệu từ backend API khớp với giao diện C1-C8 mới
+      // Chuẩn hóa dữ liệu từ backend API theo Trust Score v1.1.
       const rawScore = data.report_trust_score ?? data.trust_score ?? data.trustScore;
       const trustScore = typeof rawScore === 'number' ? rawScore : 0;
+      const trustScoreDefinition = data.trust_score || {};
+      const trustScoreVersion = trustScoreDefinition.version || data.scoring_config_version || TRUST_SCORE_VERSION;
       
       const componentSummary = data.component_summary || data.componentSummary || {};
       
       // Hỗ trợ cả hai kiểu dữ liệu: P0 (number) hoặc P1 (object chứa explanation/evidence)
-      const parseComponent = (comp: any, defaultMax: number) => {
+      const parseComponent = (comp: any, criterion: any) => {
+        const configuredMax = getApiWeight(trustScoreDefinition, criterion);
         if (comp && typeof comp === 'object') {
           return {
             score: comp.score ?? 0,
-            max: comp.max_score ?? defaultMax,
-            reason_code: comp.reason_code || 'N/A',
-            explanation: comp.explanation || 'Không có giải thích chi tiết.',
-            evidence: comp.evidence ? JSON.stringify(comp.evidence) : 'Không có bằng chứng cụ thể.',
-            recommendation: comp.recommendation || 'Kiểm tra lại tài liệu trích dẫn.'
+            max: comp.max_score ?? configuredMax,
+            reason_code: comp.reason_code || criterion.code,
+            explanation: comp.reason || comp.explanation || criterion.purpose,
+            evidence: comp.evidence ? JSON.stringify(comp.evidence, null, 2) : criterion.evidence,
+            recommendation: comp.recommendation || criterion.recommendation
           };
         }
         return {
           score: typeof comp === 'number' ? comp : 0,
-          max: defaultMax,
-          reason_code: 'COMP_SCORE',
-          explanation: 'Điểm số tiêu chí thành phần dựa trên đặc tả công thức Trust Score v1.0.',
+          max: configuredMax,
+          reason_code: criterion.code,
+          explanation: `Điểm trung bình cấu phần ${criterion.code} theo ${trustScoreVersion}. ${criterion.purpose}`,
           evidence: `Giá trị thô: ${comp}`,
-          recommendation: 'Rà soát lại tài liệu tham khảo để tối ưu hóa tiêu chí này.'
+          recommendation: criterion.recommendation
         };
       };
 
-      const criteriaBreakdown = [
-        { name: 'Mức độ hoàn thiện Metadata (C1)', ...parseComponent(componentSummary.c1_metadata_completeness || componentSummary.c1MetadataCompleteness || componentSummary.c1, 10) },
-        { name: 'Mức độ xác minh Metadata (C2)', ...parseComponent(componentSummary.c2_metadata_verification || componentSummary.c2MetadataVerification || componentSummary.c2, 20) },
-        { name: 'Độ tin cậy của nguồn (C3)', ...parseComponent(componentSummary.c3_source_credibility || componentSummary.c3SourceCredibility || componentSummary.c3, 20) },
-        { name: 'Độ phù hợp chủ đề (C4)', ...parseComponent(componentSummary.c4_relevance || componentSummary.c4Relevance || componentSummary.c4, 20) },
-        { name: 'Tính cập nhật (C5)', ...parseComponent(componentSummary.c5_recency || componentSummary.c5Recency || componentSummary.c5, 10) },
-        { name: 'Chất lượng trích dẫn (C6)', ...parseComponent(componentSummary.c6_citation_quality || componentSummary.c6CitationQuality || componentSummary.c6, 10) },
-        { name: 'Đóng góp đa dạng nguồn (C7)', ...parseComponent(componentSummary.c7_source_diversity || componentSummary.c7SourceDiversity || componentSummary.c7, 5) },
-        { name: 'Tính liêm chính học thuật (C8)', ...parseComponent(componentSummary.c8_academic_risk_integrity || componentSummary.c8AcademicRiskIntegrity || componentSummary.c8, 5) }
-      ];
+      const criteriaBreakdown = TRUST_SCORE_COMPONENTS.map((criterion) => ({
+        key: criterion.key,
+        code: criterion.code,
+        name: `${criterion.code}. ${criterion.shortLabel}`,
+        ...parseComponent(getComponentFromSummary(componentSummary, criterion), criterion)
+      }));
 
       const normalizedReport = {
         report_id: data.report_id || targetId,
         submission_id: data.submission_id || '',
+        studentName: data.owner_label || data.student_name || data.submission?.owner_label || '',
         job_id: data.job_id || '',
         scoring_preset_name: data.scoring_preset_name || 'Mặc định',
         scoring_preset_code: data.scoring_preset_code || 'IT_GENERAL',
         scoring_preset_version: data.scoring_preset_version || 1,
+        scoring_config_version: data.scoring_config_version || trustScoreVersion,
+        trustScoreVersion,
+        trustScoreDefinition,
         revision_number: data.revision_number ?? 1,
         created_at: data.created_at || new Date().toISOString(),
         trustScore,
         confidenceScore: data.confidence_score ?? data.confidenceScore ?? 0,
-        level: getLabelText(data.overall_label, trustScore),
+        level: labelText(data.overall_label, trustScore),
         summary: getSummaryText(data.summary),
         criteriaBreakdown,
         citations: (data.citations || []).map((cite: any, index: number) => {
+          const metadataStatus = String(cite.metadata?.status || cite.metadata?.match_status || 'UNKNOWN').toUpperCase();
           let status = 'pass';
-          if (cite.metadata?.match_status === 'not_found' || cite.warnings?.some((w: any) => w.severity === 'critical' || w.severity === 'high')) {
+          if (['NOT_FOUND', 'INVALID_IDENTIFIER'].includes(metadataStatus) || cite.warnings?.some((w: any) => w.severity === 'critical' || w.severity === 'high')) {
             status = 'fail';
-          } else if (cite.metadata?.match_status !== 'verified' || (cite.warnings && cite.warnings.length > 0)) {
+          } else if (!['VERIFIED', 'PARTIAL_MATCH'].includes(metadataStatus) || (cite.warnings && cite.warnings.length > 0)) {
             status = 'warning';
           }
 
           let issues = 'Hợp lệ';
           if (cite.warnings && cite.warnings.length > 0) {
             issues = cite.warnings.map((w: any) => `${w.message}${w.recommendation ? ` (Đề xuất: ${w.recommendation})` : ''}`).join('; ');
-          } else if (cite.metadata?.match_status === 'not_found') {
+          } else if (metadataStatus === 'NOT_FOUND') {
             issues = 'Không tìm thấy thông tin đối sánh tài liệu.';
-          } else if (cite.metadata?.match_status === 'unknown') {
+          } else if (metadataStatus === 'PROVIDER_UNAVAILABLE') {
             issues = 'Không thể xác minh tài liệu do lỗi hệ thống đối sánh.';
-          } else if (cite.metadata?.match_status === 'ambiguous') {
+          } else if (metadataStatus === 'AMBIGUOUS') {
             issues = 'Thông tin đối sánh không rõ ràng (nhiều kết quả trùng khớp).';
           }
 
@@ -224,7 +229,7 @@ export default function ReportScreen() {
       const url = window.URL.createObjectURL(fileBlob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `TrustLens_Report_${reportId}.${exportFormat}`);
+      link.setAttribute('download', buildExportFileName(report?.studentName, exportFormat));
       document.body.appendChild(link);
       link.click();
       
@@ -333,6 +338,20 @@ export default function ReportScreen() {
   }
 
   if (!report) return null;
+
+  const selectedMetadata = selectedCitation?.raw?.metadata || {};
+  const selectedMetadataStatus = String(selectedMetadata.status || selectedMetadata.match_status || 'UNKNOWN').toUpperCase();
+  const selectedMetadataConfidence = selectedMetadata.confidence ?? selectedMetadata.match_confidence ?? 0;
+  const selectedMetadataStatusLabel: Record<string, string> = {
+    VERIFIED: 'Xác minh đầy đủ',
+    PARTIAL_MATCH: 'Khớp một phần',
+    AMBIGUOUS: 'Mơ hồ',
+    NOT_FOUND: 'Không tìm thấy metadata',
+    PROVIDER_UNAVAILABLE: 'Provider không sẵn sàng',
+    URL_ONLY: 'Chỉ xác minh URL',
+    INVALID_IDENTIFIER: 'Định danh không hợp lệ',
+    UNKNOWN: 'Không rõ',
+  };
 
   return (
     <div className="w-full max-w-5xl mx-auto mt-4 space-y-6 animate-fade-in px-2 sm:px-4">
@@ -483,17 +502,17 @@ export default function ReportScreen() {
           </div>
 
           <div className="text-[8px] font-bold text-zinc-400 dark:text-zinc-500 mb-4 flex items-center gap-1">
-            <Sliders size={10} /> Cấu hình: {report.scoring_preset_name} (v{report.scoring_preset_version})
+            <Sliders size={10} /> {report.trustScoreVersion || report.scoring_config_version}
           </div>
 
           <p className="text-[10px] text-zinc-500 dark:text-zinc-450 font-bold leading-relaxed">{report.summary}</p>
         </div>
 
-        {/* THẺ TIÊU CHÍ THÀNH PHẦN C1-C8 (P1 ACCORDION EXPLANATIONS UI) */}
+        {/* THẺ TIÊU CHÍ THÀNH PHẦN C1-C7 */}
         <div className="lg:col-span-2 bg-white dark:bg-zinc-950 p-6 rounded-lg border border-zinc-200 dark:border-zinc-900 shadow-sm flex flex-col justify-between">
           <div className="w-full">
             <h3 className="text-xs font-bold text-zinc-850 dark:text-zinc-200 uppercase tracking-wider mb-5 flex items-center gap-1.5">
-              <ShieldCheck size={16} className="text-zinc-500" /> Điểm tiêu chí đánh giá C1–C8
+              <ShieldCheck size={16} className="text-zinc-500" /> Điểm tiêu chí đánh giá C1-C7
             </h3>
             
             <div className="space-y-3">
@@ -678,7 +697,7 @@ export default function ReportScreen() {
                   <option value="SE_CORE">Kỹ thuật phần mềm (SE_CORE v1)</option>
                 </select>
                 <p className="text-[10px] text-zinc-400 dark:text-zinc-550 leading-relaxed font-semibold">
-                  * Mỗi Preset có cơ chế phân bổ trọng số tiêu chí C1-C8 và các mức phạt (penalty) khác nhau thích hợp cho từng lĩnh vực chuyên ngành.
+                  * Mỗi Preset có cơ chế phân bổ trọng số tiêu chí C1-C7; penalty và label cap được tính riêng theo Trust Score v1.1.
                 </p>
               </div>
 
@@ -844,9 +863,7 @@ export default function ReportScreen() {
                       selectedCitation.status === 'warning' ? 'bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 border-amber-150' :
                       'bg-rose-50/50 dark:bg-rose-950/20 text-rose-700 border-rose-150'
                     }`}>
-                      {selectedCitation.raw?.metadata?.match_status === 'verified' ? 'Xác thực (Verified)' :
-                       selectedCitation.raw?.metadata?.match_status === 'ambiguous' ? 'Mơ hồ (Ambiguous)' :
-                       selectedCitation.raw?.metadata?.match_status === 'not_found' ? 'Không tìm thấy' : 'Không rõ (Unknown)'}
+                      {selectedMetadataStatusLabel[selectedMetadataStatus] || selectedMetadataStatus}
                     </span>
                   </div>
 
@@ -859,13 +876,13 @@ export default function ReportScreen() {
                     <div className="flex justify-between text-[10px]">
                       <span className="text-zinc-500">Độ tin cậy khớp (Confidence):</span>
                       <span className="font-bold text-zinc-800 dark:text-zinc-200">
-                        {selectedCitation.raw?.metadata?.match_confidence ? `${Math.round(selectedCitation.raw.metadata.match_confidence * 100)}%` : '0%'}
+                        {`${Math.round(selectedMetadataConfidence * 100)}%`}
                       </span>
                     </div>
                     <div className="w-full h-1.5 bg-zinc-150 dark:bg-zinc-800 rounded-full overflow-hidden">
                       <div 
                         className="bg-zinc-800 dark:bg-white h-1.5 rounded-full transition-all duration-500"
-                        style={{ width: `${(selectedCitation.raw?.metadata?.match_confidence || 0) * 100}%` }}
+                        style={{ width: `${selectedMetadataConfidence * 100}%` }}
                       ></div>
                     </div>
                   </div>

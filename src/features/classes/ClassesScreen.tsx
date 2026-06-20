@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Calendar, ChevronRight, BookOpen, Save } from 'lucide-react';
+import { Users, Calendar, ChevronRight, BookOpen, Save, Pencil } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { classService, Course } from '../../services/classService';
 
@@ -9,6 +9,10 @@ export default function ClassesScreen() {
   const [classes, setClasses] = useState<Course[]>([]);
   const [newCode, setNewCode] = useState('');
   const [newName, setNewName] = useState('');
+  const [editingClass, setEditingClass] = useState<Course | null>(null);
+  const [editCode, setEditCode] = useState('');
+  const [editName, setEditName] = useState('');
+  const [editTerm, setEditTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
 
@@ -45,6 +49,41 @@ export default function ClassesScreen() {
       setNewName('');
     } catch (error) {
       console.error('Lỗi khi tạo lớp học:', error);
+    }
+  };
+
+  const openEditModal = (cls: Course) => {
+    setEditingClass(cls);
+    setEditCode(cls.id || '');
+    setEditName(cls.name || '');
+    setEditTerm(cls.term_name || '');
+  };
+
+  const handleUpdateClass = async () => {
+    if (!editingClass || !editCode.trim() || !editName.trim()) return;
+
+    try {
+      const updatedClass = await classService.updateClass(editingClass.class_uuid || editingClass.id, {
+        class_code: editCode.trim().toUpperCase(),
+        name: editName.trim(),
+        term_name: editTerm.trim() || null,
+      });
+
+      setClasses((prev) => prev.map((cls) => {
+        if (cls.id !== editingClass.id && cls.class_uuid !== editingClass.class_uuid) {
+          return cls;
+        }
+        return {
+          ...cls,
+          ...updatedClass,
+          assignment_id: cls.assignment_id,
+          students: cls.students,
+        };
+      }));
+      setEditingClass(null);
+    } catch (error: any) {
+      console.error('Lỗi khi cập nhật lớp học:', error);
+      alert(error.response?.data?.message || 'Không thể cập nhật lớp học phần.');
     }
   };
 
@@ -104,7 +143,20 @@ export default function ClassesScreen() {
               }`}
             >
               <div>
-                <div className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">{cls.id}</div>
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">{cls.id}</div>
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      openEditModal(cls);
+                    }}
+                    className="p-1 rounded-md text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+                    title="Chỉnh sửa lớp học phần"
+                  >
+                    <Pencil size={13} />
+                  </button>
+                </div>
                 <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 mb-6 transition-colors line-clamp-2">{cls.name}</h3>
               </div>
 
@@ -169,6 +221,69 @@ export default function ClassesScreen() {
                 className="flex items-center gap-1 px-4 py-2 font-bold text-xs bg-zinc-900 hover:bg-zinc-850 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-black rounded-lg transition-colors shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Save size={12} /> Tạo lớp học
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editingClass && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-zinc-950/40 backdrop-blur-xs animate-fade-in-backdrop"
+            onClick={() => setEditingClass(null)}
+          ></div>
+
+          <div className="relative z-10 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-lg p-6 w-full max-w-md shadow-lg animate-scale-up">
+            <div className="flex items-center gap-2.5 mb-5 border-b border-zinc-150 dark:border-zinc-900 pb-3">
+              <Pencil size={16} className="text-zinc-500" />
+              <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Chỉnh sửa lớp học phần</h3>
+            </div>
+
+            <div className="space-y-4 mb-5">
+              <div>
+                <label className="block text-[9px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Mã lớp học phần</label>
+                <input
+                  value={editCode}
+                  onChange={(e) => setEditCode(e.target.value)}
+                  type="text"
+                  className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg focus:outline-none focus:bg-white dark:focus:bg-zinc-955 focus:border-zinc-400 dark:focus:border-zinc-700 font-bold text-zinc-850 dark:text-zinc-200 uppercase text-xs"
+                />
+              </div>
+              <div>
+                <label className="block text-[9px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Tên lớp / môn học</label>
+                <input
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  type="text"
+                  className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg focus:outline-none focus:bg-white dark:focus:bg-zinc-955 focus:border-zinc-400 dark:focus:border-zinc-700 font-bold text-zinc-850 dark:text-zinc-200 text-xs"
+                />
+              </div>
+              <div>
+                <label className="block text-[9px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Học kỳ / ghi chú thời gian</label>
+                <input
+                  value={editTerm}
+                  onChange={(e) => setEditTerm(e.target.value)}
+                  type="text"
+                  placeholder="VD: HK2 2025-2026"
+                  className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg focus:outline-none focus:bg-white dark:focus:bg-zinc-955 focus:border-zinc-400 dark:focus:border-zinc-700 font-bold text-zinc-850 dark:text-zinc-200 placeholder:font-normal placeholder:text-zinc-400 text-xs"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-zinc-150 dark:border-zinc-900">
+              <button
+                onClick={() => setEditingClass(null)}
+                className="px-4 py-2 font-semibold text-xs text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg transition-colors"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                onClick={handleUpdateClass}
+                disabled={!editCode.trim() || !editName.trim()}
+                className="flex items-center gap-1 px-4 py-2 font-bold text-xs bg-zinc-900 hover:bg-zinc-850 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-black rounded-lg transition-colors shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <Save size={12} /> Lưu lớp học
               </button>
             </div>
           </div>

@@ -212,7 +212,7 @@ export default function LandingScreen() {
             {
               step: "04",
               title: "Xuất báo cáo",
-              desc: "Tính toán Trust Score dựa trên 5 tiêu chuẩn vàng và xuất báo cáo kết luận."
+              desc: "Tính toán Trust Score v1.1 dựa trên 7 cấu phần C1-C7 và xuất báo cáo kết luận."
             }
           ].map((item, idx) => (
             <ScrollReveal 

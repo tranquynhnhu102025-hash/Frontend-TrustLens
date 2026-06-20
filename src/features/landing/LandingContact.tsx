@@ -100,17 +100,8 @@ export default function LandingContact() {
                 <MapPin size={15} className="text-zinc-400 shrink-0 mt-0.5" />
                 <div>
                   <h4 className={`font-bold ${theme === 'dark' ? 'text-zinc-200' : 'text-zinc-800'}`}>Trường Đại học Nguyễn Tất Thành</h4>
-                  <p className="mt-0.5">Khoa Công nghệ Thông tin &bull; Kỹ thuật Phần mềm</p>
-                  <p className="text-[10px] text-zinc-505 mt-0.5">300A Nguyễn Tất Thành, Q.4, TP. Hồ Chí Minh</p>
-                </div>
-              </div>
-
-              <div className="flex gap-2.5 items-start">
-                <MapPin size={15} className="text-zinc-400 shrink-0 mt-0.5" />
-                <div>
-                  <h4 className={`font-bold ${theme === 'dark' ? 'text-zinc-200' : 'text-zinc-800'}`}>Trường Đại học Xây dựng Hà Nội</h4>
                   <p className="mt-0.5">Khoa Công nghệ Thông tin</p>
-                  <p className="text-[10px] text-zinc-505 mt-0.5">55 Giải Phóng, Hai Bà Trưng, Hà Nội</p>
+                  <p className="text-[10px] text-zinc-505 mt-0.5">300A Nguyễn Tất Thành, Q.4, TP. Hồ Chí Minh</p>
                 </div>
               </div>
 
@@ -118,7 +109,7 @@ export default function LandingContact() {
                 <Mail size={15} className="text-zinc-400 shrink-0 mt-0.5" />
                 <div>
                   <h4 className={`font-bold ${theme === 'dark' ? 'text-zinc-200' : 'text-zinc-800'}`}>Địa chỉ nhận đề xuất</h4>
-                  <p className="mt-0.5">contact@trustlens.edu.vn</p>
+                  <p className="mt-0.5">acalens@gmail.com</p>
                 </div>
               </div>
             </div>

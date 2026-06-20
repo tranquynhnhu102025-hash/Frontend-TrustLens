@@ -6,24 +6,27 @@ import authService from '../../services/authService';
 export default function LoginScreen() {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState('quynhnhu@nttu.edu.vn');
-  const [password, setPassword] = useState('123456');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [shouldShake, setShouldShake] = useState(false);
 
   const handleLogin = async () => {
+    if (!email.trim() || !password) {
+      setError('Vui lòng nhập email và mật khẩu.');
+      setShouldShake(true);
+      setTimeout(() => setShouldShake(false), 400);
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
       const response = await authService.login(email, password);
       if (response.access_token) {
-        // Save user to localStorage
-        if (response.user) {
-          localStorage.setItem('user', JSON.stringify(response.user));
-        }
         navigate('/dashboard');
       }
     } catch (err: any) {
@@ -57,7 +60,7 @@ export default function LoginScreen() {
                 type="email" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="VD: quynhnhu@nttu.edu.vn"
+                placeholder="Nhập email nội bộ"
                 className="w-full pl-10 pr-3.5 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 focus:outline-none focus:bg-white dark:focus:bg-zinc-950 focus:border-zinc-400 dark:focus:border-zinc-700 font-medium text-zinc-850 dark:text-zinc-200 text-xs transition-colors" 
               />
             </div>
@@ -91,7 +94,7 @@ export default function LoginScreen() {
 
           <button 
             onClick={handleLogin}
-            disabled={loading}
+            disabled={loading || !email.trim() || !password}
             className="w-full flex justify-center items-center gap-1.5 bg-zinc-900 hover:bg-zinc-850 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-black font-bold py-2.5 rounded-lg transition-all duration-200 active:scale-98 text-xs disabled:opacity-50"
           >
             {loading ? <Loader2 size={14} className="animate-spin" /> : 'Đăng nhập hệ thống'}

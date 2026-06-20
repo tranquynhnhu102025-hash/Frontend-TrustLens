@@ -88,6 +88,31 @@ export const authService = {
     return storeAuthUser(response.data);
   },
 
+  updateMe: async (payload: {
+    full_name?: string;
+    email?: string;
+    university?: string;
+    faculty?: string;
+    major?: string;
+    notification_enabled?: boolean;
+  }) => {
+    if (import.meta.env.VITE_USE_MOCK === 'true') {
+      return storeAuthUser({
+        ...MOCK_USER,
+        full_name: payload.full_name || MOCK_USER.full_name,
+        email: payload.email || MOCK_USER.email,
+        university: payload.university || 'Trường Đại học Nguyễn Tất Thành',
+        faculty: payload.faculty || 'Khoa Công nghệ Thông tin',
+        major: payload.major || 'Kỹ thuật Phần mềm',
+        notification_enabled: payload.notification_enabled ?? true,
+        permissions: getPermissionsForRole(MOCK_USER.role),
+      } as any);
+    }
+
+    const response = await axiosClient.patch('/users/me', payload);
+    return storeAuthUser(response.data);
+  },
+
   logout: () => {
     clearAuthSession();
   }

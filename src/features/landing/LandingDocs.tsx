@@ -3,6 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import { 
   BookOpen, HelpCircle, ChevronDown, ChevronUp 
 } from 'lucide-react';
+import { TRUST_SCORE_VERSION } from '../../config/trustScoreConfig';
 
 export default function LandingDocs() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -11,7 +12,7 @@ export default function LandingDocs() {
   const faqs = [
     {
       q: "Điểm số Trust Score được tính toán như thế nào?",
-      a: "Trust Score (Điểm tin cậy học thuật) được tổng hợp từ ma trận 5 tiêu chí với các trọng số tiêu chuẩn: Độ xác thực (40%), Độ cập nhật (30%), và Định dạng trích dẫn (30%). Điểm số trên 80 được coi là Đạt chuẩn (Sạch), từ 50-79 là mức Cảnh báo cần rà soát, và dưới 50 là Rủi ro cao."
+      a: `Trust Score ${TRUST_SCORE_VERSION} được tổng hợp từ 7 cấu phần C1-C7: độ đầy đủ metadata, xác minh metadata, uy tín nguồn, độ phù hợp, tính cập nhật, chuẩn trích dẫn và rủi ro trùng lặp/tập trung. Penalty được tính riêng để tránh phạt hai lần.`
     },
     {
       q: "Tại sao tài liệu tham khảo của tôi bị cảnh báo độ cập nhật (Outdated)?",

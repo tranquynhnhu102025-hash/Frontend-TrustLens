@@ -3,10 +3,12 @@ import axiosClient from './axiosClient';
 // Định nghĩa kiểu dữ liệu cho chuẩn TypeScript
 export interface Course {
   id: string;
+  class_uuid?: string;
   name: string;
   students: number;
   date: string;
   assignment_id?: string;
+  term_name?: string | null;
 }
 
 import { MOCK_CLASSES, MOCK_SUBMISSIONS, Submission } from '../mocks/dummyData';
@@ -54,10 +56,12 @@ export const classService = {
 
           coursesList.push({
             id: item.class_code,
+            class_uuid: item.id,
             name: item.name,
             students: 0,
             date: new Date(item.created_at).toLocaleDateString('vi-VN'),
-            assignment_id: assignmentId || item.id
+            assignment_id: assignmentId || item.id,
+            term_name: item.term_name || null,
           });
         }
       }
@@ -71,6 +75,7 @@ export const classService = {
         setTimeout(() => {
           const newClass = {
             id: newCode.toUpperCase(),
+            class_uuid: newCode.toUpperCase(),
             name: newName,
             students: 0,
             date: '31/12/2026',
@@ -118,12 +123,41 @@ export const classService = {
 
       return {
         id: classRes.data.class_code,
+        class_uuid: classRes.data.id,
         name: classRes.data.name,
         students: 0,
         date: new Date(classRes.data.created_at).toLocaleDateString('vi-VN'),
-        assignment_id: assignmentId
+        assignment_id: assignmentId,
+        term_name: classRes.data.term_name || null,
       };
     }
+  },
+
+  updateClass: async (classId: string, payload: { class_code?: string; name?: string; term_name?: string | null }): Promise<Course> => {
+    if (import.meta.env.VITE_USE_MOCK === 'true') {
+      const idx = MOCK_CLASSES.findIndex((cls) => cls.id === classId || cls.class_uuid === classId);
+      if (idx === -1) {
+        throw new Error('Không tìm thấy lớp học phần.');
+      }
+      MOCK_CLASSES[idx] = {
+        ...MOCK_CLASSES[idx],
+        id: payload.class_code?.toUpperCase() || MOCK_CLASSES[idx].id,
+        name: payload.name || MOCK_CLASSES[idx].name,
+        term_name: payload.term_name ?? MOCK_CLASSES[idx].term_name,
+      };
+      return MOCK_CLASSES[idx];
+    }
+
+    const response = await axiosClient.put(`/classes/${classId}`, payload);
+    return {
+      id: response.data.class_code,
+      class_uuid: response.data.id,
+      name: response.data.name,
+      students: 0,
+      date: new Date(response.data.created_at).toLocaleDateString('vi-VN'),
+      assignment_id: response.data.id,
+      term_name: response.data.term_name || null,
+    };
   },
 
   getSubmissionsByClass: async (classId: string): Promise<Submission[]> => {
