@@ -62,6 +62,12 @@ export default function RegisterScreen() {
           shouldShake ? 'animate-shake border-red-300 dark:border-red-900' : ''
         }`}
       >
+        <Link to='/' className="flex flex-col items-center mb-8">
+          <img src="/public/Symbol/TrustLens_Symbol_Gray.svg" alt="trustlens-logo" className='h-15, w-15' />
+          <h2 className="text-xl font-bold tracking-widest text-zinc-900 dark:text-white">TRUSTLENS</h2>
+          <p className="text-center text-zinc-450 dark:text-zinc-550 text-[10px] uppercase tracking-wider font-semibold mt-1">Academic Verification</p>
+        </Link>
+
         <h2 className="text-xl font-bold tracking-widest text-center text-zinc-900 dark:text-white mb-6 uppercase">Đăng ký tài khoản</h2>
         
         {error && (

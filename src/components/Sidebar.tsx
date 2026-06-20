@@ -4,6 +4,14 @@ import {
   LayoutDashboard, BookOpen, Shield, Settings, LogOut, UploadCloud,
   ChevronLeft, ChevronRight 
 } from 'lucide-react';
+import {
+  AuthUser,
+  PERMISSIONS,
+  ROLE_GROUPS,
+  canAccess,
+  clearAuthSession,
+  getStoredAuthUser,
+} from '../auth/permissions';
 import authService from '../services/authService';
 
 interface SidebarProps {
@@ -14,7 +22,7 @@ interface SidebarProps {
 export default function Sidebar({ isCollapsed = false, onToggle }: SidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<AuthUser | null>(() => getStoredAuthUser());
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -34,12 +42,49 @@ export default function Sidebar({ isCollapsed = false, onToggle }: SidebarProps)
   }, []);
 
   const menuItems = [
-    { path: '/dashboard', name: 'Tổng quan', icon: LayoutDashboard },
-    { path: '/classes', name: 'Quản lý Lớp học', icon: BookOpen },
-    { path: '/upload', name: 'Tải lên', icon: UploadCloud },
-    { path: '/admin', name: 'Quản trị hệ thống', icon: Shield },
-    { path: '/settings', name: 'Cài đặt', icon: Settings },
+    {
+      path: '/dashboard',
+      name: 'Tổng quan',
+      icon: LayoutDashboard,
+      roles: ROLE_GROUPS.ACADEMIC_STAFF,
+      permissions: [PERMISSIONS.REPORT_VIEW_OWN_SCOPE],
+    },
+    {
+      path: '/classes',
+      name: 'Quản lý Lớp học',
+      icon: BookOpen,
+      roles: ROLE_GROUPS.ACADEMIC_STAFF,
+      permissions: [PERMISSIONS.COURSE_MANAGE],
+    },
+    {
+      path: '/upload',
+      name: 'Tải lên',
+      icon: UploadCloud,
+      roles: ROLE_GROUPS.ACADEMIC_STAFF,
+      permissions: [PERMISSIONS.SUBMISSION_UPLOAD],
+    },
+    {
+      path: '/admin',
+      name: 'Quản trị hệ thống',
+      icon: Shield,
+      roles: ROLE_GROUPS.ADMIN_ONLY,
+      permissions: [
+        PERMISSIONS.ADMIN_USER_MANAGE,
+        PERMISSIONS.ADMIN_SCORING_CONFIG,
+        PERMISSIONS.ADMIN_AUDIT_LOG,
+        PERMISSIONS.ADMIN_METADATA_PROVIDER,
+      ],
+    },
+    {
+      path: '/settings',
+      name: 'Cài đặt',
+      icon: Settings,
+      roles: ROLE_GROUPS.AUTHENTICATED,
+      permissions: [],
+    },
   ];
+
+  const visibleMenuItems = menuItems.filter((item) => canAccess(user, item.permissions, item.roles));
 
   return (
     <div className="w-full bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-900 text-zinc-900 dark:text-zinc-100 flex flex-col h-full relative">
@@ -71,7 +116,7 @@ export default function Sidebar({ isCollapsed = false, onToggle }: SidebarProps)
           <p className="text-[8px] font-bold text-zinc-400 dark:text-zinc-550 mb-3 px-2 uppercase tracking-wider">Danh mục</p>
         )}
         <nav className="space-y-1.5">
-          {menuItems.map((item) => {
+          {visibleMenuItems.map((item) => {
             const isActive = location.pathname.includes(item.path);
             return (
               <button
@@ -106,7 +151,7 @@ export default function Sidebar({ isCollapsed = false, onToggle }: SidebarProps)
             <div className="text-left overflow-hidden">
               <p className="font-bold text-xs text-zinc-800 dark:text-zinc-200 truncate">{user ? user.full_name : 'Giảng viên'}</p>
               <p className="text-[9px] font-medium text-zinc-450 dark:text-zinc-500 mt-0.5">
-                {user ? (user.role === 'LECTURER' || user.role === 'lecturer' ? 'Giảng viên' : 'Quản trị viên') : 'Giảng viên phụ trách'}
+                {user ? (String(user.role).toUpperCase() === 'ADMIN' ? 'Quản trị viên' : String(user.role).toUpperCase() === 'STUDENT' ? 'Sinh viên' : 'Giảng viên') : 'Giảng viên phụ trách'}
               </p>
             </div>
           )}
@@ -114,9 +159,7 @@ export default function Sidebar({ isCollapsed = false, onToggle }: SidebarProps)
         
         <button 
           onClick={() => {
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
-            localStorage.removeItem('user');
+            clearAuthSession();
             navigate('/login');
           }}
           title={isCollapsed ? "Đăng xuất" : undefined}

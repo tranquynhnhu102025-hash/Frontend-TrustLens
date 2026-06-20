@@ -1,5 +1,6 @@
 import axiosClient from './axiosClient';
 import { MOCK_USER } from '../mocks/dummyData';
+import { clearAuthSession, getPermissionsForRole, storeAuthUser } from '../auth/permissions';
 
 
 export interface RegisterData {
@@ -14,17 +15,21 @@ export const authService = {
     if (import.meta.env.VITE_USE_MOCK === 'true') {
       return new Promise<any>((resolve) => {
         setTimeout(() => {
+          const role = email.toLowerCase().includes('admin') ? 'admin' : 'lecturer';
           const data = {
             access_token: 'mock-access-token',
             refresh_token: 'mock-refresh-token',
             user: {
               ...MOCK_USER,
               full_name: email === 'lecturer@trustlens.vn' ? 'Demo Lecturer' : MOCK_USER.full_name,
-              email: email
+              email,
+              role,
+              permissions: getPermissionsForRole(role),
             }
           };
           localStorage.setItem('access_token', data.access_token);
           localStorage.setItem('refresh_token', data.refresh_token);
+          storeAuthUser(data.user);
           resolve(data);
         }, 500);
       });
@@ -44,6 +49,10 @@ export const authService = {
       if (data.refresh_token) {
         localStorage.setItem('refresh_token', data.refresh_token);
       }
+    }
+
+    if (data.user) {
+      storeAuthUser(data.user);
     }
 
     return data;
@@ -67,18 +76,20 @@ export const authService = {
     if (import.meta.env.VITE_USE_MOCK === 'true') {
       return new Promise<any>((resolve) => {
         setTimeout(() => {
-          resolve(MOCK_USER);
+          resolve(storeAuthUser({
+            ...MOCK_USER,
+            permissions: getPermissionsForRole(MOCK_USER.role),
+          }));
         }, 300);
       });
     }
 
     const response = await axiosClient.get('/users/me');
-    return response.data;
+    return storeAuthUser(response.data);
   },
 
   logout: () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+    clearAuthSession();
   }
 };
 

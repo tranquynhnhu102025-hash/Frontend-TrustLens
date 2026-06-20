@@ -24,7 +24,7 @@ export default function LoginScreen() {
         if (response.user) {
           localStorage.setItem('user', JSON.stringify(response.user));
         }
-        navigate('/classes');
+        navigate('/dashboard');
       }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại!');
@@ -43,9 +43,10 @@ export default function LoginScreen() {
         }`}
       >
         <Link to='/' className="flex flex-col items-center mb-8">
+          <img src="/public/Symbol/TrustLens_Symbol_Gray.svg" alt="trustlens-logo" className='h-15, w-15' />
           <h2 className="text-xl font-bold tracking-widest text-zinc-900 dark:text-white">TRUSTLENS</h2>
           <p className="text-center text-zinc-450 dark:text-zinc-550 text-[10px] uppercase tracking-wider font-semibold mt-1">Academic Verification</p>
-        </Link>       
+        </Link>
         
         <div className="space-y-4">
           <div>

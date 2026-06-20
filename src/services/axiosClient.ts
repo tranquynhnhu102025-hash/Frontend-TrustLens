@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { clearAuthSession } from '../auth/permissions';
 
 // Tạo trạm xe gọi API
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
@@ -32,7 +33,7 @@ axiosClient.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refresh_token');
         if (!refreshToken) {
-          localStorage.removeItem('access_token');
+          clearAuthSession();
           window.location.href = '/login';
           return Promise.reject(error);
         }
@@ -49,8 +50,7 @@ axiosClient.interceptors.response.use(
 
       } catch (refreshError) {
 
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
+        clearAuthSession();
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }

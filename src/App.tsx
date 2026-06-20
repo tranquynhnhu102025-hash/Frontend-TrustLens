@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { PERMISSIONS, ROLE_GROUPS } from './auth/permissions';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginScreen from './features/auth/LoginScreen';
 import RegisterScreen from './features/auth/RegisterScreen';
@@ -57,18 +58,59 @@ export default function App() {
         <Route path="/register" element={<RegisterScreen />} />
 
         {/* 3. CÁC TRANG V.I.P (Bắt buộc có Menu bên trái sau khi Đăng nhập) */}
-        <Route element={<ProtectedRoute />}>
+        <Route element={<ProtectedRoute requiredRoles={ROLE_GROUPS.AUTHENTICATED} />}>
           <Route element={<Layout />}>
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/classes" element={<ClassesScreen />} />
-            <Route path="/class/:id" element={<ClassDetailScreen />} />
-            <Route path="/upload" element={<UploadScreen />} />
+            <Route
+              element={
+                <ProtectedRoute
+                  requiredRoles={ROLE_GROUPS.ACADEMIC_STAFF}
+                  requiredPermissions={[PERMISSIONS.REPORT_VIEW_OWN_SCOPE]}
+                />
+              }
+            >
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/report" element={<ReportScreen />} />
+              <Route path="/report/:id" element={<ReportScreen />} />
+              <Route path="/analyzing/:jobId" element={<AnalyzingScreen />} />
+            </Route>
+            <Route
+              element={
+                <ProtectedRoute
+                  requiredRoles={ROLE_GROUPS.ACADEMIC_STAFF}
+                  requiredPermissions={[PERMISSIONS.COURSE_MANAGE]}
+                />
+              }
+            >
+              <Route path="/classes" element={<ClassesScreen />} />
+              <Route path="/class/:id" element={<ClassDetailScreen />} />
+            </Route>
+            <Route
+              element={
+                <ProtectedRoute
+                  requiredRoles={ROLE_GROUPS.ACADEMIC_STAFF}
+                  requiredPermissions={[PERMISSIONS.SUBMISSION_UPLOAD]}
+                />
+              }
+            >
+              <Route path="/upload" element={<UploadScreen />} />
+            </Route>
+            <Route
+              element={
+                <ProtectedRoute
+                  requiredRoles={ROLE_GROUPS.ADMIN_ONLY}
+                  requiredPermissions={[
+                    PERMISSIONS.ADMIN_USER_MANAGE,
+                    PERMISSIONS.ADMIN_SCORING_CONFIG,
+                    PERMISSIONS.ADMIN_AUDIT_LOG,
+                    PERMISSIONS.ADMIN_METADATA_PROVIDER,
+                  ]}
+                />
+              }
+            >
+              <Route path="/admin" element={<AdminScreen />} />
+            </Route>
             <Route path="/settings" element={<SettingsScreen />} />
-            <Route path="/admin" element={<AdminScreen />} />
             <Route path="/profile" element={<ProfileScreen />} />
-            <Route path="/report" element={<ReportScreen />} />
-            <Route path="/report/:id" element={<ReportScreen />} />
-            <Route path="/analyzing/:jobId" element={<AnalyzingScreen />} />
           </Route>
         </Route>
         

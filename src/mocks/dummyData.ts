@@ -243,7 +243,16 @@ export const MOCK_USER = {
   id: 'mock-user-id',
   full_name: 'Trần Quỳnh Như',
   email: 'quynhnhu@nttu.edu.vn',
-  role: 'lecturer'
+  role: 'lecturer',
+  permissions: [
+    'auth.login',
+    'course.manage',
+    'assignment.manage',
+    'submission.upload',
+    'job.analyze',
+    'report.view_own_scope',
+    'report.export',
+  ],
 };
 
 // Kiểu dữ liệu bài nộp (file đã upload)
