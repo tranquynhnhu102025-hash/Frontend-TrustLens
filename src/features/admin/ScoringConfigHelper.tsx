@@ -40,8 +40,8 @@ export default function ScoringConfigHelper({
             Helper đọc cấu hình điểm
           </h3>
           <p className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-450 mt-1 leading-relaxed">
-            Phiên bản {TRUST_SCORE_VERSION}. Tổng trọng số phải bằng 100%. Trust Score v1.1 dùng C1-C7;
-            penalty và label cap được tính riêng, không còn C8.
+            Phiên bản {TRUST_SCORE_VERSION}. Tổng trọng số phải bằng 100%. Trust Score v1.2 dùng C1-C7;
+            penalty, warning và label cap dùng raw ratio/evidence nên không bị thay đổi sai khi weight thay đổi.
           </p>
         </div>
       </div>

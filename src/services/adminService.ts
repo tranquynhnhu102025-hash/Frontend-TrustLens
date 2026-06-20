@@ -22,11 +22,50 @@ export interface MetadataProviderInfo {
   last_failure: string;
 }
 
+export interface AiHealthInfo {
+  primary_provider: string;
+  primary_status: string;
+  primary_error_code?: string | null;
+  fallback_provider: string;
+  fallback_status: string;
+  fallback_error_code?: string | null;
+  model_id: string;
+  prompt_version: string;
+}
+
+export interface RelevanceDiagnoseRequest {
+  report_text: string;
+  reference_title: string;
+  reference_abstract?: string;
+  reference_keywords?: string | string[];
+  reference_venue?: string;
+  raw_citation?: string;
+}
+
+export interface RelevanceDiagnoseResult {
+  score: number;
+  max_score: number;
+  confidence: number;
+  reason: string;
+  evidence: Record<string, any>;
+}
+
 const MOCK_PROVIDERS: MetadataProviderInfo[] = [
   { id: '1', name: 'Crossref API', code: 'crossref', base_url: 'https://api.crossref.org', enabled: true, priority: 1, status: 'healthy', latency: 420, fallback_count: 8, last_failure: 'Không có' },
   { id: '2', name: 'OpenAlex API', code: 'openalex', base_url: 'https://api.openalex.org', enabled: true, priority: 2, status: 'healthy', latency: 680, fallback_count: 14, last_failure: '2026-06-19T01:10:02Z - Read timeout' },
   { id: '3', name: 'Semantic Scholar API', code: 'semantic_scholar', base_url: 'https://api.semanticscholar.org/v1', enabled: false, priority: 3, status: 'disabled', latency: 0, fallback_count: 0, last_failure: 'Không có' }
 ];
+
+const MOCK_AI_HEALTH: AiHealthInfo = {
+  primary_provider: 'gemini',
+  primary_status: 'unavailable',
+  primary_error_code: 'MISSING_API_KEY',
+  fallback_provider: 'local',
+  fallback_status: 'unavailable',
+  fallback_error_code: 'DEPENDENCY_MISSING',
+  model_id: 'gemini-embedding-2',
+  prompt_version: 'c4-v2'
+};
 
 export interface User {
   id: string;
@@ -83,6 +122,45 @@ export const adminService = {
       throw new Error("Không tìm thấy nhà cung cấp.");
     }
     const response = await axiosClient.put(`/admin/metadata-providers/${id}`, payload);
+    return response.data;
+  },
+
+  getAiHealth: async (): Promise<AiHealthInfo> => {
+    if (import.meta.env.VITE_USE_MOCK === 'true') {
+      return new Promise((resolve) => {
+        setTimeout(() => resolve({ ...MOCK_AI_HEALTH }), 350);
+      });
+    }
+    const response = await axiosClient.get('/admin/system/ai-health');
+    return response.data;
+  },
+
+  diagnoseRelevance: async (payload: RelevanceDiagnoseRequest): Promise<RelevanceDiagnoseResult> => {
+    if (import.meta.env.VITE_USE_MOCK === 'true') {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve({
+            score: 14,
+            max_score: 20,
+            confidence: 0.41,
+            reason: 'Mock lexical fallback relevance diagnosis.',
+            evidence: {
+              provider: 'lexical',
+              model_id: 'tfidf-char-ngram',
+              prompt_version: 'c4-v2',
+              threshold_profile: 'lexical-tfidf-char-ngram-0-c4-v2',
+              raw_relevance: 0.58,
+              calibrated_probability: 0.58,
+              global_similarity: 0.52,
+              local_top_k_mean: 0.61,
+              lexical_similarity: 0.47,
+              fallback_used: true,
+            },
+          });
+        }, 450);
+      });
+    }
+    const response = await axiosClient.post('/admin/relevance/diagnose', payload);
     return response.data;
   },
 

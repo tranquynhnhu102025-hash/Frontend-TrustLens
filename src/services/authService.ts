@@ -1,6 +1,6 @@
 import axiosClient from './axiosClient';
 import { MOCK_USER } from '../mocks/dummyData';
-import { clearAuthSession, getPermissionsForRole, storeAuthUser } from '../auth/permissions';
+import { clearAuthSession, getPermissionsForRole, getStoredAuthUser, storeAuthUser } from '../auth/permissions';
 
 
 export interface RegisterData {
@@ -76,10 +76,13 @@ export const authService = {
     if (import.meta.env.VITE_USE_MOCK === 'true') {
       return new Promise<any>((resolve) => {
         setTimeout(() => {
-          resolve(storeAuthUser({
+          const storedUser = getStoredAuthUser();
+          const fallbackUser = {
             ...MOCK_USER,
             permissions: getPermissionsForRole(MOCK_USER.role),
-          }));
+          };
+
+          resolve(storeAuthUser(storedUser || fallbackUser));
         }, 300);
       });
     }
@@ -97,15 +100,16 @@ export const authService = {
     notification_enabled?: boolean;
   }) => {
     if (import.meta.env.VITE_USE_MOCK === 'true') {
+      const currentUser = getStoredAuthUser() || MOCK_USER;
       return storeAuthUser({
-        ...MOCK_USER,
-        full_name: payload.full_name || MOCK_USER.full_name,
-        email: payload.email || MOCK_USER.email,
-        university: payload.university || 'Trường Đại học Nguyễn Tất Thành',
-        faculty: payload.faculty || 'Khoa Công nghệ Thông tin',
-        major: payload.major || 'Kỹ thuật Phần mềm',
-        notification_enabled: payload.notification_enabled ?? true,
-        permissions: getPermissionsForRole(MOCK_USER.role),
+        ...currentUser,
+        full_name: payload.full_name ?? currentUser.full_name,
+        email: payload.email ?? currentUser.email,
+        university: payload.university ?? (currentUser as any).university ?? 'Trường Đại học Nguyễn Tất Thành',
+        faculty: payload.faculty ?? (currentUser as any).faculty ?? 'Khoa Công nghệ Thông tin',
+        major: payload.major ?? (currentUser as any).major ?? 'Kỹ thuật Phần mềm',
+        notification_enabled: payload.notification_enabled ?? (currentUser as any).notification_enabled ?? true,
+        permissions: getPermissionsForRole(currentUser.role),
       } as any);
     }
 

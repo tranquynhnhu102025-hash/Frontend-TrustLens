@@ -5,6 +5,7 @@ export interface Course {
   name: string;
   students: number;
   date: string;
+  due_date?: string | null;
   assignment_id?: string;
   term_name?: string | null;
 }
@@ -28,7 +29,7 @@ export const MOCK_REPORT = {
   report_id: "mock-report-uuid-1",
   submission_id: "mock-sub-uuid-1",
   job_id: "mock-job-uuid-1",
-  scoring_config_version: "trust-score-v1.1",
+  scoring_config_version: "trust-score-v1.2",
   report_trust_score: 78,
   confidence_score: 0.82,
   overall_label: "needs_review",

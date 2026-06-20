@@ -63,6 +63,16 @@ export default function ReportScreen() {
       `${summary.high_warnings || 0} cảnh báo mức cao.`;
   };
 
+  const getCitationComponent = (cite: any, key: string) => {
+    return cite?.components?.[key] || cite?.components?.[`${key}_relevance`] || null;
+  };
+
+  const formatEvidence = (value: any, fallback: string) => {
+    if (!value) return fallback;
+    if (typeof value === 'string') return value;
+    return JSON.stringify(value, null, 2);
+  };
+
   const buildExportFileName = (studentName: string | undefined, format: string) => {
     const safeName = (studentName || 'Sinh_vien')
       .normalize('NFD')
@@ -99,9 +109,13 @@ export default function ReportScreen() {
           return {
             score: comp.score ?? 0,
             max: comp.max_score ?? configuredMax,
+            raw_score: comp.raw_score,
+            raw_max_score: comp.raw_max_score,
+            ratio: comp.ratio,
             reason_code: comp.reason_code || criterion.code,
             explanation: comp.reason || comp.explanation || criterion.purpose,
-            evidence: comp.evidence ? JSON.stringify(comp.evidence, null, 2) : criterion.evidence,
+            evidence: formatEvidence(comp.evidence, criterion.evidence),
+            evidenceObject: comp.evidence || null,
             recommendation: comp.recommendation || criterion.recommendation
           };
         }
@@ -111,6 +125,7 @@ export default function ReportScreen() {
           reason_code: criterion.code,
           explanation: `Điểm trung bình cấu phần ${criterion.code} theo ${trustScoreVersion}. ${criterion.purpose}`,
           evidence: `Giá trị thô: ${comp}`,
+          evidenceObject: null,
           recommendation: criterion.recommendation
         };
       };
@@ -142,8 +157,17 @@ export default function ReportScreen() {
         criteriaBreakdown,
         citations: (data.citations || []).map((cite: any, index: number) => {
           const metadataStatus = String(cite.metadata?.status || cite.metadata?.match_status || 'UNKNOWN').toUpperCase();
+          const c2Evidence = getCitationComponent(cite, 'c2')?.evidence || cite.metadata?.evidence || {};
+          const c3Evidence = getCitationComponent(cite, 'c3')?.evidence || {};
+          const c4Component = getCitationComponent(cite, 'c4');
+          const c4Evidence = c4Component?.evidence || {};
+          const warningCodes = new Set((cite.warnings || []).map((w: any) => w.code));
           let status = 'pass';
-          if (['NOT_FOUND', 'INVALID_IDENTIFIER'].includes(metadataStatus) || cite.warnings?.some((w: any) => w.severity === 'critical' || w.severity === 'high')) {
+          if (
+            ['NOT_FOUND', 'INVALID_IDENTIFIER', 'IDENTIFIER_METADATA_CONFLICT'].includes(metadataStatus) ||
+            warningCodes.has('RETRACTED_SOURCE') ||
+            cite.warnings?.some((w: any) => w.severity === 'critical' || w.severity === 'high')
+          ) {
             status = 'fail';
           } else if (!['VERIFIED', 'PARTIAL_MATCH'].includes(metadataStatus) || (cite.warnings && cite.warnings.length > 0)) {
             status = 'warning';
@@ -160,6 +184,10 @@ export default function ReportScreen() {
             issues = 'Thông tin đối sánh không rõ ràng (nhiều kết quả trùng khớp).';
           }
 
+          if (metadataStatus === 'IDENTIFIER_METADATA_CONFLICT') {
+            issues = 'DOI exists but title/author/year conflicts with provider metadata.';
+          }
+
           return {
             id: cite.citation_id ?? cite.id ?? index + 1,
             title: cite.normalized_fields?.title || cite.raw_text || 'Tài liệu tham khảo',
@@ -170,6 +198,14 @@ export default function ReportScreen() {
             source: cite.normalized_fields?.venue || 'N/A',
             status,
             issues,
+            c2Evidence,
+            c3Evidence,
+            c4Component,
+            c4Evidence,
+            publicationStatus: cite.metadata?.publication_status || c3Evidence.publication_status || 'UNKNOWN',
+            fallbackUsed: Boolean(c4Evidence.fallback_used),
+            relevanceProvider: c4Evidence.provider || 'N/A',
+            relevanceModel: c4Evidence.model_id || c4Evidence.model || 'N/A',
             raw: cite // Lưu đối tượng gốc phục vụ ngăn kéo chi tiết (UI-08)
           };
         })
@@ -342,6 +378,11 @@ export default function ReportScreen() {
   const selectedMetadata = selectedCitation?.raw?.metadata || {};
   const selectedMetadataStatus = String(selectedMetadata.status || selectedMetadata.match_status || 'UNKNOWN').toUpperCase();
   const selectedMetadataConfidence = selectedMetadata.confidence ?? selectedMetadata.match_confidence ?? 0;
+  const selectedC2Evidence = selectedCitation?.c2Evidence || {};
+  const selectedC3Evidence = selectedCitation?.c3Evidence || {};
+  const selectedC4Evidence = selectedCitation?.c4Evidence || {};
+  const selectedTopChunks = Array.isArray(selectedC4Evidence.top_chunks) ? selectedC4Evidence.top_chunks : [];
+  const selectedPublicationStatus = String(selectedCitation?.publicationStatus || selectedC3Evidence.publication_status || 'UNKNOWN').toUpperCase();
   const selectedMetadataStatusLabel: Record<string, string> = {
     VERIFIED: 'Xác minh đầy đủ',
     PARTIAL_MATCH: 'Khớp một phần',
@@ -350,6 +391,7 @@ export default function ReportScreen() {
     PROVIDER_UNAVAILABLE: 'Provider không sẵn sàng',
     URL_ONLY: 'Chỉ xác minh URL',
     INVALID_IDENTIFIER: 'Định danh không hợp lệ',
+    IDENTIFIER_METADATA_CONFLICT: 'DOI match, metadata conflict',
     UNKNOWN: 'Không rõ',
   };
 
@@ -538,6 +580,11 @@ export default function ReportScreen() {
                           <div>
                             <span className="font-bold text-zinc-700 dark:text-zinc-300 text-xs">{item.name}</span>
                             <span className="text-[8px] font-bold text-zinc-400 dark:text-zinc-500 ml-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-850 px-1.5 py-0.5 rounded">Tối đa: {item.max}đ</span>
+                            {item.raw_score !== undefined && (
+                              <span className="text-[8px] font-bold text-zinc-400 dark:text-zinc-500 ml-1.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-850 px-1.5 py-0.5 rounded">
+                                Raw: {item.raw_score}/{item.raw_max_score}
+                              </span>
+                            )}
                           </div>
                           <span className="font-bold text-zinc-800 dark:text-zinc-200 text-xs">{item.score}/{item.max}</span>
                         </div>
@@ -886,6 +933,94 @@ export default function ReportScreen() {
                       ></div>
                     </div>
                   </div>
+                </div>
+              </div>
+
+              {/* Trust Score v1.2 Evidence */}
+              <div className="space-y-3 bg-zinc-550/5 dark:bg-zinc-900/10 border border-zinc-150 dark:border-zinc-900/50 p-4 rounded-xl">
+                <h4 className="text-[9px] font-bold text-zinc-450 dark:text-zinc-500 uppercase tracking-wider mb-2">Trust Score v1.2 evidence</h4>
+
+                <div className="grid grid-cols-2 gap-3 text-[10px]">
+                  <div>
+                    <span className="text-zinc-500 block">DOI consistency</span>
+                    <span className="font-bold text-zinc-800 dark:text-zinc-200">{selectedC2Evidence.bibliographic_consistency || 'N/A'}</span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-500 block">Publication status</span>
+                    <span className={`font-bold ${
+                      selectedPublicationStatus === 'RETRACTED' ? 'text-rose-700 dark:text-rose-400' :
+                      selectedPublicationStatus === 'EXPRESSION_OF_CONCERN' ? 'text-amber-700 dark:text-amber-400' :
+                      'text-zinc-800 dark:text-zinc-200'
+                    }`}>
+                      {selectedPublicationStatus}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-500 block">Title similarity</span>
+                    <span className="font-mono font-bold text-zinc-800 dark:text-zinc-200">{selectedC2Evidence.title_similarity ?? 'N/A'}</span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-500 block">Year difference</span>
+                    <span className="font-mono font-bold text-zinc-800 dark:text-zinc-200">{selectedC2Evidence.year_difference ?? 'N/A'}</span>
+                  </div>
+                </div>
+
+                <div className="border-t border-zinc-150 dark:border-zinc-900 pt-3 space-y-2">
+                  <div className="grid grid-cols-2 gap-3 text-[10px]">
+                    <div>
+                      <span className="text-zinc-500 block">C4 provider</span>
+                      <span className="font-bold text-zinc-800 dark:text-zinc-200">{selectedC4Evidence.provider || 'N/A'}</span>
+                    </div>
+                    <div>
+                      <span className="text-zinc-500 block">Model</span>
+                      <span className="font-mono font-bold text-zinc-800 dark:text-zinc-200">{selectedC4Evidence.model_id || selectedC4Evidence.model || 'N/A'}</span>
+                    </div>
+                    <div>
+                      <span className="text-zinc-500 block">Prompt</span>
+                      <span className="font-mono font-bold text-zinc-800 dark:text-zinc-200">{selectedC4Evidence.prompt_version || 'N/A'}</span>
+                    </div>
+                    <div>
+                      <span className="text-zinc-500 block">Fallback</span>
+                      <span className="font-bold text-zinc-800 dark:text-zinc-200">{selectedC4Evidence.fallback_used ? 'YES' : 'NO'}</span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-[10px]">
+                    <div className="bg-white dark:bg-zinc-950 border border-zinc-150 dark:border-zinc-850 rounded-lg p-2">
+                      <span className="text-zinc-500 block">Raw relevance</span>
+                      <span className="font-mono font-bold">{selectedC4Evidence.raw_relevance ?? 'N/A'}</span>
+                    </div>
+                    <div className="bg-white dark:bg-zinc-950 border border-zinc-150 dark:border-zinc-850 rounded-lg p-2">
+                      <span className="text-zinc-500 block">Calibrated</span>
+                      <span className="font-mono font-bold">{selectedC4Evidence.calibrated_probability ?? 'N/A'}</span>
+                    </div>
+                    <div className="bg-white dark:bg-zinc-950 border border-zinc-150 dark:border-zinc-850 rounded-lg p-2">
+                      <span className="text-zinc-500 block">Global</span>
+                      <span className="font-mono font-bold">{selectedC4Evidence.global_similarity ?? 'N/A'}</span>
+                    </div>
+                    <div className="bg-white dark:bg-zinc-950 border border-zinc-150 dark:border-zinc-850 rounded-lg p-2">
+                      <span className="text-zinc-500 block">Local top-k</span>
+                      <span className="font-mono font-bold">{selectedC4Evidence.local_top_k_mean ?? 'N/A'}</span>
+                    </div>
+                  </div>
+
+                  {selectedC4Evidence.threshold_profile && (
+                    <div className="text-[9px] font-mono text-zinc-500 break-all bg-white dark:bg-zinc-950 border border-zinc-150 dark:border-zinc-850 rounded-lg p-2">
+                      threshold_profile: {selectedC4Evidence.threshold_profile}
+                    </div>
+                  )}
+
+                  {selectedTopChunks.length > 0 && (
+                    <div className="space-y-1">
+                      <span className="text-[9px] font-bold text-zinc-450 uppercase tracking-wider">Top chunks</span>
+                      {selectedTopChunks.map((chunk: any, idx: number) => (
+                        <div key={`${chunk.chunk_id || idx}`} className="flex justify-between gap-3 bg-white dark:bg-zinc-950 border border-zinc-150 dark:border-zinc-850 rounded-lg p-2 text-[10px]">
+                          <span className="font-bold text-zinc-700 dark:text-zinc-300 truncate">{chunk.heading || chunk.chunk_id || `chunk-${idx + 1}`}</span>
+                          <span className="font-mono text-zinc-500 shrink-0">{chunk.similarity ?? 'N/A'}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 

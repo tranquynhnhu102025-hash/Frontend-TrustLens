@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Users, Calendar, ChevronRight, BookOpen, Save, Pencil } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { classService, Course } from '../../services/classService';
+import { classService, Course, toDateInputValue } from '../../services/classService';
 
 export default function ClassesScreen() {
   const navigate = useNavigate();
@@ -13,6 +13,7 @@ export default function ClassesScreen() {
   const [editCode, setEditCode] = useState('');
   const [editName, setEditName] = useState('');
   const [editTerm, setEditTerm] = useState('');
+  const [editDueDate, setEditDueDate] = useState('');
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
 
@@ -57,6 +58,7 @@ export default function ClassesScreen() {
     setEditCode(cls.id || '');
     setEditName(cls.name || '');
     setEditTerm(cls.term_name || '');
+    setEditDueDate(toDateInputValue(cls.due_date));
   };
 
   const handleUpdateClass = async () => {
@@ -67,6 +69,8 @@ export default function ClassesScreen() {
         class_code: editCode.trim().toUpperCase(),
         name: editName.trim(),
         term_name: editTerm.trim() || null,
+        due_date: editDueDate || null,
+        assignment_id: editingClass.assignment_id,
       });
 
       setClasses((prev) => prev.map((cls) => {
@@ -76,7 +80,6 @@ export default function ClassesScreen() {
         return {
           ...cls,
           ...updatedClass,
-          assignment_id: cls.assignment_id,
           students: cls.students,
         };
       }));
@@ -267,6 +270,15 @@ export default function ClassesScreen() {
                   type="text"
                   placeholder="VD: HK2 2025-2026"
                   className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg focus:outline-none focus:bg-white dark:focus:bg-zinc-955 focus:border-zinc-400 dark:focus:border-zinc-700 font-bold text-zinc-850 dark:text-zinc-200 placeholder:font-normal placeholder:text-zinc-400 text-xs"
+                />
+              </div>
+              <div>
+                <label className="block text-[9px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Hạn nộp</label>
+                <input
+                  value={editDueDate}
+                  onChange={(e) => setEditDueDate(e.target.value)}
+                  type="date"
+                  className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg focus:outline-none focus:bg-white dark:focus:bg-zinc-955 focus:border-zinc-400 dark:focus:border-zinc-700 font-bold text-zinc-850 dark:text-zinc-200 text-xs"
                 />
               </div>
             </div>

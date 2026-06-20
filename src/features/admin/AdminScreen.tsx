@@ -12,7 +12,7 @@ import ScoringConfigHelper, {
   WeightMap,
 } from './ScoringConfigHelper';
 import VisitorRoleHelper from './VisitorRoleHelper';
-import adminService, { AuditLog, MetadataProviderInfo, User } from '../../services/adminService';
+import adminService, { AiHealthInfo, AuditLog, MetadataProviderInfo, RelevanceDiagnoseResult, User } from '../../services/adminService';
 import { TRUST_SCORE_THRESHOLDS, TRUST_SCORE_VERSION } from '../../config/trustScoreConfig';
 
 export default function AdminScreen() {
@@ -23,9 +23,18 @@ export default function AdminScreen() {
   const [error, setError] = useState('');
 
   // States cho P1 Provider Status UI
-  const [selectedSubSection, setSelectedSubSection] = useState<'dashboard' | 'providers' | 'scoring' | 'users'>('dashboard');
+  const [selectedSubSection, setSelectedSubSection] = useState<'dashboard' | 'providers' | 'scoring' | 'users' | 'ai'>('dashboard');
   const [providers, setProviders] = useState<MetadataProviderInfo[]>([]);
   const [loadingProviders, setLoadingProviders] = useState(false);
+  const [aiHealth, setAiHealth] = useState<AiHealthInfo | null>(null);
+  const [loadingAiHealth, setLoadingAiHealth] = useState(false);
+  const [diagnoseInput, setDiagnoseInput] = useState({
+    report_text: 'Bao cao xay dung he thong phat hien gian lan trong giao dich truc tuyen.',
+    reference_title: 'Fraud detection in online transactions',
+    reference_abstract: 'This study evaluates anomaly detection models for suspicious payment behavior.'
+  });
+  const [diagnoseResult, setDiagnoseResult] = useState<RelevanceDiagnoseResult | null>(null);
+  const [diagnosing, setDiagnosing] = useState(false);
 
   // States cho Quản lý người dùng
   const [users, setUsers] = useState<User[]>([]);
@@ -207,6 +216,35 @@ export default function AdminScreen() {
     fetchProviders();
   };
 
+  const fetchAiHealth = async () => {
+    setLoadingAiHealth(true);
+    try {
+      const data = await adminService.getAiHealth();
+      setAiHealth(data);
+    } catch (err) {
+      console.error("Lỗi khi kiểm tra AI health:", err);
+    } finally {
+      setLoadingAiHealth(false);
+    }
+  };
+
+  const handleToggleAiSection = () => {
+    setSelectedSubSection('ai');
+    fetchAiHealth();
+  };
+
+  const handleDiagnoseRelevance = async () => {
+    setDiagnosing(true);
+    try {
+      const result = await adminService.diagnoseRelevance(diagnoseInput);
+      setDiagnoseResult(result);
+    } catch (err: any) {
+      alert("Khong the diagnose relevance: " + (err.response?.data?.message || err.message));
+    } finally {
+      setDiagnosing(false);
+    }
+  };
+
   const handleToggleProviderEnabled = async (provId: string, currentEnabled: boolean) => {
     try {
       const updated = await adminService.updateProvider(provId, { enabled: !currentEnabled });
@@ -228,6 +266,139 @@ export default function AdminScreen() {
   };
 
   // NẾU ĐANG XEM DANH SÁCH BỘ DỮ LIỆU ĐỐI CHIẾU (METADATA PROVIDERS)
+  if (selectedSubSection === 'ai') {
+    const healthTone = (status?: string) => status === 'available'
+      ? 'bg-green-50/50 dark:bg-green-950/20 text-green-700 border-green-150'
+      : 'bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 border-amber-150';
+
+    return (
+      <div className="w-full animate-fade-in max-w-5xl mx-auto mt-4 space-y-6 px-2 sm:px-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-150 dark:border-zinc-900 pb-5">
+          <div className="space-y-1">
+            <button
+              onClick={() => setSelectedSubSection('dashboard')}
+              className="flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
+            >
+              <ChevronLeft size={14} /> Tro ve Dashboard quan tri
+            </button>
+            <h2 className="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2 mt-2">
+              <Activity className="text-zinc-500" size={20} /> AI relevance v1.2
+            </h2>
+            <p className="text-zinc-550 dark:text-zinc-500 text-xs font-semibold">
+              Kiem tra embedding provider va diagnose C4 bang sample da sanitize. Request khong luu noi dung bai nop.
+            </p>
+          </div>
+          <button
+            onClick={fetchAiHealth}
+            disabled={loadingAiHealth}
+            className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-750 dark:text-zinc-300 font-bold text-xs px-4 py-2.5 rounded-xl transition-colors flex items-center gap-1.5"
+          >
+            {loadingAiHealth ? <Loader2 size={13} className="animate-spin" /> : <Activity size={13} />}
+            Refresh health
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[
+            {
+              label: 'Primary provider',
+              provider: aiHealth?.primary_provider || 'N/A',
+              status: aiHealth?.primary_status || 'unknown',
+              error: aiHealth?.primary_error_code,
+            },
+            {
+              label: 'Fallback provider',
+              provider: aiHealth?.fallback_provider || 'N/A',
+              status: aiHealth?.fallback_status || 'unknown',
+              error: aiHealth?.fallback_error_code,
+            },
+          ].map((item) => (
+            <div key={item.label} className="bg-white dark:bg-zinc-950 p-5 rounded-xl border border-zinc-200 dark:border-zinc-900 shadow-sm">
+              <div className="flex justify-between items-start gap-3">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-450">{item.label}</p>
+                  <h3 className="text-sm font-bold text-zinc-850 dark:text-zinc-200 mt-1">{item.provider}</h3>
+                </div>
+                <span className={`text-[9px] font-bold px-2 py-0.5 rounded border uppercase ${healthTone(item.status)}`}>
+                  {item.status}
+                </span>
+              </div>
+              <div className="mt-4 grid grid-cols-1 gap-2 text-[10px] font-semibold text-zinc-500">
+                <div>Model: <span className="font-mono text-zinc-800 dark:text-zinc-200">{aiHealth?.model_id || 'N/A'}</span></div>
+                <div>Prompt: <span className="font-mono text-zinc-800 dark:text-zinc-200">{aiHealth?.prompt_version || 'N/A'}</span></div>
+                <div>Error: <span className="font-mono text-zinc-800 dark:text-zinc-200">{item.error || 'None'}</span></div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div className="bg-white dark:bg-zinc-950 p-5 rounded-xl border border-zinc-200 dark:border-zinc-900 shadow-sm space-y-4">
+            <h3 className="text-xs font-bold text-zinc-850 dark:text-zinc-200 uppercase tracking-wider">Diagnose relevance</h3>
+            <div className="space-y-3">
+              <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Report text</label>
+              <textarea
+                value={diagnoseInput.report_text}
+                onChange={(e) => setDiagnoseInput(prev => ({ ...prev, report_text: e.target.value }))}
+                className="w-full h-28 px-3 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-850 rounded-lg text-xs font-semibold focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-700 text-zinc-800 dark:text-zinc-200"
+              />
+              <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Reference title</label>
+              <input
+                value={diagnoseInput.reference_title}
+                onChange={(e) => setDiagnoseInput(prev => ({ ...prev, reference_title: e.target.value }))}
+                className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-850 rounded-lg text-xs font-semibold focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-700 text-zinc-800 dark:text-zinc-200"
+              />
+              <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Reference abstract</label>
+              <textarea
+                value={diagnoseInput.reference_abstract}
+                onChange={(e) => setDiagnoseInput(prev => ({ ...prev, reference_abstract: e.target.value }))}
+                className="w-full h-24 px-3 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-850 rounded-lg text-xs font-semibold focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-700 text-zinc-800 dark:text-zinc-200"
+              />
+              <button
+                onClick={handleDiagnoseRelevance}
+                disabled={diagnosing || !diagnoseInput.report_text || !diagnoseInput.reference_title}
+                className="w-full bg-zinc-900 hover:bg-zinc-850 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-black font-bold text-xs px-4 py-2.5 rounded-xl transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
+              >
+                {diagnosing ? <Loader2 size={13} className="animate-spin" /> : <Search size={13} />}
+                Run diagnose
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-zinc-950 p-5 rounded-xl border border-zinc-200 dark:border-zinc-900 shadow-sm space-y-4">
+            <h3 className="text-xs font-bold text-zinc-850 dark:text-zinc-200 uppercase tracking-wider">Result</h3>
+            {diagnoseResult ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div className="bg-zinc-50 dark:bg-zinc-900 rounded-lg border border-zinc-150 dark:border-zinc-850 p-3">
+                    <p className="text-[9px] font-bold text-zinc-450 uppercase">Score</p>
+                    <p className="text-lg font-black text-zinc-850 dark:text-white">{diagnoseResult.score}/{diagnoseResult.max_score}</p>
+                  </div>
+                  <div className="bg-zinc-50 dark:bg-zinc-900 rounded-lg border border-zinc-150 dark:border-zinc-850 p-3">
+                    <p className="text-[9px] font-bold text-zinc-450 uppercase">Confidence</p>
+                    <p className="text-lg font-black text-zinc-850 dark:text-white">{Math.round(diagnoseResult.confidence * 100)}%</p>
+                  </div>
+                  <div className="bg-zinc-50 dark:bg-zinc-900 rounded-lg border border-zinc-150 dark:border-zinc-850 p-3">
+                    <p className="text-[9px] font-bold text-zinc-450 uppercase">Fallback</p>
+                    <p className="text-lg font-black text-zinc-850 dark:text-white">{diagnoseResult.evidence?.fallback_used ? 'YES' : 'NO'}</p>
+                  </div>
+                </div>
+                <p className="text-xs font-semibold text-zinc-650 dark:text-zinc-300">{diagnoseResult.reason}</p>
+                <pre className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-150 dark:border-zinc-850 rounded-lg p-3 text-[10px] overflow-x-auto font-mono text-zinc-650 dark:text-zinc-350">
+                  {JSON.stringify(diagnoseResult.evidence, null, 2)}
+                </pre>
+              </div>
+            ) : (
+              <div className="h-full min-h-64 flex items-center justify-center text-center text-xs font-semibold text-zinc-450 border border-dashed border-zinc-200 dark:border-zinc-850 rounded-xl">
+                Run diagnose to inspect raw C4 v1.2 evidence.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (selectedSubSection === 'providers') {
     return (
       <div className="w-full animate-fade-in max-w-5xl mx-auto mt-4 space-y-6 px-2 sm:px-4">
@@ -1032,8 +1203,25 @@ export default function AdminScreen() {
         </div>
 
         {/* 4. Nhật ký hệ thống */}
-        <div 
+        <div
+          onClick={handleToggleAiSection}
           style={{ animationDelay: '300ms' }}
+          className="bg-white dark:bg-zinc-950 p-5 rounded-lg border border-zinc-200 dark:border-zinc-900 hover:border-zinc-400 dark:hover:border-zinc-700 transition-all duration-300 hover:-translate-y-1 cursor-pointer group flex flex-col justify-between shadow-sm animate-fade-in-down"
+        >
+          <div>
+            <div className="text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-855 w-11 h-11 rounded-lg flex items-center justify-center mb-4 group-hover:scale-102 transition-transform">
+              <Activity size={20} />
+            </div>
+            <h3 className="text-sm font-bold text-zinc-850 dark:text-zinc-200 mb-1.5">AI relevance</h3>
+            <p className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 mb-4 line-clamp-2 leading-relaxed">Kiem tra Gemini/local fallback va diagnose pipeline C4 v1.2.</p>
+          </div>
+          <button className="text-[11px] font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-1 group-hover:gap-1.5 transition-all">
+            Truy cáº­p <ArrowRight size={13} />
+          </button>
+        </div>
+
+        <div 
+          style={{ animationDelay: '400ms' }}
           className="bg-white dark:bg-zinc-950 p-5 rounded-lg border border-zinc-200 dark:border-zinc-900 hover:border-zinc-400 dark:hover:border-zinc-700 transition-all duration-300 hover:-translate-y-1 cursor-pointer group flex flex-col justify-between shadow-sm animate-fade-in-down"
         >
           <div>

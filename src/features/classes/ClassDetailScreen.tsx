@@ -5,7 +5,7 @@ import {
   ShieldAlert, Search, Users, Calendar, ChevronRight, Loader2, UploadCloud,
   CheckCircle2, Play, RefreshCw, X, AlertCircle, Pencil, Save
 } from 'lucide-react';
-import { classService, Course, Submission } from '../../services/classService';
+import { classService, countUniqueStudents, Course, Submission, toDateInputValue } from '../../services/classService';
 import { batchService } from '../../services/batchService';
 import NumberTicker from '../../components/NumberTicker';
 
@@ -22,6 +22,7 @@ export default function ClassDetailScreen() {
   const [editCode, setEditCode] = useState('');
   const [editName, setEditName] = useState('');
   const [editTerm, setEditTerm] = useState('');
+  const [editDueDate, setEditDueDate] = useState('');
 
   // States cho tính năng Phân tích hàng loạt (P1 Batch UI)
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -48,11 +49,13 @@ export default function ClassDetailScreen() {
           setError('Không tìm thấy thông tin lớp học.');
           return;
         }
-        setCourse(foundCourse);
-
         // Tải danh sách bài nộp của lớp học
         const subs = await classService.getSubmissionsByClass(id);
         setSubmissions(subs);
+        setCourse({
+          ...foundCourse,
+          students: countUniqueStudents(subs),
+        });
       } catch (err: any) {
         console.error("Lỗi khi tải dữ liệu chi tiết lớp học:", err);
         setError(err.response?.data?.message || 'Không thể kết nối đến máy chủ.');
@@ -91,6 +94,7 @@ export default function ClassDetailScreen() {
           if (id) {
             const subs = await classService.getSubmissionsByClass(id);
             setSubmissions(subs);
+            setCourse((prev) => prev ? { ...prev, students: countUniqueStudents(subs) } : prev);
           }
         }
       } catch (err) {
@@ -147,6 +151,7 @@ export default function ClassDetailScreen() {
     setEditCode(course.id || '');
     setEditName(course.name || '');
     setEditTerm(course.term_name || '');
+    setEditDueDate(toDateInputValue(course.due_date));
     setIsEditClassOpen(true);
   };
 
@@ -158,12 +163,13 @@ export default function ClassDetailScreen() {
         class_code: editCode.trim().toUpperCase(),
         name: editName.trim(),
         term_name: editTerm.trim() || null,
+        due_date: editDueDate || null,
+        assignment_id: course.assignment_id,
       });
       setCourse({
         ...course,
         ...updated,
-        assignment_id: course.assignment_id,
-        students: course.students,
+        students: countUniqueStudents(submissions),
       });
       setIsEditClassOpen(false);
     } catch (err: any) {
@@ -752,6 +758,15 @@ export default function ClassDetailScreen() {
                   onChange={(e) => setEditTerm(e.target.value)}
                   placeholder="VD: HK2 2025-2026"
                   className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg focus:outline-none focus:bg-white dark:focus:bg-zinc-955 focus:border-zinc-400 dark:focus:border-zinc-700 font-bold text-zinc-850 dark:text-zinc-200 placeholder:font-normal placeholder:text-zinc-400 text-xs"
+                />
+              </div>
+              <div>
+                <label className="block text-[9px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Hạn nộp</label>
+                <input
+                  value={editDueDate}
+                  onChange={(e) => setEditDueDate(e.target.value)}
+                  type="date"
+                  className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg focus:outline-none focus:bg-white dark:focus:bg-zinc-955 focus:border-zinc-400 dark:focus:border-zinc-700 font-bold text-zinc-850 dark:text-zinc-200 text-xs"
                 />
               </div>
             </div>

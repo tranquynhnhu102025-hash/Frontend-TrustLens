@@ -1,4 +1,4 @@
-export const TRUST_SCORE_VERSION = 'trust-score-v1.1';
+export const TRUST_SCORE_VERSION = 'trust-score-v1.2';
 
 export type TrustScoreComponentKey = 'c1' | 'c2' | 'c3' | 'c4' | 'c5' | 'c6' | 'c7';
 export type TrustScoreWeightMap = Record<TrustScoreComponentKey, number>;
@@ -90,8 +90,8 @@ export const TRUST_SCORE_COMPONENTS: TrustScoreComponentDefinition[] = [
     legacySummaryKeys: ['c4Relevance', 'c4'],
     weightKey: 'c4_relevance',
     maxScore: 20,
-    purpose: 'So mức liên quan giữa report context và title/abstract/keyword của reference.',
-    evidence: 'Semantic similarity, lexical overlap, model/fallback used, abstract availability.',
+    purpose: 'So mức liên quan giữa report core context, report chunks và title/abstract/keyword của reference.',
+    evidence: 'Provider, model, prompt version, threshold profile, global/local/lexical similarity, top chunks, fallback status.',
     high: 'Nguồn bám sát chủ đề hoặc luận điểm chính của báo cáo.',
     low: 'Nguồn có thể hợp lệ nhưng lệch chủ đề hoặc liên quan gián tiếp.',
     recommendation: 'Thay hoặc bổ sung nguồn liên quan trực tiếp hơn đến nội dung báo cáo.',
@@ -146,8 +146,8 @@ export const TRUST_SCORE_COMPONENTS: TrustScoreComponentDefinition[] = [
 export const TRUST_SCORE_PRESETS = [
   {
     id: 'DEFAULT',
-    name: 'Trust Score v1.1 mặc định',
-    desc: 'Cấu hình MVP chuẩn gồm C1-C7, tổng trọng số 100.',
+    name: 'Trust Score v1.2 mặc định',
+    desc: 'Cấu hình P0 chuẩn gồm C1-C7, tổng trọng số 100, penalty tách khỏi weight.',
     weights: TRUST_SCORE_WEIGHTS,
   },
   {
@@ -167,7 +167,8 @@ export const TRUST_SCORE_PRESETS = [
 export const TRUST_SCORE_LIMITATIONS = [
   'Trust Score là điểm sàng lọc và hỗ trợ thẩm định tài liệu tham khảo, không thay thế đánh giá chuyên môn.',
   'NOT_FOUND nghĩa là chưa tìm được metadata ở provider đã cấu hình, không chứng minh nguồn là giả.',
-  'Điểm relevance phụ thuộc vào chất lượng text trích xuất và metadata title/abstract có sẵn.',
+  'Điểm relevance phụ thuộc vào chất lượng text trích xuất, title/abstract có sẵn, provider embedding và threshold profile.',
+  'DOI tồn tại không đồng nghĩa citation được ghi đúng; TrustLens tách identifier existence và bibliographic consistency.',
 ];
 
 export const labelFromScore = (score: number): 'reliable' | 'acceptable' | 'needs_review' | 'high_risk' => {
