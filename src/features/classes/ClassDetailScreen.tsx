@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, FileText, ShieldCheck, AlertTriangle, 
   ShieldAlert, Search, Users, Calendar, ChevronRight, Loader2, UploadCloud,
-  CheckCircle2, Play, RefreshCw, X, AlertCircle, Pencil, Save
+  CheckCircle2, Play, RefreshCw, X, AlertCircle, Pencil, Save, Trash2
 } from 'lucide-react';
 import { classService, countUniqueStudents, Course, Submission, toDateInputValue } from '../../services/classService';
 import { batchService } from '../../services/batchService';
@@ -23,6 +23,8 @@ export default function ClassDetailScreen() {
   const [editName, setEditName] = useState('');
   const [editTerm, setEditTerm] = useState('');
   const [editDueDate, setEditDueDate] = useState('');
+  const [isDeletingClass, setIsDeletingClass] = useState(false);
+  const [deletingSubmissionId, setDeletingSubmissionId] = useState<string | null>(null);
 
   // States cho tính năng Phân tích hàng loạt (P1 Batch UI)
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -178,6 +180,43 @@ export default function ClassDetailScreen() {
     }
   };
 
+  const handleDeleteClass = async () => {
+    if (!course) return;
+
+    const confirmed = window.confirm(`Xóa lớp "${course.id} - ${course.name}"? Tất cả bài nộp trong lớp sẽ bị ẩn khỏi danh sách.`);
+    if (!confirmed) return;
+
+    setIsDeletingClass(true);
+    try {
+      await classService.deleteClass(course.class_uuid || course.id);
+      navigate('/classes');
+    } catch (err: any) {
+      console.error("Lỗi khi xóa lớp:", err);
+      alert(err.response?.data?.message || "Không thể xóa lớp học.");
+    } finally {
+      setIsDeletingClass(false);
+    }
+  };
+
+  const handleDeleteSubmission = async (submission: Submission) => {
+    const confirmed = window.confirm(`Xóa file "${submission.fileName}" của ${submission.studentName}?`);
+    if (!confirmed) return;
+
+    setDeletingSubmissionId(submission.id);
+    try {
+      await classService.deleteSubmission(submission.id);
+      const nextSubmissions = submissions.filter((item) => item.id !== submission.id);
+      setSubmissions(nextSubmissions);
+      setSelectedIds((prev) => prev.filter((item) => item !== submission.id));
+      setCourse((prev) => prev ? { ...prev, students: countUniqueStudents(nextSubmissions) } : prev);
+    } catch (err: any) {
+      console.error("Lỗi khi xóa file:", err);
+      alert(err.response?.data?.message || "Không thể xóa file đã tải lên.");
+    } finally {
+      setDeletingSubmissionId(null);
+    }
+  };
+
   // Lọc danh sách bài nộp theo nội dung tìm kiếm
   const filteredSubmissions = submissions.filter(sub => 
     sub.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -306,6 +345,13 @@ export default function ClassDetailScreen() {
                 className="flex-1 md:flex-initial bg-white dark:bg-zinc-950 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-800 font-semibold text-xs px-4 py-2.5 rounded-lg transition-all duration-200 active:scale-98 flex items-center justify-center gap-1.5"
               >
                 <Pencil size={13} className="text-zinc-500" /> Chỉnh sửa lớp
+              </button>
+              <button
+                onClick={handleDeleteClass}
+                disabled={isDeletingClass}
+                className="flex-1 md:flex-initial bg-white dark:bg-zinc-950 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-rose-650 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 font-semibold text-xs px-4 py-2.5 rounded-lg transition-all duration-200 active:scale-98 flex items-center justify-center gap-1.5 disabled:opacity-50"
+              >
+                <Trash2 size={13} /> Xóa lớp
               </button>
               {selectedIds.length > 0 && (
                 <button
@@ -537,12 +583,22 @@ export default function ClassDetailScreen() {
                       )}
                     </td>
                     <td className="p-4 text-right pr-6">
-                      <button 
-                        onClick={() => navigate(`/report/${sub.id}`)}
-                        className="text-zinc-800 hover:text-black dark:text-zinc-200 dark:hover:text-white bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 font-bold text-[11px] px-3 py-1.5 rounded-lg transition-all inline-flex items-center gap-1 shadow-xs active:scale-98"
-                      >
-                        Xem báo cáo <ChevronRight size={12} />
-                      </button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button 
+                          onClick={() => navigate(`/report/${sub.id}`)}
+                          className="text-zinc-800 hover:text-black dark:text-zinc-200 dark:hover:text-white bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 font-bold text-[11px] px-3 py-1.5 rounded-lg transition-all inline-flex items-center gap-1 shadow-xs active:scale-98"
+                        >
+                          Xem báo cáo <ChevronRight size={12} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteSubmission(sub)}
+                          disabled={deletingSubmissionId === sub.id}
+                          className="p-1.5 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 text-zinc-400 hover:text-rose-650 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors disabled:opacity-40"
+                          title="Xóa file đã tải lên"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))

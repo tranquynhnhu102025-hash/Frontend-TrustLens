@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Calendar, ChevronRight, BookOpen, Save, Pencil } from 'lucide-react';
+import { Users, Calendar, ChevronRight, BookOpen, Save, Pencil, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { classService, Course, toDateInputValue } from '../../services/classService';
 
@@ -14,6 +14,7 @@ export default function ClassesScreen() {
   const [editName, setEditName] = useState('');
   const [editTerm, setEditTerm] = useState('');
   const [editDueDate, setEditDueDate] = useState('');
+  const [deletingClassId, setDeletingClassId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
 
@@ -90,6 +91,23 @@ export default function ClassesScreen() {
     }
   };
 
+  const handleDeleteClass = async (cls: Course) => {
+    const classId = cls.class_uuid || cls.id;
+    const confirmed = window.confirm(`Xóa lớp "${cls.id} - ${cls.name}"? Tất cả bài nộp trong lớp sẽ bị ẩn khỏi danh sách.`);
+    if (!confirmed) return;
+
+    setDeletingClassId(classId);
+    try {
+      await classService.deleteClass(classId);
+      setClasses((prev) => prev.filter((item) => item.id !== cls.id && item.class_uuid !== cls.class_uuid));
+    } catch (error: any) {
+      console.error('Lỗi khi xóa lớp học phần:', error);
+      alert(error.response?.data?.message || 'Không thể xóa lớp học phần.');
+    } finally {
+      setDeletingClassId(null);
+    }
+  };
+
   return (
     <div className="w-full space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-200 dark:border-zinc-900 pb-5">
@@ -148,17 +166,31 @@ export default function ClassesScreen() {
               <div>
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">{cls.id}</div>
-                  <button
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      openEditModal(cls);
-                    }}
-                    className="p-1 rounded-md text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
-                    title="Chỉnh sửa lớp học phần"
-                  >
-                    <Pencil size={13} />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        openEditModal(cls);
+                      }}
+                      className="p-1 rounded-md text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+                      title="Chỉnh sửa lớp học phần"
+                    >
+                      <Pencil size={13} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleDeleteClass(cls);
+                      }}
+                      disabled={deletingClassId === (cls.class_uuid || cls.id)}
+                      className="p-1 rounded-md text-zinc-400 hover:text-rose-650 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-colors disabled:opacity-40"
+                      title="Xóa lớp học phần"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
                 </div>
                 <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 mb-6 transition-colors line-clamp-2">{cls.name}</h3>
               </div>

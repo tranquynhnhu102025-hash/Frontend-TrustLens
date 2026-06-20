@@ -247,6 +247,36 @@ export const classService = {
     };
   },
 
+  deleteClass: async (classId: string): Promise<void> => {
+    if (import.meta.env.VITE_USE_MOCK === 'true') {
+      const idx = MOCK_CLASSES.findIndex((cls) => cls.id === classId || cls.class_uuid === classId);
+      if (idx !== -1) {
+        const removed = MOCK_CLASSES[idx];
+        MOCK_CLASSES.splice(idx, 1);
+        for (let i = MOCK_SUBMISSIONS.length - 1; i >= 0; i -= 1) {
+          if (MOCK_SUBMISSIONS[i].classId === removed.id || MOCK_SUBMISSIONS[i].classId === removed.class_uuid) {
+            MOCK_SUBMISSIONS.splice(i, 1);
+          }
+        }
+      }
+      return;
+    }
+
+    await axiosClient.delete(`/classes/${classId}`);
+  },
+
+  deleteSubmission: async (submissionId: string): Promise<void> => {
+    if (import.meta.env.VITE_USE_MOCK === 'true' || submissionId.startsWith('mock-')) {
+      const idx = MOCK_SUBMISSIONS.findIndex((sub) => sub.id === submissionId);
+      if (idx !== -1) {
+        MOCK_SUBMISSIONS.splice(idx, 1);
+      }
+      return;
+    }
+
+    await axiosClient.delete(`/submissions/${submissionId}`);
+  },
+
   getSubmissionsByClass: async (classId: string): Promise<Submission[]> => {
     if (import.meta.env.VITE_USE_MOCK === 'true' || classId.startsWith('mock-') || !classId) {
       return new Promise((resolve) => {
