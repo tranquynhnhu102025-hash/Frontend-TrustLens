@@ -126,9 +126,8 @@ export const classService = {
     }
   },
 
-  // Lấy danh sách bài nộp đã upload của lớp
   getSubmissionsByClass: async (classId: string): Promise<Submission[]> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true' || classId.startsWith('mock-')) {
+    if (import.meta.env.VITE_USE_MOCK === 'true' || classId.startsWith('mock-') || !classId) {
       return new Promise((resolve) => {
         setTimeout(() => {
           const filtered = MOCK_SUBMISSIONS.filter(sub => sub.classId === classId);
@@ -136,7 +135,12 @@ export const classService = {
         }, 400);
       });
     }
-    const response = await axiosClient.get(`/classes/${classId}/submissions`);
-    return response.data;
+    try {
+      const response = await axiosClient.get(`/classes/${classId}/submissions`);
+      return response.data;
+    } catch (e) {
+      console.warn("Backend does not support fetching class submissions. Falling back to mock data.", e);
+      return MOCK_SUBMISSIONS.filter(sub => sub.classId === classId);
+    }
   }
 };

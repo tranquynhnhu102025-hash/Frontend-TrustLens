@@ -3,10 +3,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { 
   ShieldAlert, ShieldCheck, Download, AlertTriangle, 
   CheckCircle2, FileText, ChevronLeft, BarChart3, Info, Loader2,
-  Calendar, Layers, Sliders, ChevronDown, Check, Play, RefreshCw, X
+  Calendar, Layers, Sliders, ChevronDown, Check, Play, RefreshCw, X, ExternalLink
 } from 'lucide-react';
 import { reportService } from '../../services/reportService';
 import { jobService } from '../../services/jobService';
+import NumberTicker from '../../components/NumberTicker';
 
 export default function ReportScreen() {
   const navigate = useNavigate();
@@ -24,10 +25,16 @@ export default function ReportScreen() {
   const [retryReason, setRetryReason] = useState('');
   const [submittingRescore, setSubmittingRescore] = useState(false);
 
+  // State cho hiệu ứng SVG Radial gauge
+  const [gaugeScore, setGaugeScore] = useState(0);
+
   // States cho P1 Export Options (Bộ xuất báo cáo)
   const [isExportDropdownOpen, setIsExportDropdownOpen] = useState(false);
   const [exportFormat, setExportFormat] = useState('pdf');
   const [includeNotes, setIncludeNotes] = useState(false);
+
+  // State cho UI-08 Citation Detail Drawer
+  const [selectedCitation, setSelectedCitation] = useState<any>(null);
 
   // States cho P1 Revision (Lịch sử bản sửa đổi)
   const [revisions, setRevisions] = useState<any[]>([]);
@@ -70,6 +77,7 @@ export default function ReportScreen() {
 
   // Hàm tải dữ liệu báo cáo (chấp nhận nạp theo ID bản sửa đổi khác)
   const loadReportData = async (targetId: string) => {
+    setGaugeScore(0);
     setLoading(true);
     setError('');
     try {
@@ -156,7 +164,8 @@ export default function ReportScreen() {
             year: cite.normalized_fields?.year || 'N/A',
             source: cite.normalized_fields?.venue || 'N/A',
             status,
-            issues
+            issues,
+            raw: cite // Lưu đối tượng gốc phục vụ ngăn kéo chi tiết (UI-08)
           };
         })
       };
@@ -184,6 +193,15 @@ export default function ReportScreen() {
     const reportId = id || 'mock-report-uuid-1';
     loadReportData(reportId);
   }, [id]);
+
+  useEffect(() => {
+    if (report) {
+      const timer = setTimeout(() => {
+        setGaugeScore(report.trustScore);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [report]);
 
   const handleExport = async () => {
     const reportId = currentRevisionId || id || 'mock-report-uuid-1';
@@ -240,9 +258,60 @@ export default function ReportScreen() {
 
   if (loading && !report) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3">
-        <Loader2 size={32} className="text-zinc-900 dark:text-white animate-spin" />
-        <p className="text-zinc-500 dark:text-zinc-400 font-semibold text-xs">Đang tải kết quả thẩm định...</p>
+      <div className="w-full max-w-5xl mx-auto mt-4 space-y-6 animate-pulse px-2 sm:px-4">
+        {/* Header Skeleton */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-zinc-150 dark:border-zinc-900 pb-5">
+          <div className="space-y-2">
+            <div className="h-4 w-32 bg-zinc-200 dark:bg-zinc-800 rounded"></div>
+            <div className="h-6 w-64 bg-zinc-200 dark:bg-zinc-805 rounded mt-1"></div>
+          </div>
+          <div className="flex gap-2 w-full md:w-auto">
+            <div className="h-9 w-28 bg-zinc-100 dark:bg-zinc-900 rounded"></div>
+            <div className="h-9 w-28 bg-zinc-200 dark:bg-zinc-800 rounded"></div>
+          </div>
+        </div>
+
+        {/* Score & Key Details Panel Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1 bg-white dark:bg-zinc-950 p-6 rounded-xl border border-zinc-200 dark:border-zinc-900 flex flex-col items-center justify-center text-center shadow-sm h-64">
+            <div className="h-3 w-28 bg-zinc-150 dark:bg-zinc-850 rounded mb-4"></div>
+            <div className="w-24 h-24 rounded-full bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-zinc-200 dark:bg-zinc-800"></div>
+            </div>
+            <div className="h-5 w-24 bg-zinc-205 dark:bg-zinc-800 rounded mt-4"></div>
+          </div>
+
+          <div className="lg:col-span-2 bg-white dark:bg-zinc-955 p-6 rounded-xl border border-zinc-200 dark:border-zinc-900 shadow-sm flex flex-col justify-between h-64">
+            <div className="space-y-3">
+              <div className="h-4 w-40 bg-zinc-200 dark:bg-zinc-800 rounded"></div>
+              <div className="grid grid-cols-2 gap-4 pt-2">
+                <div className="space-y-2">
+                  <div className="h-3 w-16 bg-zinc-100 dark:bg-zinc-900 rounded"></div>
+                  <div className="h-3.5 w-32 bg-zinc-150 dark:bg-zinc-800 rounded"></div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-3 w-16 bg-zinc-100 dark:bg-zinc-900 rounded"></div>
+                  <div className="h-3.5 w-32 bg-zinc-150 dark:bg-zinc-800 rounded"></div>
+                </div>
+              </div>
+            </div>
+            <div className="h-9 w-full bg-zinc-100 dark:bg-zinc-900 rounded"></div>
+          </div>
+        </div>
+
+        {/* Detailed checks Checklist Skeleton */}
+        <div className="bg-white dark:bg-zinc-950 rounded-xl border border-zinc-200 dark:border-zinc-900 shadow-sm overflow-hidden p-6 space-y-4">
+          <div className="h-4 w-48 bg-zinc-200 dark:bg-zinc-800 rounded mb-4"></div>
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="p-4 border border-zinc-105 dark:border-zinc-900/60 rounded-lg flex items-start gap-4">
+              <div className="w-5 h-5 rounded-full bg-zinc-205 dark:bg-zinc-800 shrink-0"></div>
+              <div className="space-y-2 flex-1">
+                <div className="h-3.5 w-2/3 bg-zinc-200 dark:bg-zinc-800 rounded"></div>
+                <div className="h-3 w-1/3 bg-zinc-100 dark:bg-zinc-900 rounded"></div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -326,7 +395,7 @@ export default function ReportScreen() {
             </button>
 
             {isExportDropdownOpen && (
-              <div className="absolute right-0 mt-2 z-30 w-64 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-xl shadow-lg p-4 space-y-4 animate-fade-in text-xs">
+              <div className="absolute right-0 mt-2 z-30 w-64 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-xl shadow-lg p-4 space-y-4 animate-scale-up text-xs origin-top-right">
                 <div className="space-y-2">
                   <p className="font-bold text-zinc-800 dark:text-zinc-200">Định dạng tệp tin</p>
                   <div className="grid grid-cols-3 gap-1.5">
@@ -379,8 +448,10 @@ export default function ReportScreen() {
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
               <path className="text-zinc-100 dark:text-zinc-850" strokeWidth="2" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
               <path 
-                className={report.trustScore >= 80 ? 'text-green-600 dark:text-green-550' : report.trustScore >= 50 ? 'text-amber-600 dark:text-amber-550' : 'text-rose-600 dark:text-rose-550'} 
-                strokeDasharray={`${report.trustScore}, 100`} 
+                className={`transition-[stroke-dasharray] duration-1000 ease-out ${
+                  report.trustScore >= 80 ? 'text-green-600 dark:text-green-550' : report.trustScore >= 50 ? 'text-amber-600 dark:text-amber-550' : 'text-rose-600 dark:text-rose-550'
+                }`} 
+                strokeDasharray={`${gaugeScore}, 100`} 
                 strokeWidth="2" 
                 stroke="currentColor" 
                 fill="none" 
@@ -389,7 +460,9 @@ export default function ReportScreen() {
               />
             </svg>
             <div className="absolute flex flex-col items-center">
-              <span className="text-4xl font-bold text-zinc-850 dark:text-white">{report.trustScore.toFixed(0)}</span>
+              <span className="text-4xl font-bold text-zinc-850 dark:text-white">
+                <NumberTicker value={report.trustScore} />
+              </span>
               <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500">/ 100</span>
             </div>
           </div>
@@ -406,7 +479,7 @@ export default function ReportScreen() {
           </div>
 
           <div className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 mb-3 bg-zinc-550/5 dark:bg-zinc-900 px-2 py-1 rounded border border-zinc-150 dark:border-zinc-850">
-            Độ tự tin (Confidence): <span className="text-zinc-800 dark:text-zinc-250">{(report.confidenceScore * 100).toFixed(0)}%</span>
+            Độ tự tin (Confidence): <span className="text-zinc-800 dark:text-zinc-250"><NumberTicker value={report.confidenceScore * 100} suffix="%" /></span>
           </div>
 
           <div className="text-[8px] font-bold text-zinc-400 dark:text-zinc-500 mb-4 flex items-center gap-1">
@@ -431,7 +504,10 @@ export default function ReportScreen() {
                 return (
                   <div 
                     key={idx} 
-                    className="border border-zinc-150 dark:border-zinc-900 rounded-xl overflow-hidden transition-all duration-200 hover:border-zinc-300 dark:hover:border-zinc-800"
+                    style={{
+                      animationDelay: `${idx * 80}ms`,
+                    }}
+                    className="border border-zinc-150 dark:border-zinc-900 rounded-xl overflow-hidden transition-all duration-200 hover:border-zinc-300 dark:hover:border-zinc-800 animate-fade-in-down"
                   >
                     {/* Thanh tiêu đề tiêu chí */}
                     <div 
@@ -521,8 +597,15 @@ export default function ReportScreen() {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-150 dark:divide-zinc-900 text-[11px]">
-              {report.citations.map((cite: any) => (
-                <tr key={cite.id} className="hover:bg-zinc-550/5 transition-colors">
+              {report.citations.map((cite: any, index: number) => (
+                <tr 
+                  key={cite.id} 
+                  onClick={() => setSelectedCitation(cite)}
+                  style={{
+                    animationDelay: `${index * 50}ms`,
+                  }}
+                  className="hover:bg-zinc-100/50 dark:hover:bg-zinc-900/40 transition-colors animate-fade-in-down cursor-pointer"
+                >
                   <td className="p-4 pl-6">
                     <p className="font-bold text-zinc-800 dark:text-zinc-200 line-clamp-2">{cite.title}</p>
                     <p className="font-semibold text-zinc-400 dark:text-zinc-550 mt-1">{cite.author}</p>
@@ -565,8 +648,8 @@ export default function ReportScreen() {
 
       {/* MODAL CẤU HÌNH CHẤM ĐIỂM LẠI (P1 RE-SCORE MODAL) */}
       {isRescoreModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 w-full max-w-lg rounded-2xl shadow-xl flex flex-col overflow-hidden animate-fade-in text-xs">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in-backdrop">
+          <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 w-full max-w-lg rounded-2xl shadow-xl flex flex-col overflow-hidden animate-scale-up text-xs">
             {/* Modal Header */}
             <div className="p-5 border-b border-zinc-150 dark:border-zinc-900 flex justify-between items-center bg-zinc-50 dark:bg-zinc-900/20">
               <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-1.5">
@@ -664,6 +747,175 @@ export default function ReportScreen() {
                 ) : (
                   <><Play size={12} /> Bắt đầu chấm lại</>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DRAWER CHI TIẾT TRÍCH DẪN (UI-08) */}
+      {selectedCitation && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-zinc-950/40 backdrop-blur-xs transition-opacity duration-300 animate-fade-in-backdrop" 
+            onClick={() => setSelectedCitation(null)}
+          ></div>
+
+          {/* Drawer Panel */}
+          <div className="relative z-10 w-full sm:w-[480px] bg-white dark:bg-zinc-950 shadow-2xl border-l border-zinc-200 dark:border-zinc-900 flex flex-col h-full overflow-y-auto animate-slide-in-right p-6 text-xs text-zinc-900 dark:text-zinc-100">
+            {/* Header */}
+            <div className="flex justify-between items-center pb-4 border-b border-zinc-150 dark:border-zinc-900 mb-5">
+              <div>
+                <span className="text-[9px] font-bold bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-2 py-0.5 rounded text-zinc-500 uppercase">
+                  Citation #{selectedCitation.id}
+                </span>
+                <h3 className="text-sm font-bold text-zinc-900 dark:text-white mt-1">Chi tiết tài liệu trích dẫn</h3>
+              </div>
+              <button 
+                onClick={() => setSelectedCitation(null)}
+                className="p-1.5 hover:bg-zinc-105 dark:hover:bg-zinc-900 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Content Body */}
+            <div className="flex-1 space-y-6">
+              {/* Raw Text */}
+              <div className="space-y-1.5">
+                <h4 className="text-[9px] font-bold text-zinc-450 dark:text-zinc-500 uppercase tracking-wider">Văn bản trích dẫn gốc (Raw citation)</h4>
+                <div className="bg-zinc-550/5 dark:bg-zinc-900/40 border border-zinc-150 dark:border-zinc-900 p-3.5 rounded-xl text-zinc-700 dark:text-zinc-300 font-semibold italic leading-relaxed">
+                  "{selectedCitation.raw?.raw_text || selectedCitation.title}"
+                </div>
+              </div>
+
+              {/* Normalized Fields */}
+              <div className="space-y-3 bg-zinc-550/5 dark:bg-zinc-900/10 border border-zinc-150 dark:border-zinc-900/50 p-4 rounded-xl">
+                <h4 className="text-[9px] font-bold text-zinc-450 dark:text-zinc-500 uppercase tracking-wider mb-2">Trường thông tin chuẩn hóa</h4>
+                
+                <div className="space-y-2">
+                  <div>
+                    <span className="text-[10px] text-zinc-450 block">Tiêu đề (Title)</span>
+                    <span className="font-bold text-zinc-800 dark:text-zinc-200">{selectedCitation.title}</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-[10px] text-zinc-450 block">Năm (Year)</span>
+                      <span className="font-bold text-zinc-800 dark:text-zinc-200">{selectedCitation.year}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-zinc-450 block">Loại nguồn</span>
+                      <span className="font-bold text-zinc-800 dark:text-zinc-200 uppercase text-[10px]">
+                        {selectedCitation.raw?.metadata?.source_type || 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] text-zinc-450 block">Tác giả (Authors)</span>
+                    <span className="font-bold text-zinc-800 dark:text-zinc-200">{selectedCitation.author}</span>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] text-zinc-450 block">Nơi xuất bản (Venue)</span>
+                    <span className="font-bold text-zinc-800 dark:text-zinc-200">{selectedCitation.source}</span>
+                  </div>
+
+                  {selectedCitation.raw?.normalized_fields?.doi && (
+                    <div>
+                      <span className="text-[10px] text-zinc-450 block">DOI</span>
+                      <span className="font-mono text-zinc-700 dark:text-zinc-300 font-bold">{selectedCitation.raw.normalized_fields.doi}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Match Metadata */}
+              <div className="space-y-3 bg-zinc-550/5 dark:bg-zinc-900/10 border border-zinc-150 dark:border-zinc-900/50 p-4 rounded-xl">
+                <h4 className="text-[9px] font-bold text-zinc-450 dark:text-zinc-500 uppercase tracking-wider mb-2">Kết quả đối sánh học thuật</h4>
+
+                <div className="space-y-2.5">
+                  <div className="flex justify-between items-center">
+                    <span className="text-zinc-500">Trạng thái đối khớp:</span>
+                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded border uppercase ${
+                      selectedCitation.status === 'pass' ? 'bg-green-50/50 dark:bg-green-950/20 text-green-700 border-green-150' :
+                      selectedCitation.status === 'warning' ? 'bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 border-amber-150' :
+                      'bg-rose-50/50 dark:bg-rose-950/20 text-rose-700 border-rose-150'
+                    }`}>
+                      {selectedCitation.raw?.metadata?.match_status === 'verified' ? 'Xác thực (Verified)' :
+                       selectedCitation.raw?.metadata?.match_status === 'ambiguous' ? 'Mơ hồ (Ambiguous)' :
+                       selectedCitation.raw?.metadata?.match_status === 'not_found' ? 'Không tìm thấy' : 'Không rõ (Unknown)'}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-zinc-500">Cơ sở dữ liệu (Provider):</span>
+                    <span className="font-bold text-zinc-800 dark:text-zinc-200 capitalize">{selectedCitation.raw?.metadata?.provider || 'N/A'}</span>
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[10px]">
+                      <span className="text-zinc-500">Độ tin cậy khớp (Confidence):</span>
+                      <span className="font-bold text-zinc-800 dark:text-zinc-200">
+                        {selectedCitation.raw?.metadata?.match_confidence ? `${Math.round(selectedCitation.raw.metadata.match_confidence * 100)}%` : '0%'}
+                      </span>
+                    </div>
+                    <div className="w-full h-1.5 bg-zinc-150 dark:bg-zinc-800 rounded-full overflow-hidden">
+                      <div 
+                        className="bg-zinc-800 dark:bg-white h-1.5 rounded-full transition-all duration-500"
+                        style={{ width: `${(selectedCitation.raw?.metadata?.match_confidence || 0) * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Warnings and Recommendations */}
+              {selectedCitation.raw?.warnings && selectedCitation.raw.warnings.length > 0 && (
+                <div className="space-y-2.5">
+                  <h4 className="text-[9px] font-bold text-rose-650 dark:text-rose-550 uppercase tracking-wider">Cảnh báo hệ thống ({selectedCitation.raw.warnings.length})</h4>
+                  
+                  {selectedCitation.raw.warnings.map((w: any, idx: number) => (
+                    <div key={idx} className="p-3.5 bg-rose-50/30 dark:bg-rose-955/5 border border-rose-150 dark:border-rose-900/30 rounded-xl space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold text-rose-800 dark:text-rose-400 capitalize text-[10px]">Cảnh báo #{(idx + 1)}</span>
+                        <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded border uppercase ${
+                          w.severity === 'critical' || w.severity === 'high' ? 'bg-red-50 dark:bg-red-950/20 text-red-700 border-red-200' : 'bg-amber-50 dark:bg-amber-950/20 text-amber-700 border-amber-200'
+                        }`}>
+                          {w.severity}
+                        </span>
+                      </div>
+                      <p className="font-semibold text-zinc-800 dark:text-zinc-250 leading-relaxed">{w.message}</p>
+                      {w.recommendation && (
+                        <div className="pt-2 border-t border-rose-100/50 dark:border-rose-900/20 text-[10px] text-zinc-550 dark:text-zinc-400">
+                          <span className="font-bold text-zinc-700 dark:text-zinc-300">Đề xuất:</span> {w.recommendation}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Footer Action */}
+            <div className="pt-4 border-t border-zinc-150 dark:border-zinc-900 mt-6 flex gap-2">
+              {selectedCitation.raw?.normalized_fields?.url && (
+                <a 
+                  href={selectedCitation.raw.normalized_fields.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex-1 bg-zinc-900 hover:bg-zinc-850 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-black font-semibold text-xs px-4 py-2.5 rounded-xl transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+                >
+                  <ExternalLink size={13} /> Đi tới nguồn trích dẫn
+                </a>
+              )}
+              <button 
+                onClick={() => setSelectedCitation(null)}
+                className="flex-1 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-750 dark:text-zinc-300 font-bold text-xs px-4 py-2.5 rounded-xl transition-colors"
+              >
+                Đóng chi tiết
               </button>
             </div>
           </div>

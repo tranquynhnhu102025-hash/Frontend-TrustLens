@@ -33,6 +33,18 @@ export default function UploadScreen() {
   const [classesList, setClassesList] = useState<Course[]>([]);
   const [loadingClasses, setLoadingClasses] = useState(true);
 
+  // State kiểm soát hoạt cảnh
+  const [mounted, setMounted] = useState(false);
+
+  // Kích hoạt hoạt cảnh khi tải xong thông tin lớp học
+  useEffect(() => {
+    if (!loadingClasses && currentClass) {
+      setMounted(true);
+    } else {
+      setMounted(false);
+    }
+  }, [loadingClasses, currentClass]);
+
   useEffect(() => {
     const loadClasses = async () => {
       setLoadingClasses(true);
@@ -193,24 +205,36 @@ export default function UploadScreen() {
 
   if (loadingClasses && !currentClass) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3">
-        <Loader2 size={32} className="text-zinc-905 dark:text-white animate-spin" />
-        <p className="text-zinc-500 dark:text-zinc-400 font-semibold text-xs">Đang tải danh sách lớp học...</p>
+      <div className="w-full max-w-4xl mx-auto mt-4 space-y-6 animate-pulse">
+        {/* Header Skeleton */}
+        <div className="text-center border-b border-zinc-150 dark:border-zinc-900 pb-5 space-y-3">
+          <div className="h-6 w-48 bg-zinc-200 dark:bg-zinc-800 rounded mx-auto"></div>
+          <div className="h-5 w-64 bg-zinc-100 dark:bg-zinc-900/60 rounded mx-auto mt-2"></div>
+        </div>
+
+        {/* Dropzone Skeleton */}
+        <div className="p-5 border border-zinc-200 dark:border-zinc-900 bg-white dark:bg-zinc-955 rounded-lg shadow-sm">
+          <div className="w-full h-36 border-2 border-dashed border-zinc-150 dark:border-zinc-850 rounded-lg flex flex-col items-center justify-center gap-2">
+            <div className="w-6 h-6 bg-zinc-200 dark:bg-zinc-800 rounded-full"></div>
+            <div className="h-3.5 w-48 bg-zinc-200 dark:bg-zinc-800 rounded"></div>
+            <div className="h-3 w-32 bg-zinc-100 dark:bg-zinc-900 rounded"></div>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!currentClass) {
     return (
-      <div className="w-full max-w-md mx-auto mt-16 p-8 border border-zinc-200 dark:border-zinc-900 bg-white dark:bg-zinc-950 rounded-lg text-center animate-fade-in shadow-sm">
-        <AlertCircle size={36} className="text-zinc-400 dark:text-zinc-555 mx-auto mb-4" />
+      <div className="w-full max-w-md mx-auto mt-16 p-8 border border-zinc-200 dark:border-zinc-900 bg-white dark:bg-zinc-950 rounded-lg text-center animate-scale-up shadow-sm">
+        <AlertCircle size={36} className="text-zinc-400 dark:text-zinc-500 mx-auto mb-4 animate-bounce" />
         <h3 className="text-sm font-bold mb-1 text-zinc-900 dark:text-white">Chưa cấu hình lớp học phần</h3>
         <p className="text-xs mb-5 leading-relaxed text-zinc-500 font-medium">
           Vui lòng tạo một lớp học phần phụ trách để bắt đầu tải lên báo cáo.
         </p>
         <button 
           onClick={() => navigate('/classes')}
-          className="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-850 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-black font-bold px-4 py-2 rounded-lg transition-colors text-xs"
+          className="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-850 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-black font-bold px-4 py-2 rounded-lg transition-all duration-250 active:scale-98 text-xs"
         >
           <ArrowLeft size={13} /> Đi tới quản lý lớp học
         </button>
@@ -222,7 +246,9 @@ export default function UploadScreen() {
   const hasFinished = fileItems.some(item => item.status === 'success');
 
   return (
-    <div className="w-full max-w-4xl mx-auto mt-4 space-y-6">
+    <div className={`w-full max-w-4xl mx-auto mt-4 space-y-6 transition-all duration-500 ${
+      mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+    }`}>
       <div className="text-center border-b border-zinc-150 dark:border-zinc-900 pb-5">
         <h2 className="text-xl font-bold text-zinc-900 dark:text-white">Tải lên bài báo cáo</h2>
         <div className="text-xs font-semibold text-zinc-550 dark:text-zinc-500 mt-2 flex items-center justify-center gap-1.5">
@@ -242,14 +268,14 @@ export default function UploadScreen() {
       </div>
 
       {error && (
-        <div className="flex items-center gap-1.5 p-3.5 bg-red-50 dark:bg-red-950/20 text-red-650 dark:text-red-400 font-semibold rounded-lg border border-red-200 dark:border-red-900/50 text-xs">
+        <div className="flex items-center gap-1.5 p-3.5 bg-red-50 dark:bg-red-955/20 text-red-655 dark:text-red-400 font-semibold rounded-lg border border-red-200 dark:border-red-900/50 text-xs animate-fade-in-down">
           <AlertCircle size={14} className="shrink-0" /> {error}
         </div>
       )}
 
       {/* DROPZONE AREA */}
       <div className="p-5 border border-zinc-200 dark:border-zinc-900 bg-white dark:bg-zinc-950 rounded-lg shadow-sm">
-        <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-zinc-200 dark:border-zinc-850 rounded-lg cursor-pointer transition-colors bg-zinc-50/50 dark:bg-zinc-900/10 hover:bg-zinc-50 dark:hover:bg-zinc-900/30 hover:border-zinc-400 dark:hover:border-zinc-700 group">
+        <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-zinc-200 dark:border-zinc-850 rounded-lg cursor-pointer transition-all duration-300 bg-zinc-50/50 dark:bg-zinc-900/10 hover:bg-zinc-50 dark:hover:bg-zinc-900/30 hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-sm active:scale-99 group">
           <div className="flex flex-col items-center justify-center pt-4 pb-5">
             <UploadCloud size={20} className="text-zinc-400 dark:text-zinc-500 mb-2 group-hover:scale-105 transition-transform" />
             <p className="mb-0.5 text-xs font-semibold text-zinc-650 dark:text-zinc-350">
@@ -262,27 +288,27 @@ export default function UploadScreen() {
           <input type="file" className="hidden" accept=".pdf,.docx" multiple onChange={handleFileDrop} disabled={processing} />
         </label>
 
+
         {/* FILE LIST QUEUE */}
         {fileItems.length > 0 && (
-          <div className="mt-6 space-y-3">
-            <h3 className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 px-1">
-              Hàng đợi tải lên ({fileItems.length} tệp)
-            </h3>
-            
+          <div className="mt-5">
             <div className="space-y-2">
-              {fileItems.map((item) => (
+              {fileItems.map((item, index) => (
                 <div 
                   key={item.id} 
-                  className="p-3.5 border border-zinc-200 dark:border-zinc-900 bg-white dark:bg-zinc-950 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm"
+                  style={{
+                    animationDelay: `${index * 60}ms`,
+                  }}
+                  className="p-3.5 border border-zinc-200 dark:border-zinc-900 bg-white dark:bg-zinc-955 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm animate-fade-in-down hover:border-zinc-300 dark:hover:border-zinc-800 transition-colors"
                 >
                   {/* File Metadata */}
                   <div className="flex items-center gap-3 overflow-hidden min-w-[200px] max-w-[300px]">
-                    <div className="p-2 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-lg shrink-0">
+                    <div className="p-2 bg-zinc-105 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-650 dark:text-zinc-400 rounded-lg shrink-0">
                       <FileText size={15} />
                     </div>
                     <div className="truncate">
                       <p className="text-xs font-bold truncate text-zinc-800 dark:text-zinc-200">{item.file.name}</p>
-                      <p className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 mt-0.5">{(item.file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                      <p className="text-[10px] font-semibold text-zinc-405 dark:text-zinc-500 mt-0.5">{(item.file.size / (1024 * 1024)).toFixed(2)} MB</p>
                     </div>
                   </div>
 
@@ -295,7 +321,7 @@ export default function UploadScreen() {
                         value={item.ownerLabel}
                         onChange={(e) => updateOwnerLabel(item.id, e.target.value)}
                         placeholder="Sinh viên / Mã nhóm thực hiện" 
-                        className="w-full px-3 py-1.5 border border-zinc-200 dark:border-zinc-850 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg text-xs font-semibold transition-colors focus:outline-none focus:bg-white dark:focus:bg-zinc-950 focus:border-zinc-400 dark:focus:border-zinc-700 text-zinc-800 dark:text-zinc-200"
+                        className="w-full px-3 py-1.5 border border-zinc-200 dark:border-zinc-850 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg text-xs font-semibold transition-colors focus:outline-none focus:bg-white dark:focus:bg-zinc-955 focus:border-zinc-400 dark:focus:border-zinc-700 text-zinc-800 dark:text-zinc-200"
                         disabled={processing}
                       />
                     ) : (
@@ -313,8 +339,13 @@ export default function UploadScreen() {
                           <span>Đang xử lý</span>
                           <span>{item.progress}%</span>
                         </div>
-                        <div className="w-20 h-1 bg-zinc-100 dark:bg-zinc-900 rounded-full overflow-hidden ml-auto">
-                          <div className="bg-zinc-900 dark:bg-white h-1 transition-all duration-300" style={{ width: `${item.progress}%` }}></div>
+                        <div className="w-20 h-1.5 bg-zinc-100 dark:bg-zinc-900 rounded-full overflow-hidden ml-auto">
+                          <div 
+                            className={`h-1.5 transition-all duration-300 ${
+                              theme === 'dark' ? 'animate-shimmer' : 'animate-shimmer-light'
+                            }`} 
+                            style={{ width: `${item.progress}%` }}
+                          ></div>
                         </div>
                       </div>
                     )}

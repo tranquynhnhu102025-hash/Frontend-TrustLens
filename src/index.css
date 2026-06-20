@@ -1,1 +1,145 @@
 @import "tailwindcss";
+
+@utility animate-float {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+@utility animate-drift-1 {
+  animation: drift-slow-1 18s ease-in-out infinite alternate;
+}
+
+@utility animate-drift-2 {
+  animation: drift-slow-2 22s ease-in-out infinite alternate;
+}
+
+@utility delay-100 {
+  transition-delay: 100ms;
+}
+@utility delay-150 {
+  transition-delay: 150ms;
+}
+@utility delay-200 {
+  transition-delay: 200ms;
+}
+@utility delay-300 {
+  transition-delay: 300ms;
+}
+@utility delay-450 {
+  transition-delay: 450ms;
+}
+@utility delay-600 {
+  transition-delay: 600ms;
+}
+@utility delay-750 {
+  transition-delay: 750ms;
+}
+@utility delay-900 {
+  transition-delay: 900ms;
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes drift-slow-1 {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  50% {
+    transform: translate(30px, -45px) scale(1.15);
+  }
+  100% {
+    transform: translate(-15px, 20px) scale(0.9);
+  }
+}
+
+@keyframes drift-slow-2 {
+  0% {
+    transform: translate(0px, 0px) scale(1.1);
+  }
+  50% {
+    transform: translate(-30px, 30px) scale(0.95);
+  }
+  100% {
+    transform: translate(20px, -15px) scale(1.1);
+  }
+}
+
+@utility animate-scale-up {
+  animation: scale-up-modal 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@utility animate-fade-in-backdrop {
+  animation: fade-in-backdrop 0.2s ease-out both;
+}
+
+@utility animate-fade-in-down {
+  animation: fade-in-down 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes scale-up-modal {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes fade-in-backdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility animate-shimmer {
+  background: linear-gradient(90deg, var(--color-zinc-900) 25%, var(--color-zinc-700) 50%, var(--color-zinc-900) 75%);
+  background-size: 200% 100%;
+  animation: progress-shimmer 1.5s infinite linear;
+}
+
+@utility animate-shimmer-light {
+  background: linear-gradient(90deg, var(--color-zinc-200) 25%, var(--color-zinc-100) 50%, var(--color-zinc-200) 75%);
+  background-size: 200% 100%;
+  animation: progress-shimmer 1.5s infinite linear;
+}
+
+@utility animate-shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+@keyframes progress-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}

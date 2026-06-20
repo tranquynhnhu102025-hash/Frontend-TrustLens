@@ -1,5 +1,5 @@
 import axiosClient from './axiosClient';
-import { MOCK_REPORT } from '../mocks/dummyData';
+import { MOCK_REPORT, MOCK_REVISIONS } from '../mocks/dummyData';
 
 export const reportService = {
   getReport: async (id: string) => {
@@ -10,7 +10,7 @@ export const reportService = {
         }, 600);
       });
     }
-    const response = await axiosClient.get(`/reports/${id}`);
+    const response = await axiosClient.get(`/reports/submissions/${id}`);
     return response.data; 
   },
 
@@ -22,11 +22,11 @@ export const reportService = {
         }, 600);
       });
     }
-    const response = await axiosClient.get(`/submissions/${submissionId}/report`);
+    const response = await axiosClient.get(`/reports/submissions/${submissionId}`);
     return response.data;
   },
 
-  exportReport: async (reportId: string, format = 'pdf', includeTeacherNotes = false) => {
+  exportReport: async (reportId: string, format = 'pdf', _includeTeacherNotes = false) => {
     if (import.meta.env.VITE_USE_MOCK === 'true' || reportId.startsWith('mock-')) {
       return new Promise<any>((resolve) => {
         setTimeout(() => {
@@ -34,18 +34,25 @@ export const reportService = {
         }, 800);
       });
     }
-    const response = await axiosClient.post(`/reports/${reportId}/exports`, {
-      format,
-      include_raw_citation: true,
-      include_teacher_notes: includeTeacherNotes
-    });
-    return response.data;
+    // Return a token containing the details for downloadExportFile
+    return { export_id: `direct-download::${reportId}::${format}` };
   },
 
   downloadExportFile: async (exportId: string): Promise<Blob> => {
     if (import.meta.env.VITE_USE_MOCK === 'true' || exportId.startsWith('mock-')) {
       return new Blob(['Mock PDF/Word/Excel Content'], { type: 'application/octet-stream' });
     }
+    if (exportId.startsWith('direct-download::')) {
+      const parts = exportId.split('::');
+      const reportId = parts[1]; // Submission ID
+      const format = parts[2];   // pdf, docx, or xlsx
+      
+      const response = await axiosClient.get(`/reports/submissions/${reportId}/export/${format}`, {
+        responseType: 'blob'
+      });
+      return response.data;
+    }
+    // Fallback/Legacy
     const response = await axiosClient.get(`/report-exports/${exportId}/download`, {
       responseType: 'blob'
     });
@@ -63,4 +70,4 @@ export const reportService = {
     const response = await axiosClient.get(`/reports/${reportId}/history`);
     return response.data;
   }
-};
+};

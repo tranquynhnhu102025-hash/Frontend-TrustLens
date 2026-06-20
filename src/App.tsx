@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginScreen from './features/auth/LoginScreen';
@@ -22,6 +23,23 @@ import LandingDocs from './features/landing/LandingDocs';
 import LandingContact from './features/landing/LandingContact';
   
 export default function App() {
+  useEffect(() => {
+    const theme = (localStorage.getItem('theme') as 'light' | 'dark' | 'system') || 'dark';
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else if (theme === 'light') {
+      root.classList.remove('dark');
+    } else {
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (systemPrefersDark) {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
+    }
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>
