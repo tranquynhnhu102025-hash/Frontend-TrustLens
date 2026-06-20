@@ -33,7 +33,7 @@ export default function LandingPricing() {
         "Xuất báo cáo chi tiết (.PDF, .DOCX)",
         "Ưu tiên xử lý băng thông cao"
       ],
-      buttonText: "Đăng nhập tài khoản trường",
+      buttonText: "Đăng nhập",
       popular: true,
       link: "/login"
     },
@@ -49,78 +49,87 @@ export default function LandingPricing() {
         "Tùy chỉnh ngưỡng chấm điểm",
         "Hỗ trợ kỹ thuật 24/7"
       ],
-      buttonText: "Liên hệ Phòng Đào tạo",
+      buttonText: "Liên hệ ngay",
       popular: false,
       link: "/contact"
     }
   ];
 
   return (
-    <div className={`w-full py-16 px-6 relative overflow-hidden transition-colors duration-300 ${
-      theme === 'dark' ? 'bg-slate-950' : 'bg-slate-50'
+    <div className={`w-full py-16 px-6 relative overflow-hidden transition-colors duration-200 ${
+      theme === 'dark' ? 'bg-zinc-950' : 'bg-zinc-50'
     }`}>
-      {/* Background glow */}
-      <div className={`absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full blur-[160px] pointer-events-none transition-all duration-300 ${
-        theme === 'dark' ? 'bg-blue-500/5' : 'bg-blue-500/3'
-      }`}></div>
-
-      <div className="max-w-6xl mx-auto space-y-16">
+      <div className="max-w-5xl mx-auto space-y-12">
         {/* Title */}
-        <div className="text-center space-y-4">
-          <h2 className={`text-3xl sm:text-5xl font-black tracking-tight transition-colors ${
-            theme === 'dark' ? 'text-white' : 'text-slate-900'
+        <div className="text-center space-y-3">
+          <h2 className={`text-2xl sm:text-4xl font-bold tracking-tight transition-colors ${
+            theme === 'dark' ? 'text-white' : 'text-zinc-900'
           }`}>
             Hạn mức sử dụng & Gói giải pháp
           </h2>
-          <p className={`text-sm sm:text-base max-w-2xl mx-auto font-medium transition-colors ${
-            theme === 'dark' ? 'text-slate-400' : 'text-slate-655'
+          <p className={`text-xs sm:text-sm max-w-xl mx-auto font-medium transition-colors ${
+            theme === 'dark' ? 'text-zinc-450' : 'text-zinc-500'
           }`}>
             Chọn gói giải pháp phù hợp với vai trò của bạn trong hệ sinh thái học thuật TrustLens.
           </p>
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {tiers.map((tier, idx) => (
             <div 
               key={idx}
-              className={`rounded-[32px] border p-8 flex flex-col justify-between relative transition-all duration-300 ${
+              className={`rounded-xl border p-6 flex flex-col justify-between relative transition-colors duration-150 ${
                 tier.popular 
                   ? (theme === 'dark' 
-                      ? 'border-blue-500/40 shadow-xl shadow-blue-500/5 bg-slate-900/60 scale-105 z-10' 
-                      : 'border-blue-500 shadow-xl shadow-blue-500/10 bg-white scale-105 z-10') 
+                      ? 'border-white bg-white text-black' 
+                      : 'border-zinc-900 bg-zinc-900 text-white') 
                   : (theme === 'dark' 
-                      ? 'border-slate-900 hover:border-slate-800 bg-slate-900/40' 
-                      : 'border-slate-200 hover:border-slate-300 bg-white shadow-sm shadow-slate-100')
+                      ? 'border-zinc-900 bg-zinc-900/30 text-zinc-105' 
+                      : 'border-zinc-200 bg-white shadow-sm')
               }`}
             >
               {tier.popular && (
-                <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white font-bold text-[10px] uppercase tracking-widest px-3 py-1 rounded-full shadow-md">
-                  Phổ biến nhất
+                <span className={`absolute -top-3 left-6 font-bold text-[8px] uppercase tracking-widest px-2.5 py-0.5 rounded border ${
+                  theme === 'dark' ? 'bg-black text-white border-black' : 'bg-white text-black border-zinc-900'
+                }`}>
+                  Phổ biến
                 </span>
               )}
 
               <div className="space-y-6">
                 <div>
-                  <h3 className={`text-lg font-black ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{tier.name}</h3>
-                  <p className={`text-xs mt-2 font-medium min-h-[40px] ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{tier.desc}</p>
+                  <h3 className={`text-sm font-bold uppercase tracking-wider ${
+                    tier.popular 
+                      ? (theme === 'dark' ? 'text-black' : 'text-white')
+                      : (theme === 'dark' ? 'text-white' : 'text-zinc-900')
+                  }`}>{tier.name}</h3>
+                  <p className={`text-xs mt-2 font-medium min-h-[40px] ${
+                    tier.popular
+                      ? (theme === 'dark' ? 'text-zinc-600' : 'text-zinc-400')
+                      : (theme === 'dark' ? 'text-zinc-400' : 'text-zinc-500')
+                  }`}>{tier.desc}</p>
                 </div>
 
-                <div className={`flex items-baseline gap-1.5 border-y py-4 ${
-                  theme === 'dark' ? 'border-slate-850/60 text-white' : 'border-slate-100 text-slate-900'
+                <div className={`flex items-baseline gap-1 border-y py-4 ${
+                  tier.popular
+                    ? (theme === 'dark' ? 'border-zinc-200' : 'border-zinc-800')
+                    : (theme === 'dark' ? 'border-zinc-900' : 'border-zinc-100')
                 }`}>
-                  <span className="text-4xl font-black">{tier.price}</span>
-                  {tier.price === "0đ" && <span className="text-xs text-slate-500 font-bold">/ vĩnh viễn</span>}
-                  {tier.price === "Nội bộ" && <span className="text-xs text-blue-550 font-bold">/ trường cấp</span>}
+                  <span className="text-3xl font-extrabold">{tier.price}</span>
+                  {tier.price === "0đ" && <span className="text-[10px] font-semibold text-zinc-500">/ vĩnh viễn</span>}
+                  {tier.price === "Nội bộ" && <span className={`text-[10px] font-semibold ${tier.popular ? (theme === 'dark' ? 'text-zinc-650' : 'text-zinc-350') : 'text-zinc-505'}`}>/ trường cấp</span>}
                 </div>
 
                 {/* Features List */}
-                <ul className="space-y-3">
+                <ul className="space-y-2.5">
                   {tier.features.map((feature, fIdx) => (
-                    <li key={fIdx} className={`flex items-start gap-2.5 text-xs font-bold ${
-                      theme === 'dark' ? 'text-slate-300' : 'text-slate-755'
-                    }`}>
-                      <Check size={14} className="text-blue-505 shrink-0 mt-0.5" />
+                    <li key={fIdx} className="flex items-start gap-2 text-xs font-semibold">
+                      <Check size={13} className={`shrink-0 mt-0.5 ${
+                        tier.popular
+                          ? (theme === 'dark' ? 'text-black' : 'text-white')
+                          : 'text-zinc-400'
+                      }`} />
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -129,12 +138,14 @@ export default function LandingPricing() {
 
               <button
                 onClick={() => navigate(tier.link)}
-                className={`w-full font-bold text-xs py-3.5 rounded-xl mt-8 transition-all duration-300 active:scale-95 ${
+                className={`w-full font-bold text-xs py-2.5 rounded-lg mt-6 transition-colors duration-150 ${
                   tier.popular
-                    ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20'
+                    ? (theme === 'dark' 
+                        ? 'bg-black hover:bg-zinc-900 text-white' 
+                        : 'bg-white hover:bg-zinc-100 text-black')
                     : (theme === 'dark' 
-                        ? 'bg-slate-850 hover:bg-slate-800 text-slate-200 border border-slate-800' 
-                        : 'bg-slate-150 hover:bg-slate-200 text-slate-700 border border-slate-200 shadow-inner')
+                        ? 'bg-zinc-900 hover:bg-zinc-850 text-zinc-200 border border-zinc-800' 
+                        : 'bg-white hover:bg-zinc-50 text-zinc-700 border border-zinc-200')
                 }`}
               >
                 {tier.buttonText}

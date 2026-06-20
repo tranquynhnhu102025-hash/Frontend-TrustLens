@@ -4,12 +4,14 @@ import LoginScreen from './features/auth/LoginScreen';
 import RegisterScreen from './features/auth/RegisterScreen';
 import UploadScreen from './features/upload/UploadScreen';
 import ClassesScreen from './features/classes/ClassesScreen';
+import ClassDetailScreen from './features/classes/ClassDetailScreen';
 import DashboardPage from './features/dashboard/DashboardScreen';
 import Layout from './features/Layout/Layout';
 import ProfileScreen from './features/auth/ProfileScreen';
 import SettingsScreen from './features/settings/SettingsScreen';
 import AdminScreen from './features/admin/AdminScreen';
 import ReportScreen from './features/report/ReportScreen';
+import AnalyzingScreen from './features/analyzing/AnalyzingScreen';
 
 // Import Landing Pages
 import LandingLayout from './features/landing/LandingLayout';
@@ -41,12 +43,14 @@ export default function App() {
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/classes" element={<ClassesScreen />} />
+            <Route path="/class/:id" element={<ClassDetailScreen />} />
             <Route path="/upload" element={<UploadScreen />} />
             <Route path="/settings" element={<SettingsScreen />} />
             <Route path="/admin" element={<AdminScreen />} />
             <Route path="/profile" element={<ProfileScreen />} />
             <Route path="/report" element={<ReportScreen />} />
             <Route path="/report/:id" element={<ReportScreen />} />
+            <Route path="/analyzing/:jobId" element={<AnalyzingScreen />} />
           </Route>
         </Route>
         

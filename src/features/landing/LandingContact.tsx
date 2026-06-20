@@ -27,59 +27,51 @@ export default function LandingContact() {
   ];
 
   return (
-    <div className={`w-full py-16 px-6 relative overflow-hidden transition-colors duration-300 ${
-      theme === 'dark' ? 'bg-slate-950' : 'bg-slate-50'
+    <div className={`w-full py-16 px-6 relative overflow-hidden transition-colors duration-200 ${
+      theme === 'dark' ? 'bg-zinc-950' : 'bg-zinc-50'
     }`}>
-      {/* Glow decorations */}
-      <div className={`absolute top-10 left-10 w-96 h-96 rounded-full blur-[128px] pointer-events-none transition-all duration-300 ${
-        theme === 'dark' ? 'bg-blue-500/5' : 'bg-blue-500/2'
-      }`}></div>
-      <div className={`absolute bottom-10 right-10 w-96 h-96 rounded-full blur-[128px] pointer-events-none transition-all duration-300 ${
-        theme === 'dark' ? 'bg-indigo-500/5' : 'bg-indigo-500/2'
-      }`}></div>
-
-      <div className="max-w-6xl mx-auto space-y-16">
+      <div className="max-w-5xl mx-auto space-y-12">
         {/* Title */}
-        <div className="text-center space-y-4">
-          <h2 className={`text-3xl sm:text-5xl font-black tracking-tight transition-colors ${
-            theme === 'dark' ? 'text-white' : 'text-slate-900'
+        <div className="text-center space-y-3">
+          <h2 className={`text-2xl sm:text-4xl font-bold tracking-tight transition-colors ${
+            theme === 'dark' ? 'text-white' : 'text-zinc-900'
           }`}>
             Liên hệ ban nghiên cứu
           </h2>
-          <p className={`text-sm sm:text-base max-w-xl mx-auto font-medium transition-colors ${
-            theme === 'dark' ? 'text-slate-400' : 'text-slate-655'
+          <p className={`text-xs sm:text-sm max-w-xl mx-auto font-medium transition-colors ${
+            theme === 'dark' ? 'text-zinc-450' : 'text-zinc-500'
           }`}>
             Gửi thắc mắc, đề xuất hợp tác nghiên cứu hoặc báo lỗi kỹ thuật trực tiếp cho chúng tôi.
           </p>
         </div>
 
         {/* 1. TEAM MEMBERS */}
-        <div className="space-y-6">
-          <h3 className={`text-lg font-black flex items-center gap-2 ${
-            theme === 'dark' ? 'text-white' : 'text-slate-900'
+        <div className="space-y-4">
+          <h3 className={`text-sm font-bold flex items-center gap-1.5 ${
+            theme === 'dark' ? 'text-white' : 'text-zinc-900'
           }`}>
-            <Users size={20} className="text-blue-500" /> Nhóm phát triển dự án
+            <Users size={16} className="text-zinc-500" /> Nhóm phát triển dự án
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {teamMembers.map((member, idx) => (
               <div 
                 key={idx} 
-                className={`p-6 rounded-2xl border flex flex-col justify-between transition-all duration-300 ${
+                className={`p-5 rounded-lg border flex flex-col justify-between transition-colors duration-150 ${
                   theme === 'dark' 
-                    ? 'bg-slate-900/40 border-slate-900 hover:border-slate-800' 
-                    : 'bg-white border-slate-200 hover:border-slate-350 shadow-sm shadow-slate-100'
+                    ? 'bg-zinc-900/30 border-zinc-900 hover:border-zinc-800' 
+                    : 'bg-white border-zinc-150 hover:border-zinc-300 shadow-sm'
                 }`}
               >
                 <div className="space-y-2">
-                  <h4 className={`font-black text-base leading-none transition-colors ${
-                    theme === 'dark' ? 'text-white' : 'text-slate-900'
+                  <h4 className={`font-bold text-sm leading-none transition-colors ${
+                    theme === 'dark' ? 'text-white' : 'text-zinc-900'
                   }`}>{member.name}</h4>
-                  <span className="text-[11px] font-bold text-blue-550 block">{member.role}</span>
+                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">{member.role}</span>
                 </div>
-                <div className={`border-t mt-4 pt-3 flex items-center gap-1.5 text-xs font-bold transition-colors ${
-                  theme === 'dark' ? 'border-slate-850/60 text-slate-500' : 'border-slate-100 text-slate-500'
+                <div className={`border-t mt-4 pt-3 flex items-center gap-1.5 text-xs transition-colors ${
+                  theme === 'dark' ? 'border-zinc-850 text-zinc-500' : 'border-zinc-100 text-zinc-400 font-medium'
                 }`}>
-                  <GraduationCap size={14} className="text-slate-400 shrink-0" />
+                  <GraduationCap size={13} className="text-zinc-400 shrink-0" />
                   <span className="truncate">{member.school}</span>
                 </div>
               </div>
@@ -88,132 +80,132 @@ export default function LandingContact() {
         </div>
 
         {/* 2. FORM & INFO GRID */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           {/* Info Card */}
-          <div className={`space-y-6 p-8 rounded-3xl border transition-all duration-300 ${
+          <div className={`lg:col-span-2 space-y-5 p-6 rounded-lg border transition-colors duration-150 ${
             theme === 'dark' 
-              ? 'bg-slate-900/40 border-slate-900' 
-              : 'bg-white border-slate-200 shadow-sm shadow-slate-100'
+              ? 'bg-zinc-900/30 border-zinc-900' 
+              : 'bg-white border-zinc-150 shadow-sm'
           }`}>
-            <h3 className={`text-lg font-black flex items-center gap-2 ${
-              theme === 'dark' ? 'text-white' : 'text-slate-900'
+            <h3 className={`text-sm font-bold flex items-center gap-1.5 ${
+              theme === 'dark' ? 'text-white' : 'text-zinc-900'
             }`}>
-              <Building2 size={20} className="text-indigo-500" /> Thông tin đơn vị liên kết
+              <Building2 size={16} className="text-zinc-500" /> Thông tin liên kết
             </h3>
 
-            <div className={`space-y-5 text-xs leading-relaxed font-medium transition-colors ${
-              theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+            <div className={`space-y-4 text-xs leading-relaxed font-medium transition-colors ${
+              theme === 'dark' ? 'text-zinc-400' : 'text-zinc-600'
             }`}>
-              <div className="flex gap-3 items-start">
-                <MapPin size={16} className="text-slate-400 shrink-0 mt-0.5" />
+              <div className="flex gap-2.5 items-start">
+                <MapPin size={15} className="text-zinc-400 shrink-0 mt-0.5" />
                 <div>
-                  <h4 className={`font-bold ${theme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>Trường Đại học Nguyễn Tất Thành</h4>
-                  <p className="mt-1">Khoa Công nghệ Thông tin &bull; Kỹ thuật Phần mềm</p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">300A Nguyễn Tất Thành, Phường 13, Quận 4, TP. Hồ Chí Minh</p>
+                  <h4 className={`font-bold ${theme === 'dark' ? 'text-zinc-200' : 'text-zinc-800'}`}>Trường Đại học Nguyễn Tất Thành</h4>
+                  <p className="mt-0.5">Khoa Công nghệ Thông tin &bull; Kỹ thuật Phần mềm</p>
+                  <p className="text-[10px] text-zinc-505 mt-0.5">300A Nguyễn Tất Thành, Q.4, TP. Hồ Chí Minh</p>
                 </div>
               </div>
 
-              <div className="flex gap-3 items-start">
-                <MapPin size={16} className="text-slate-400 shrink-0 mt-0.5" />
+              <div className="flex gap-2.5 items-start">
+                <MapPin size={15} className="text-zinc-400 shrink-0 mt-0.5" />
                 <div>
-                  <h4 className={`font-bold ${theme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>Trường Đại học Xây dựng Hà Nội</h4>
-                  <p className="mt-1">Khoa Công nghệ Thông tin &bull; Phòng nghiên cứu Khoa học</p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">55 Giải Phóng, Đồng Tâm, Hai Bà Trưng, Hà Nội</p>
+                  <h4 className={`font-bold ${theme === 'dark' ? 'text-zinc-200' : 'text-zinc-800'}`}>Trường Đại học Xây dựng Hà Nội</h4>
+                  <p className="mt-0.5">Khoa Công nghệ Thông tin</p>
+                  <p className="text-[10px] text-zinc-505 mt-0.5">55 Giải Phóng, Hai Bà Trưng, Hà Nội</p>
                 </div>
               </div>
 
-              <div className="flex gap-3 items-start">
-                <Mail size={16} className="text-slate-400 shrink-0 mt-0.5" />
+              <div className="flex gap-2.5 items-start">
+                <Mail size={15} className="text-zinc-400 shrink-0 mt-0.5" />
                 <div>
-                  <h4 className={`font-bold ${theme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>Địa chỉ Email nhận đề xuất</h4>
-                  <p className="mt-1">contact@trustlens.edu.vn</p>
+                  <h4 className={`font-bold ${theme === 'dark' ? 'text-zinc-200' : 'text-zinc-800'}`}>Địa chỉ nhận đề xuất</h4>
+                  <p className="mt-0.5">contact@trustlens.edu.vn</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Contact Form */}
-          <div className={`p-8 rounded-3xl border relative transition-all duration-300 ${
+          <div className={`lg:col-span-3 p-6 rounded-lg border relative transition-colors duration-150 ${
             theme === 'dark' 
-              ? 'bg-slate-900/40 border-slate-900' 
-              : 'bg-white border-slate-200 shadow-sm shadow-slate-100'
+              ? 'bg-zinc-900/30 border-zinc-900' 
+              : 'bg-white border-zinc-150 shadow-sm'
           }`}>
             {submitted && (
-              <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-sm z-10 flex flex-col items-center justify-center p-6 text-center animate-fade-in rounded-3xl">
-                <CheckCircle2 size={48} className="text-emerald-500 mb-4" />
-                <h4 className="text-lg font-black text-white mb-2">Gửi phản hồi thành công!</h4>
-                <p className="text-slate-400 text-xs max-w-xs leading-relaxed font-medium">
+              <div className="absolute inset-0 bg-zinc-950/95 backdrop-blur-sm z-10 flex flex-col items-center justify-center p-6 text-center animate-fade-in rounded-lg">
+                <CheckCircle2 size={40} className="text-zinc-200 mb-3" />
+                <h4 className="text-sm font-bold text-white mb-1.5">Gửi phản hồi thành công!</h4>
+                <p className="text-zinc-400 text-xs max-w-xs leading-relaxed font-medium">
                   Cảm ơn bạn đã liên hệ với chúng tôi. Ban nghiên cứu TrustLens sẽ phản hồi lại bạn qua Email trong vòng 48 giờ làm việc.
                 </p>
               </div>
             )}
 
-            <h3 className={`text-lg font-black flex items-center gap-2 mb-6 ${
-              theme === 'dark' ? 'text-white' : 'text-slate-900'
+            <h3 className={`text-sm font-bold flex items-center gap-1.5 mb-5 ${
+              theme === 'dark' ? 'text-white' : 'text-zinc-900'
             }`}>
-              <MessageSquare size={20} className="text-purple-550" /> Biểu mẫu gửi thư góp ý
+              <MessageSquare size={16} className="text-zinc-500" /> Gửi thư góp ý
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Họ và tên</label>
+                  <label className="block text-[9px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Họ và tên</label>
                   <input 
                     type="text" 
                     required 
                     value={formData.name} 
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                     placeholder="VD: Nguyễn Văn A" 
-                    className={`w-full px-4 py-3 border rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-colors ${
+                    className={`w-full px-3.5 py-2.5 border rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-zinc-450 transition-colors ${
                       theme === 'dark' 
-                        ? 'bg-slate-950/80 border-slate-850 text-white placeholder:text-slate-650' 
-                        : 'bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:bg-white'
+                        ? 'bg-zinc-900/80 border-zinc-800 text-white placeholder:text-zinc-650 focus:border-zinc-700' 
+                        : 'bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:bg-white focus:border-zinc-350'
                     }`} 
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Địa chỉ Email</label>
+                  <label className="block text-[9px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Địa chỉ Email</label>
                   <input 
                     type="email" 
                     required 
                     value={formData.email} 
                     onChange={e => setFormData({ ...formData, email: e.target.value })}
                     placeholder="VD: email@huce.edu.vn" 
-                    className={`w-full px-4 py-3 border rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-colors ${
+                    className={`w-full px-3.5 py-2.5 border rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-zinc-450 transition-colors ${
                       theme === 'dark' 
-                        ? 'bg-slate-950/80 border-slate-850 text-white placeholder:text-slate-650' 
-                        : 'bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:bg-white'
+                        ? 'bg-zinc-900/80 border-zinc-800 text-white placeholder:text-zinc-650 focus:border-zinc-700' 
+                        : 'bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:bg-white focus:border-zinc-350'
                     }`} 
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-slate-505 uppercase tracking-widest mb-1.5">Nội dung chi tiết</label>
+                <label className="block text-[9px] font-bold text-zinc-405 uppercase tracking-wider mb-1">Nội dung chi tiết</label>
                 <textarea 
                   required 
                   rows={4}
                   value={formData.message} 
                   onChange={e => setFormData({ ...formData, message: e.target.value })}
-                  placeholder="Nhập nội dung đề xuất hoặc lỗi hệ thống bạn gặp phải..." 
-                  className={`w-full px-4 py-3 border rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/40 resize-none transition-colors ${
+                  placeholder="Nhập nội dung góp ý..." 
+                  className={`w-full px-3.5 py-2.5 border rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-zinc-450 resize-none transition-colors ${
                     theme === 'dark' 
-                      ? 'bg-slate-950/80 border-slate-850 text-white placeholder:text-slate-650' 
-                      : 'bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:bg-white'
+                      ? 'bg-zinc-900/80 border-zinc-800 text-white placeholder:text-zinc-650 focus:border-zinc-700' 
+                      : 'bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:bg-white focus:border-zinc-350'
                   }`} 
                 ></textarea>
               </div>
 
-              <div className="flex justify-end pt-2">
+              <div className="flex justify-end pt-1">
                 <button 
                   type="submit"
-                  className={`flex items-center gap-2 font-bold text-xs px-6 py-3 rounded-xl transition-all shadow-md active:scale-95 group ${
+                  className={`flex items-center gap-1.5 font-bold text-xs px-5 py-2.5 rounded-lg transition-colors ${
                     theme === 'dark' 
-                      ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-500/10 shadow-md' 
-                      : 'bg-slate-900 hover:bg-slate-850 text-white shadow-slate-950/10 shadow-md'
+                      ? 'bg-white hover:bg-zinc-105 text-black' 
+                      : 'bg-zinc-900 hover:bg-zinc-850 text-white'
                   }`}
                 >
-                  Gửi liên hệ <Send size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                  Gửi liên hệ <Send size={12} />
                 </button>
               </div>
             </form>

@@ -7,14 +7,10 @@ export default function ClassesScreen() {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   
-  // 1. KHO CHỨA DỮ LIỆU
   const [classes, setClasses] = useState<Course[]>([]);
-
-  // 2. BỘ NHỚ TẠM
   const [newCode, setNewCode] = useState('');
   const [newName, setNewName] = useState('');
 
-  // 3. TẢI DỮ LIỆU LỚP HỌC
   useEffect(() => {
     const fetchClasses = async () => {
       try {
@@ -27,7 +23,6 @@ export default function ClassesScreen() {
     fetchClasses();
   }, []);
 
-  // 4. HÀNH ĐỘNG THÊM LỚP
   const handleAddClass = async () => {
     if (!newCode || !newName) return; 
     
@@ -43,99 +38,93 @@ export default function ClassesScreen() {
   };
 
   return (
-    <div className="w-full">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+    <div className="w-full space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-150 dark:border-zinc-900 pb-5">
         <div>
-          <h2 className="text-3xl font-black text-slate-800 mb-2">Danh sách lớp phụ trách</h2>
-          <p className="text-slate-500 font-medium">Chọn học phần để tiến hành nộp và duyệt tập tin báo cáo đồ án.</p>
+          <h2 className="text-xl font-bold text-zinc-900 dark:text-white">Danh sách lớp phụ trách</h2>
+          <p className="text-zinc-550 dark:text-zinc-500 text-xs font-semibold mt-0.5">Chọn học phần để tiến hành nộp và duyệt tập tin báo cáo đồ án.</p>
         </div>
         <button 
           onClick={() => setShowModal(true)} 
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl shadow-md shadow-blue-200 transition-all"
+          className="bg-zinc-900 hover:bg-zinc-850 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-black font-semibold text-xs px-4 py-2.5 rounded-lg transition-colors"
         >
           + Thêm lớp học phần
         </button>
       </div>
 
       {/* DANH SÁCH THẺ (CARD) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {classes.map((cls, index) => (
           <div 
             key={index}
             onClick={() => {
-              navigate('/upload', { state: { selectedClass: cls } });
+              navigate(`/class/${cls.id}`);
             }}
-            className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-blue-300 transition-all cursor-pointer group"
+            className="bg-white dark:bg-zinc-950 p-5 rounded-lg border border-zinc-200 dark:border-zinc-900 shadow-sm hover:border-zinc-400 dark:hover:border-zinc-700 transition-colors cursor-pointer group flex flex-col justify-between"
           >
-            <div className="text-sm font-bold text-blue-600 mb-2">{cls.id}</div>
-            <h3 className="text-lg font-black text-slate-800 mb-6 group-hover:text-blue-700 transition-colors line-clamp-2">{cls.name}</h3>
+            <div>
+              <div className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">{cls.id}</div>
+              <h3 className="text-sm font-bold text-zinc-805 dark:text-zinc-200 mb-6 transition-colors line-clamp-2">{cls.name}</h3>
+            </div>
             
-            <div className="flex items-center justify-between text-xs font-bold text-slate-400">
-              <div className="flex items-center gap-4">
-                <span className="flex items-center gap-1.5"><Users size={14} /> {cls.students} Sinh viên</span>
-                <span className="flex items-center gap-1.5"><Calendar size={14} /> Hạn: {cls.date}</span>
+            <div className="flex items-center justify-between text-[11px] font-semibold text-zinc-450 dark:text-zinc-500 pt-3 border-t border-zinc-100 dark:border-zinc-900">
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1"><Users size={12} /> {cls.students} Sinh viên</span>
+                <span className="flex items-center gap-1"><Calendar size={12} /> Hạn: {cls.date}</span>
               </div>
-              <ChevronRight size={16} className="text-slate-300 group-hover:text-blue-600 transition-colors" />
+              <ChevronRight size={14} className="text-zinc-350 dark:text-zinc-605 group-hover:translate-x-0.5 transition-transform" />
             </div>
           </div>
         ))}
       </div>
 
-      {/* BẢNG POPUP KÍNH MỜ (GLASSMORPHISM) */}
+      {/* BẢNG POPUP TỐI GIẢN */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/30 backdrop-blur-md" onClick={() => setShowModal(false)}></div>
+          <div className="absolute inset-0 bg-zinc-950/40 backdrop-blur-xs" onClick={() => setShowModal(false)}></div>
           
-          <div className="absolute w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 translate-x-20 -translate-y-20 pointer-events-none"></div>
-          <div className="absolute w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-[100px] opacity-40 -translate-x-20 translate-y-20 pointer-events-none"></div>
-
-          <div className="relative z-10 bg-white/80 backdrop-blur-xl rounded-[32px] p-8 w-full max-w-md shadow-2xl border border-white/50">
-            <div className="flex items-center gap-4 mb-8 border-b border-slate-200/50 pb-5">
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-3 rounded-2xl shadow-lg shadow-blue-200">
-                <BookOpen size={24} />
-              </div>
-              <div>
-                <h3 className="text-xl font-black text-slate-900">Thêm lớp học phần</h3>
-              </div>
+          <div className="relative z-10 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-lg p-6 w-full max-w-md shadow-sm">
+            <div className="flex items-center gap-2.5 mb-5 border-b border-zinc-150 dark:border-zinc-900 pb-3">
+              <BookOpen size={16} className="text-zinc-500" />
+              <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Thêm lớp học phần</h3>
             </div>
             
-            <div className="space-y-5 mb-8">
+            <div className="space-y-4 mb-5">
               <div>
-                <label className="block text-sm font-bold text-slate-800 mb-2">Mã học phần</label>
+                <label className="block text-[9px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Mã học phần</label>
                 <input 
                   value={newCode}
                   onChange={(e) => setNewCode(e.target.value)} 
                   type="text" 
                   placeholder="VD: INT4050" 
-                  className="w-full px-5 py-3.5 border border-slate-200/80 bg-white/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-900 uppercase placeholder:font-medium placeholder:text-slate-400 placeholder:normal-case shadow-inner transition-all" 
+                  className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg focus:outline-none focus:bg-white dark:focus:bg-zinc-950 focus:border-zinc-400 dark:focus:border-zinc-700 font-bold text-zinc-850 dark:text-zinc-200 uppercase placeholder:font-normal placeholder:text-zinc-400 transition-colors text-xs" 
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-800 mb-2">Tên đồ án / môn học</label>
+                <label className="block text-[9px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Tên đồ án / môn học</label>
                 <input 
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)} 
                   type="text" 
                   placeholder="VD: Đồ án Tốt nghiệp" 
-                  className="w-full px-5 py-3.5 border border-slate-200/80 bg-white/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-900 placeholder:font-medium placeholder:text-slate-400 shadow-inner transition-all" 
+                  className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg focus:outline-none focus:bg-white dark:focus:bg-zinc-950 focus:border-zinc-400 dark:focus:border-zinc-700 font-bold text-zinc-850 dark:text-zinc-200 placeholder:font-normal placeholder:text-zinc-400 transition-colors text-xs" 
                 />
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 pt-2">
+            <div className="flex justify-end gap-2 pt-2 border-t border-zinc-150 dark:border-zinc-900">
               <button 
                 onClick={() => setShowModal(false)} 
-                className="px-6 py-3 font-bold text-slate-600 hover:bg-white/80 rounded-2xl transition-all"
+                className="px-4 py-2 font-semibold text-xs text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg transition-colors"
               >
                 Hủy bỏ
               </button>
               <button 
                 onClick={handleAddClass}
                 disabled={!newCode || !newName}
-                className="flex items-center gap-2 px-6 py-3 font-bold bg-blue-600 text-white hover:bg-blue-700 rounded-2xl transition-all shadow-lg shadow-blue-200 disabled:opacity-50 disabled:cursor-not-allowed group"
+                className="flex items-center gap-1 px-4 py-2 font-bold text-xs bg-zinc-900 hover:bg-zinc-850 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-black rounded-lg transition-colors shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                <Save size={18} className="group-hover:scale-110 transition-transform" />
-                Tạo lớp học
+                <Save size={12} /> Tạo lớp học
               </button>
             </div>
           </div>
@@ -143,4 +132,4 @@ export default function ClassesScreen() {
       )}
     </div>
   );
-}
+}
