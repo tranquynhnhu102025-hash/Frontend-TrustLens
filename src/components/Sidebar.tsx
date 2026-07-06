@@ -13,6 +13,7 @@ import {
   getStoredAuthUser,
 } from '../auth/permissions';
 import authService from '../services/authService';
+import { APP_VERSION, API_VERSION } from '../config/appVersion';
 
 interface SidebarProps {
   isCollapsed?: boolean;
@@ -175,6 +176,22 @@ export default function Sidebar({ isCollapsed = false, onToggle }: SidebarProps)
           <LogOut size={12} className="shrink-0" /> 
           {!isCollapsed && <span>Đăng xuất</span>}
         </button>
+      </div>
+
+      <div
+        className={`px-4 pb-4 text-[9px] font-semibold text-zinc-400 dark:text-zinc-600 ${
+          isCollapsed ? 'text-center' : 'flex items-center justify-between gap-2'
+        }`}
+        title={`TrustLens ${APP_VERSION} / API ${API_VERSION}`}
+      >
+        {!isCollapsed ? (
+          <>
+            <span>TrustLens</span>
+            <span className="font-mono">v{APP_VERSION}</span>
+          </>
+        ) : (
+          <span className="font-mono">v{APP_VERSION}</span>
+        )}
       </div>
     </div>
   );
