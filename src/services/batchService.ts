@@ -1,4 +1,5 @@
 import axiosClient from './axiosClient';
+import { isBatchAnalysisEnabled } from '../config/featureFlags';
 import { isMockMode } from './mockMode';
 
 export interface BatchItem {
@@ -29,8 +30,15 @@ export interface BatchStatusResponse {
 const mockBatchStates: Record<string, BatchStatusResponse> = {};
 const useMock = isMockMode;
 
+const ensureBatchEnabled = () => {
+  if (!isBatchAnalysisEnabled()) {
+    throw new Error('Batch analysis is not part of the v1.2 production contract.');
+  }
+};
+
 export const batchService = {
   createBatch: async (assignmentId: string, submissionIds: string[]): Promise<{ batch_id: string; status: string; total_items: number }> => {
+    ensureBatchEnabled();
     if (useMock()) {
       const batchId = `mock-batch-${Math.random().toString(36).substring(2, 9)}`;
       
@@ -86,6 +94,7 @@ export const batchService = {
   },
 
   startBatch: async (batchId: string): Promise<{ batch_id: string; status: string }> => {
+    ensureBatchEnabled();
     if (useMock()) {
       const batch = mockBatchStates[batchId];
       if (batch) {
@@ -109,6 +118,7 @@ export const batchService = {
   },
 
   getBatchStatus: async (batchId: string): Promise<BatchStatusResponse> => {
+    ensureBatchEnabled();
     if (useMock()) {
       const batch = mockBatchStates[batchId];
       if (!batch) {
@@ -177,6 +187,7 @@ export const batchService = {
   },
 
   cancelBatch: async (batchId: string): Promise<{ batch_id: string; status: string }> => {
+    ensureBatchEnabled();
     if (useMock()) {
       const batch = mockBatchStates[batchId];
       if (batch) {
@@ -194,6 +205,7 @@ export const batchService = {
   },
 
   retryFailed: async (batchId: string): Promise<{ batch_id: string; status: string }> => {
+    ensureBatchEnabled();
     if (useMock()) {
       const batch = mockBatchStates[batchId];
       if (batch) {

@@ -253,6 +253,8 @@ export const MOCK_USER = {
 // Kiểu dữ liệu bài nộp (file đã upload)
 export interface Submission {
   id: string;
+  report_id?: string | null;
+  reportId?: string | null;
   studentName: string;
   fileName: string;
   date: string;

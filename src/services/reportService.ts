@@ -47,10 +47,10 @@ export const reportService = {
     }
     if (exportId.startsWith('direct-download::')) {
       const parts = exportId.split('::');
-      const reportId = parts[1]; // Submission ID
+      const reportOrSubmissionId = parts[1];
       const format = parts[2];   // pdf, docx, or xlsx
       
-      const response = await axiosClient.get(`/reports/submissions/${reportId}/export/${format}`, {
+      const response = await axiosClient.get(`/reports/submissions/${reportOrSubmissionId}/export/${format}`, {
         responseType: 'blob'
       });
       return response.data;

@@ -6,12 +6,14 @@ import {
   CheckCircle2, Play, RefreshCw, X, AlertCircle, Pencil, Save, Trash2
 } from 'lucide-react';
 import { classService, countUniqueStudents, Course, Submission, toDateInputValue } from '../../services/classService';
-import { batchService } from '../../services/batchService';
+import { isBatchAnalysisEnabled } from '../../config/featureFlags';
+import { isMockMode } from '../../services/mockMode';
 import NumberTicker from '../../components/NumberTicker';
 
 export default function ClassDetailScreen() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const batchAnalysisEnabled = isBatchAnalysisEnabled();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -80,12 +82,13 @@ export default function ClassDetailScreen() {
 
   // Hook Polling tiến trình của Batch (P1 Batch Polling)
   useEffect(() => {
-    if (!currentBatchId || !batchPolling) return;
+    if (!batchAnalysisEnabled || !currentBatchId || !batchPolling) return;
 
     let intervalId: NodeJS.Timeout;
 
     const pollBatchStatus = async () => {
       try {
+        const { batchService } = await import('../../services/batchService');
         const data = await batchService.getBatchStatus(currentBatchId);
         setBatchData(data);
 
@@ -108,14 +111,15 @@ export default function ClassDetailScreen() {
     intervalId = setInterval(pollBatchStatus, 2000);
 
     return () => clearInterval(intervalId);
-  }, [currentBatchId, batchPolling, id]);
+  }, [batchAnalysisEnabled, currentBatchId, batchPolling, id]);
 
   const handleStartBatch = async () => {
-    if (selectedIds.length === 0 || !course) return;
+    if (!batchAnalysisEnabled || selectedIds.length === 0 || !course) return;
 
     setLoading(true);
     try {
       // 1. Tạo batch
+      const { batchService } = await import('../../services/batchService');
       const res = await batchService.createBatch(course.assignment_id || course.id, selectedIds);
       const batchId = res.batch_id;
 
@@ -137,9 +141,10 @@ export default function ClassDetailScreen() {
   };
 
   const handleRetryFailedItems = async () => {
-    if (!currentBatchId) return;
+    if (!batchAnalysisEnabled || !currentBatchId) return;
 
     try {
+      const { batchService } = await import('../../services/batchService');
       await batchService.retryFailed(currentBatchId);
       setBatchPolling(true); // Bật polling trở lại
     } catch (err: any) {
@@ -218,6 +223,15 @@ export default function ClassDetailScreen() {
   };
 
   // Lọc danh sách bài nộp theo nội dung tìm kiếm
+  const getSubmissionReportId = (submission: Submission) => {
+    const reportId = submission.report_id || submission.reportId;
+    if (reportId) return reportId;
+    if (isMockMode()) {
+      return submission.id.startsWith('mock-report') ? submission.id : `mock-report-${submission.id}`;
+    }
+    return null;
+  };
+
   const filteredSubmissions = submissions.filter(sub => 
     sub.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     sub.fileName.toLowerCase().includes(searchQuery.toLowerCase())
@@ -228,6 +242,7 @@ export default function ClassDetailScreen() {
   const passedCount = submissions.filter(s => s.status === 'pass').length;
   const warningCount = submissions.filter(s => s.status === 'warning').length;
   const criticalCount = submissions.filter(s => s.status === 'fail').length;
+  const tableColumnCount = batchAnalysisEnabled ? 7 : 6;
 
   if (loading && !course && !isBatchModalOpen) {
     return (
@@ -353,7 +368,7 @@ export default function ClassDetailScreen() {
               >
                 <Trash2 size={13} /> Xóa lớp
               </button>
-              {selectedIds.length > 0 && (
+              {batchAnalysisEnabled && selectedIds.length > 0 && (
                 <button
                   onClick={handleStartBatch}
                   className="flex-1 md:flex-initial bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-800 font-semibold text-xs px-4 py-2.5 rounded-lg transition-all duration-200 active:scale-98 flex items-center justify-center gap-1.5"
@@ -450,20 +465,22 @@ export default function ClassDetailScreen() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-zinc-50/50 dark:bg-zinc-900/30 text-zinc-500 dark:text-zinc-400 text-[10px] uppercase tracking-wider font-bold border-b border-zinc-200 dark:border-zinc-900">
-                <th className="p-4 pl-6 w-12 text-center">
-                  <input 
-                    type="checkbox" 
-                    checked={submissions.length > 0 && selectedIds.length === submissions.length}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedIds(submissions.map(s => s.id));
-                      } else {
-                        setSelectedIds([]);
-                      }
-                    }}
-                    className="cursor-pointer"
-                  />
-                </th>
+                {batchAnalysisEnabled && (
+                  <th className="p-4 pl-6 w-12 text-center">
+                    <input
+                      type="checkbox"
+                      checked={submissions.length > 0 && selectedIds.length === submissions.length}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedIds(submissions.map(s => s.id));
+                        } else {
+                          setSelectedIds([]);
+                        }
+                      }}
+                      className="cursor-pointer"
+                    />
+                  </th>
+                )}
                 <th className="p-4 pl-2">Sinh viên / Nhóm</th>
                 <th className="p-4">Tên tệp tin</th>
                 <th className="p-4">Ngày nộp</th>
@@ -501,7 +518,7 @@ export default function ClassDetailScreen() {
                 ))
               ) : submissions.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-16 text-center">
+                  <td colSpan={tableColumnCount} className="p-16 text-center">
                     <div className="max-w-md mx-auto flex flex-col items-center">
                       <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-900 rounded-full flex items-center justify-center mb-4 border border-zinc-200 dark:border-zinc-800 text-zinc-400">
                         <FileText size={20} />
@@ -521,7 +538,7 @@ export default function ClassDetailScreen() {
                 </tr>
               ) : filteredSubmissions.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-16 text-center">
+                  <td colSpan={tableColumnCount} className="p-16 text-center">
                     <div className="max-w-md mx-auto flex flex-col items-center">
                       <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-900 rounded-full flex items-center justify-center mb-4 border border-zinc-200 dark:border-zinc-800 text-zinc-400">
                         <Search size={18} />
@@ -536,20 +553,22 @@ export default function ClassDetailScreen() {
               ) : (
                 filteredSubmissions.map((sub) => (
                   <tr key={sub.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/20 transition-all duration-200">
-                    <td className="p-4 pl-6 text-center">
-                      <input 
-                        type="checkbox" 
-                        checked={selectedIds.includes(sub.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedIds(prev => [...prev, sub.id]);
-                          } else {
-                            setSelectedIds(prev => prev.filter(x => x !== sub.id));
-                          }
-                        }}
-                        className="cursor-pointer"
-                      />
-                    </td>
+                    {batchAnalysisEnabled && (
+                      <td className="p-4 pl-6 text-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(sub.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedIds(prev => [...prev, sub.id]);
+                            } else {
+                              setSelectedIds(prev => prev.filter(x => x !== sub.id));
+                            }
+                          }}
+                          className="cursor-pointer"
+                        />
+                      </td>
+                    )}
                     <td className="p-4 pl-2 font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
                       <div className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-[10px] text-zinc-500 font-bold shrink-0">
                         {sub.studentName.charAt(0)}
@@ -585,8 +604,12 @@ export default function ClassDetailScreen() {
                     <td className="p-4 text-right pr-6">
                       <div className="flex items-center justify-end gap-1.5">
                         <button 
-                          onClick={() => navigate(`/report/${sub.id}`)}
-                          className="text-zinc-800 hover:text-black dark:text-zinc-200 dark:hover:text-white bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 font-bold text-[11px] px-3 py-1.5 rounded-lg transition-all inline-flex items-center gap-1 shadow-xs active:scale-98"
+                          onClick={() => {
+                            const reportId = getSubmissionReportId(sub);
+                            if (reportId) navigate(`/report/${reportId}`);
+                          }}
+                          disabled={!getSubmissionReportId(sub)}
+                          className="text-zinc-800 hover:text-black dark:text-zinc-200 dark:hover:text-white bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 font-bold text-[11px] px-3 py-1.5 rounded-lg transition-all inline-flex items-center gap-1 shadow-xs active:scale-98 disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                           Xem báo cáo <ChevronRight size={12} />
                         </button>
@@ -609,7 +632,7 @@ export default function ClassDetailScreen() {
       </div>
 
       {/* MODAL TIẾN TRÌNH PHÂN TÍCH HÀNG LOẠT (P1 BATCH UI) VỚI HOẠT CẢNH MƯỢT MÀ */}
-      {isBatchModalOpen && batchData && (
+      {batchAnalysisEnabled && isBatchModalOpen && batchData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-zinc-950/40 backdrop-blur-xs animate-fade-in-backdrop"

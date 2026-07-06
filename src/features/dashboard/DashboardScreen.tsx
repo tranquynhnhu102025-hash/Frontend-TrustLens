@@ -185,7 +185,7 @@ export default function DashboardScreen() {
                       <tr 
                         key={idx} 
                         className="hover:bg-zinc-550/5 transition-colors cursor-pointer" 
-                        onClick={() => navigate(item.submission_id ? `/report/${item.submission_id}` : item.id ? `/report/${item.id}` : '/report')}
+                        onClick={() => navigate(item.report_id ? `/report/${item.report_id}` : '/classes')}
                       >
                         <td className="p-3 pl-5 font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
                           <div className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-[10px] text-zinc-500 font-bold shrink-0">

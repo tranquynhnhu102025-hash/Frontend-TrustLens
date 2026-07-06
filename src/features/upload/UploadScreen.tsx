@@ -16,6 +16,7 @@ interface FileItem {
   progress: number;
   error?: string;
   submissionId?: string;
+  reportId?: string | null;
 }
 
 export default function UploadScreen() {
@@ -190,7 +191,12 @@ export default function UploadScreen() {
           throw new Error('Không lấy được Job ID từ phản hồi phân tích.');
         }
 
-        updateItem(item.id, { status: 'success', progress: 100, submissionId });
+        updateItem(item.id, {
+          status: 'success',
+          progress: 100,
+          submissionId,
+          reportId: analyzeRes.report_id || null,
+        });
         
         // Điều hướng đến trang analyzing của Job
         navigate(`/analyzing/${jobId}`);
@@ -366,9 +372,9 @@ export default function UploadScreen() {
 
                     {/* Actions */}
                     <div className="shrink-0 flex items-center gap-1.5">
-                      {item.status === 'success' && item.submissionId && (
+                      {item.status === 'success' && item.reportId && (
                         <button
-                          onClick={() => navigate(`/report/${item.submissionId}`)}
+                          onClick={() => navigate(`/report/${item.reportId}`)}
                           className="p-1.5 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-lg transition-colors"
                           title="Xem báo cáo thẩm định"
                         >

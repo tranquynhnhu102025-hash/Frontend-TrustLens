@@ -39,6 +39,15 @@ function unwrapItems<T>(data: T[] | { items?: T[] }): T[] {
   return Array.isArray(data) ? data : data.items || [];
 }
 
+function normalizeSubmission(item: any): Submission {
+  return {
+    ...item,
+    id: item.id || item.submission_id,
+    report_id: item.report_id ?? item.reportId ?? null,
+    reportId: item.reportId ?? item.report_id ?? null,
+  };
+}
+
 function formatDueDate(value?: string | null) {
   if (!value) return 'Chưa đặt';
 
@@ -296,6 +305,6 @@ export const classService = {
     }
 
     const response = await axiosClient.get(`/classes/${classId}/submissions`);
-    return unwrapItems<Submission>(response.data);
+    return unwrapItems<any>(response.data).map(normalizeSubmission);
   },
 };
