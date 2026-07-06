@@ -35,6 +35,10 @@ const DEFAULT_ASSIGNMENT_TITLE = 'Báo cáo Đồ án cuối kỳ';
 const DEFAULT_ASSIGNMENT_DESCRIPTION =
   'Nộp file báo cáo đồ án để hệ thống thẩm định tài liệu tham khảo';
 
+function unwrapItems<T>(data: T[] | { items?: T[] }): T[] {
+  return Array.isArray(data) ? data : data.items || [];
+}
+
 function formatDueDate(value?: string | null) {
   if (!value) return 'Chưa đặt';
 
@@ -69,7 +73,7 @@ export function countUniqueStudents(submissions: Submission[]) {
 async function getSubmissionCount(classId: string) {
   try {
     const response = await axiosClient.get(`/classes/${classId}/submissions`);
-    return Array.isArray(response.data) ? countUniqueStudents(response.data) : 0;
+    return countUniqueStudents(unwrapItems<Submission>(response.data));
   } catch (error) {
     console.warn('Khong the tai so luong bai nop cua lop:', classId, error);
     return 0;
@@ -96,15 +100,14 @@ export const classService = {
     const assignmentsRes = await axiosClient.get('/assignments');
 
     const assignmentsMap = new Map<string, AssignmentSummary>();
-    if (Array.isArray(assignmentsRes.data)) {
-      assignmentsRes.data.forEach((asm: AssignmentSummary) => {
-        assignmentsMap.set(asm.class_id, asm);
-      });
-    }
+    unwrapItems<AssignmentSummary>(assignmentsRes.data).forEach((asm: AssignmentSummary) => {
+      assignmentsMap.set(asm.class_id, asm);
+    });
 
     const coursesList: Course[] = [];
-    if (Array.isArray(classesRes.data)) {
-      for (const item of classesRes.data) {
+    const classItems = unwrapItems<any>(classesRes.data);
+    if (classItems.length > 0) {
+      for (const item of classItems) {
         let assignment = assignmentsMap.get(item.id);
 
         if (!assignment) {
@@ -157,9 +160,7 @@ export const classService = {
     }
 
     const coursesRes = await axiosClient.get('/courses');
-    let course = Array.isArray(coursesRes.data)
-      ? coursesRes.data.find((c: any) => c.code.toUpperCase() === newCode.toUpperCase())
-      : null;
+    let course = unwrapItems<any>(coursesRes.data).find((c: any) => c.code.toUpperCase() === newCode.toUpperCase()) || null;
 
     if (!course) {
       const newCourseRes = await axiosClient.post('/courses', {
@@ -295,6 +296,6 @@ export const classService = {
     }
 
     const response = await axiosClient.get(`/classes/${classId}/submissions`);
-    return response.data;
+    return unwrapItems<Submission>(response.data);
   },
 };

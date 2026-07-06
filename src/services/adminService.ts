@@ -70,6 +70,10 @@ const MOCK_AI_HEALTH: AiHealthInfo = {
 
 const useMock = isMockMode;
 
+function unwrapItems<T>(data: T[] | { items?: T[] }): T[] {
+  return Array.isArray(data) ? data : data.items || [];
+}
+
 export interface User {
   id: string;
   full_name: string;
@@ -97,7 +101,7 @@ export const adminService = {
       });
     }
     const response = await axiosClient.get('/admin/audit-logs');
-    return response.data;
+    return unwrapItems<AuditLog>(response.data);
   },
 
   getProviders: async (): Promise<MetadataProviderInfo[]> => {
@@ -176,7 +180,7 @@ export const adminService = {
       });
     }
     const response = await axiosClient.get('/admin/users');
-    return { users: response.data, isMocked: false };
+    return { users: unwrapItems<User>(response.data), isMocked: false };
   },
 
   createUser: async (user: Omit<User, 'id' | 'createdAt'>): Promise<{ user: User; isMocked: boolean }> => {
