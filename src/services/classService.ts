@@ -1,4 +1,5 @@
 import axiosClient from './axiosClient';
+import { isMockMode } from './mockMode';
 import { MOCK_CLASSES, MOCK_SUBMISSIONS, Submission } from '../mocks/dummyData';
 
 export type { Submission };
@@ -27,6 +28,8 @@ type UpdateClassPayload = {
   due_date?: string | null;
   assignment_id?: string;
 };
+
+const useMock = isMockMode;
 
 const DEFAULT_ASSIGNMENT_TITLE = 'Báo cáo Đồ án cuối kỳ';
 const DEFAULT_ASSIGNMENT_DESCRIPTION =
@@ -75,7 +78,7 @@ async function getSubmissionCount(classId: string) {
 
 export const classService = {
   getClasses: async (): Promise<Course[]> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true') {
+    if (useMock()) {
       return new Promise((resolve) => {
         setTimeout(() => {
           resolve(
@@ -135,7 +138,7 @@ export const classService = {
   },
 
   createClass: async (newCode: string, newName: string): Promise<Course> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true') {
+    if (useMock()) {
       return new Promise((resolve) => {
         setTimeout(() => {
           const newClass: Course = {
@@ -198,7 +201,7 @@ export const classService = {
   },
 
   updateClass: async (classId: string, payload: UpdateClassPayload): Promise<Course> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true') {
+    if (useMock()) {
       const idx = MOCK_CLASSES.findIndex((cls) => cls.id === classId || cls.class_uuid === classId);
       if (idx === -1) {
         throw new Error('Khong tim thay lop hoc phan.');
@@ -248,7 +251,7 @@ export const classService = {
   },
 
   deleteClass: async (classId: string): Promise<void> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true') {
+    if (useMock()) {
       const idx = MOCK_CLASSES.findIndex((cls) => cls.id === classId || cls.class_uuid === classId);
       if (idx !== -1) {
         const removed = MOCK_CLASSES[idx];
@@ -266,7 +269,7 @@ export const classService = {
   },
 
   deleteSubmission: async (submissionId: string): Promise<void> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true' || submissionId.startsWith('mock-')) {
+    if (useMock()) {
       const idx = MOCK_SUBMISSIONS.findIndex((sub) => sub.id === submissionId);
       if (idx !== -1) {
         MOCK_SUBMISSIONS.splice(idx, 1);
@@ -278,7 +281,11 @@ export const classService = {
   },
 
   getSubmissionsByClass: async (classId: string): Promise<Submission[]> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true' || classId.startsWith('mock-') || !classId) {
+    if (!classId) {
+      return [];
+    }
+
+    if (useMock()) {
       return new Promise((resolve) => {
         setTimeout(() => {
           const filtered = MOCK_SUBMISSIONS.filter((sub) => sub.classId === classId);
@@ -287,12 +294,7 @@ export const classService = {
       });
     }
 
-    try {
-      const response = await axiosClient.get(`/classes/${classId}/submissions`);
-      return response.data;
-    } catch (error) {
-      console.warn('Backend does not support fetching class submissions. Falling back to mock data.', error);
-      return MOCK_SUBMISSIONS.filter((sub) => sub.classId === classId);
-    }
+    const response = await axiosClient.get(`/classes/${classId}/submissions`);
+    return response.data;
   },
 };

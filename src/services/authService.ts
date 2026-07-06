@@ -1,6 +1,9 @@
 import axiosClient from './axiosClient';
+import { isMockMode } from './mockMode';
 import { MOCK_USER } from '../mocks/dummyData';
 import { clearAuthSession, getPermissionsForRole, getStoredAuthUser, storeAuthUser } from '../auth/permissions';
+
+const useMock = isMockMode;
 
 
 export interface RegisterData {
@@ -12,7 +15,7 @@ export interface RegisterData {
 export const authService = {
   // Hàm Login: Lấy và lưu cả Access Token lẫn Refresh Token
   login: async (email: string, password: string) => {
-    if (import.meta.env.VITE_USE_MOCK === 'true') {
+    if (useMock()) {
       return new Promise<any>((resolve) => {
         setTimeout(() => {
           const role = email.toLowerCase().includes('admin') ? 'admin' : 'lecturer';
@@ -59,7 +62,7 @@ export const authService = {
   },
 
   register: async (data: RegisterData) => {
-    if (import.meta.env.VITE_USE_MOCK === 'true') {
+    if (useMock()) {
       return new Promise<any>((resolve) => {
         setTimeout(() => {
           resolve({ message: 'Đăng ký tài khoản giả lập thành công!' });
@@ -73,7 +76,7 @@ export const authService = {
 
 
   getMe: async () => {
-    if (import.meta.env.VITE_USE_MOCK === 'true') {
+    if (useMock()) {
       return new Promise<any>((resolve) => {
         setTimeout(() => {
           const storedUser = getStoredAuthUser();
@@ -99,7 +102,7 @@ export const authService = {
     major?: string;
     notification_enabled?: boolean;
   }) => {
-    if (import.meta.env.VITE_USE_MOCK === 'true') {
+    if (useMock()) {
       const currentUser = getStoredAuthUser() || MOCK_USER;
       return storeAuthUser({
         ...currentUser,

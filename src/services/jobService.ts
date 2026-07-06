@@ -1,4 +1,5 @@
 import axiosClient from './axiosClient';
+import { isMockMode } from './mockMode';
 
 export interface JobError {
   error_code: string;
@@ -23,10 +24,11 @@ export interface JobStatusResponse {
 import { MOCK_STAGES } from '../mocks/dummyData';
 
 const mockJobStates: Record<string, number> = {};
+const useMock = isMockMode;
 
 export const jobService = {
   getJobStatus: async (jobId: string): Promise<JobStatusResponse> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true' || jobId.startsWith('mock-')) {
+    if (useMock()) {
       // Giả lập thời gian chờ để có tiến trình tăng dần
       let currentIndex = mockJobStates[jobId] ?? 0;
       const stage = MOCK_STAGES[currentIndex];
@@ -58,7 +60,7 @@ export const jobService = {
   },
 
   retryJob: async (jobId: string, mode = 'full', reason = ''): Promise<{ job_id: string; status: string }> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true' || jobId.startsWith('mock-')) {
+    if (useMock()) {
       const newJobId = `mock-job-${Math.random().toString(36).substring(2, 9)}`;
       
       // Giả lập điểm bắt đầu tùy theo loại retry

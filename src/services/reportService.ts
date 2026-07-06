@@ -1,21 +1,24 @@
 import axiosClient from './axiosClient';
+import { isMockMode } from './mockMode';
 import { MOCK_REPORT, MOCK_REVISIONS } from '../mocks/dummyData';
+
+const useMock = isMockMode;
 
 export const reportService = {
   getReport: async (id: string) => {
-    if (import.meta.env.VITE_USE_MOCK === 'true' || id.startsWith('mock-')) {
+    if (useMock()) {
       return new Promise<any>((resolve) => {
         setTimeout(() => {
           resolve(MOCK_REPORT);
         }, 600);
       });
     }
-    const response = await axiosClient.get(`/reports/submissions/${id}`);
+    const response = await axiosClient.get(`/reports/${id}`);
     return response.data; 
   },
 
   getReportBySubmission: async (submissionId: string) => {
-    if (import.meta.env.VITE_USE_MOCK === 'true' || submissionId.startsWith('mock-')) {
+    if (useMock()) {
       return new Promise<any>((resolve) => {
         setTimeout(() => {
           resolve(MOCK_REPORT);
@@ -27,7 +30,7 @@ export const reportService = {
   },
 
   exportReport: async (reportId: string, format = 'pdf', _includeTeacherNotes = false) => {
-    if (import.meta.env.VITE_USE_MOCK === 'true' || reportId.startsWith('mock-')) {
+    if (useMock()) {
       return new Promise<any>((resolve) => {
         setTimeout(() => {
           resolve({ export_id: `mock-export-${Math.random().toString(36).substring(2, 9)}` });
@@ -39,7 +42,7 @@ export const reportService = {
   },
 
   downloadExportFile: async (exportId: string): Promise<Blob> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true' || exportId.startsWith('mock-')) {
+    if (useMock()) {
       return new Blob(['Mock PDF/Word/Excel Content'], { type: 'application/octet-stream' });
     }
     if (exportId.startsWith('direct-download::')) {
@@ -60,7 +63,7 @@ export const reportService = {
   },
 
   getReportHistory: async (reportId: string): Promise<any[]> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true' || reportId.startsWith('mock-')) {
+    if (useMock()) {
       return new Promise<any[]>((resolve) => {
         setTimeout(() => {
           resolve(MOCK_REVISIONS);

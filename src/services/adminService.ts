@@ -1,4 +1,5 @@
 import axiosClient from './axiosClient';
+import { isMockMode } from './mockMode';
 import { MOCK_AUDIT_LOGS } from '../mocks/dummyData';
 
 export interface AuditLog {
@@ -67,6 +68,8 @@ const MOCK_AI_HEALTH: AiHealthInfo = {
   prompt_version: 'c4-v2'
 };
 
+const useMock = isMockMode;
+
 export interface User {
   id: string;
   full_name: string;
@@ -86,7 +89,7 @@ let MOCK_USERS: User[] = [
 
 export const adminService = {
   getAuditLogs: async (): Promise<AuditLog[]> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true') {
+    if (useMock()) {
       return new Promise((resolve) => {
         setTimeout(() => {
           resolve(MOCK_AUDIT_LOGS);
@@ -98,7 +101,7 @@ export const adminService = {
   },
 
   getProviders: async (): Promise<MetadataProviderInfo[]> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true') {
+    if (useMock()) {
       return new Promise((resolve) => {
         setTimeout(() => {
           resolve([...MOCK_PROVIDERS]);
@@ -110,7 +113,7 @@ export const adminService = {
   },
 
   updateProvider: async (id: string, payload: Partial<MetadataProviderInfo>): Promise<MetadataProviderInfo> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true') {
+    if (useMock()) {
       const idx = MOCK_PROVIDERS.findIndex(p => p.id === id);
       if (idx !== -1) {
         MOCK_PROVIDERS[idx] = { ...MOCK_PROVIDERS[idx], ...payload };
@@ -126,7 +129,7 @@ export const adminService = {
   },
 
   getAiHealth: async (): Promise<AiHealthInfo> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true') {
+    if (useMock()) {
       return new Promise((resolve) => {
         setTimeout(() => resolve({ ...MOCK_AI_HEALTH }), 350);
       });
@@ -136,7 +139,7 @@ export const adminService = {
   },
 
   diagnoseRelevance: async (payload: RelevanceDiagnoseRequest): Promise<RelevanceDiagnoseResult> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true') {
+    if (useMock()) {
       return new Promise((resolve) => {
         setTimeout(() => {
           resolve({
@@ -165,24 +168,19 @@ export const adminService = {
   },
 
   getUsers: async (): Promise<{ users: User[]; isMocked: boolean }> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true') {
+    if (useMock()) {
       return new Promise((resolve) => {
         setTimeout(() => {
           resolve({ users: [...MOCK_USERS], isMocked: true });
         }, 400);
       });
     }
-    try {
-      const response = await axiosClient.get('/admin/users');
-      return { users: response.data, isMocked: false };
-    } catch (err) {
-      console.warn("Backend /admin/users failed, falling back to mock:", err);
-      return { users: [...MOCK_USERS], isMocked: true };
-    }
+    const response = await axiosClient.get('/admin/users');
+    return { users: response.data, isMocked: false };
   },
 
   createUser: async (user: Omit<User, 'id' | 'createdAt'>): Promise<{ user: User; isMocked: boolean }> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true') {
+    if (useMock()) {
       return new Promise((resolve) => {
         setTimeout(() => {
           const newUser: User = {
@@ -195,23 +193,12 @@ export const adminService = {
         }, 400);
       });
     }
-    try {
-      const response = await axiosClient.post('/admin/users', user);
-      return { user: response.data, isMocked: false };
-    } catch (err) {
-      console.warn("Backend POST /admin/users failed, falling back to mock:", err);
-      const newUser: User = {
-        ...user,
-        id: `usr-${Date.now()}`,
-        createdAt: new Date().toISOString().split('T')[0]
-      };
-      MOCK_USERS = [newUser, ...MOCK_USERS];
-      return { user: newUser, isMocked: true };
-    }
+    const response = await axiosClient.post('/admin/users', user);
+    return { user: response.data, isMocked: false };
   },
 
   updateUser: async (id: string, payload: Partial<User>): Promise<{ user: User; isMocked: boolean }> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true') {
+    if (useMock()) {
       return new Promise((resolve, reject) => {
         setTimeout(() => {
           const idx = MOCK_USERS.findIndex(u => u.id === id);
@@ -224,22 +211,12 @@ export const adminService = {
         }, 300);
       });
     }
-    try {
-      const response = await axiosClient.put(`/admin/users/${id}`, payload);
-      return { user: response.data, isMocked: false };
-    } catch (err) {
-      console.warn(`Backend PUT /admin/users/${id} failed, falling back to mock:`, err);
-      const idx = MOCK_USERS.findIndex(u => u.id === id);
-      if (idx !== -1) {
-        MOCK_USERS[idx] = { ...MOCK_USERS[idx], ...payload };
-        return { user: { ...MOCK_USERS[idx] }, isMocked: true };
-      }
-      throw new Error("Không tìm thấy người dùng.");
-    }
+    const response = await axiosClient.put(`/admin/users/${id}`, payload);
+    return { user: response.data, isMocked: false };
   },
 
   deleteUser: async (id: string): Promise<{ success: boolean; isMocked: boolean }> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true') {
+    if (useMock()) {
       return new Promise((resolve) => {
         setTimeout(() => {
           MOCK_USERS = MOCK_USERS.filter(u => u.id !== id);
@@ -247,14 +224,8 @@ export const adminService = {
         }, 300);
       });
     }
-    try {
-      await axiosClient.delete(`/admin/users/${id}`);
-      return { success: true, isMocked: false };
-    } catch (err) {
-      console.warn(`Backend DELETE /admin/users/${id} failed, falling back to mock:`, err);
-      MOCK_USERS = MOCK_USERS.filter(u => u.id !== id);
-      return { success: true, isMocked: true };
-    }
+    await axiosClient.delete(`/admin/users/${id}`);
+    return { success: true, isMocked: false };
   }
 };
 

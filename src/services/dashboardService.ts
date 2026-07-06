@@ -1,9 +1,12 @@
 import axiosClient from './axiosClient';
+import { isMockMode } from './mockMode';
 import { MOCK_SUMMARY, MOCK_ACTIVITIES } from '../mocks/dummyData';
+
+const useMock = isMockMode;
 
 export const dashboardService = {
   getSummary: async () => {
-    if (import.meta.env.VITE_USE_MOCK === 'true') {
+    if (useMock()) {
       return MOCK_SUMMARY;
     }
     try {
@@ -16,7 +19,7 @@ export const dashboardService = {
   },
 
   getRecentActivities: async () => {
-    if (import.meta.env.VITE_USE_MOCK === 'true') {
+    if (useMock()) {
       return MOCK_ACTIVITIES;
     }
     try {
@@ -29,7 +32,7 @@ export const dashboardService = {
   },
 
   getWeeklyTrend: async () => {
-    if (import.meta.env.VITE_USE_MOCK === 'true') {
+    if (useMock()) {
       return [40, 70, 45, 90, 65, 85, 100].map((rate, index) => ({
         label: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'][index],
         total: 1,

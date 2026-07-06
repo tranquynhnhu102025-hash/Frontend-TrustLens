@@ -1,4 +1,5 @@
 import axiosClient from './axiosClient';
+import { isMockMode } from './mockMode';
 
 export interface BatchItem {
   submission_id: string;
@@ -26,10 +27,11 @@ export interface BatchStatusResponse {
 }
 
 const mockBatchStates: Record<string, BatchStatusResponse> = {};
+const useMock = isMockMode;
 
 export const batchService = {
   createBatch: async (assignmentId: string, submissionIds: string[]): Promise<{ batch_id: string; status: string; total_items: number }> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true' || assignmentId.startsWith('mock-')) {
+    if (useMock()) {
       const batchId = `mock-batch-${Math.random().toString(36).substring(2, 9)}`;
       
       // Khởi tạo trạng thái ban đầu của mock batch
@@ -84,7 +86,7 @@ export const batchService = {
   },
 
   startBatch: async (batchId: string): Promise<{ batch_id: string; status: string }> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true' || batchId.startsWith('mock-batch-')) {
+    if (useMock()) {
       const batch = mockBatchStates[batchId];
       if (batch) {
         batch.status = 'queued';
@@ -107,7 +109,7 @@ export const batchService = {
   },
 
   getBatchStatus: async (batchId: string): Promise<BatchStatusResponse> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true' || batchId.startsWith('mock-batch-')) {
+    if (useMock()) {
       const batch = mockBatchStates[batchId];
       if (!batch) {
         throw new Error('Không tìm thấy thông tin lô phân tích.');
@@ -175,7 +177,7 @@ export const batchService = {
   },
 
   cancelBatch: async (batchId: string): Promise<{ batch_id: string; status: string }> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true' || batchId.startsWith('mock-batch-')) {
+    if (useMock()) {
       const batch = mockBatchStates[batchId];
       if (batch) {
         batch.status = 'cancelled';
@@ -192,7 +194,7 @@ export const batchService = {
   },
 
   retryFailed: async (batchId: string): Promise<{ batch_id: string; status: string }> => {
-    if (import.meta.env.VITE_USE_MOCK === 'true' || batchId.startsWith('mock-batch-')) {
+    if (useMock()) {
       const batch = mockBatchStates[batchId];
       if (batch) {
         batch.status = 'running';

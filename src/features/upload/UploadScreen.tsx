@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useNavigate, useLocation, useOutletContext } from 'react-router-dom';
 import { classService, Course } from '../../services/classService';
+import { isMockMode } from '../../services/mockMode';
 
 interface FileItem {
   id: string;
@@ -25,6 +26,7 @@ export default function UploadScreen() {
   const theme = contextTheme || localStorage.getItem('theme') || 'dark';
   
   const selectedClass = location.state?.selectedClass;
+  const useMock = isMockMode;
 
   const [fileItems, setFileItems] = useState<FileItem[]>([]);
   const [error, setError] = useState('');
@@ -160,7 +162,7 @@ export default function UploadScreen() {
 
       updateItem(item.id, { status: 'uploading', progress: 10, error: undefined });
 
-      if (import.meta.env.VITE_USE_MOCK === 'true') {
+      if (useMock()) {
         const mockJobId = `mock-job-${item.id}-${Math.random().toString(36).substring(2, 9)}`;
         // Chuyển hướng ngay sang màn hình phân tích (mock)
         navigate(`/analyzing/${mockJobId}`);

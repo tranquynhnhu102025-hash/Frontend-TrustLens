@@ -85,8 +85,17 @@ export default function AnalyzingScreen() {
         // Nếu hoàn thành, dừng poll và chuyển hướng sang Report
         if (data.status.toLowerCase() === 'completed') {
           clearInterval(intervalId);
+          if (!data.report_id) {
+            setError({
+              error_code: 'REPORT_ID_MISSING',
+              message: 'Backend reported the job as completed but did not return a report_id.',
+              retryable: false,
+            });
+            setStatus('failed_internal');
+            return;
+          }
           setTimeout(() => {
-            navigate(`/report/${data.report_id || data.submission_id}`);
+            navigate(`/report/${data.report_id}`);
           }, 1200);
         }
 
@@ -94,8 +103,8 @@ export default function AnalyzingScreen() {
         if (data.status.toLowerCase().startsWith('failed') || data.status.toLowerCase() === 'cancelled') {
           clearInterval(intervalId);
           setError(data.error || {
-            error_code: data.error_code || 'JOB_FAILED',
-            message: data.error_message || 'Quá trình thẩm định tài liệu thất bại không rõ nguyên nhân.'
+            error_code: 'JOB_FAILED',
+            message: 'Quá trình thẩm định tài liệu thất bại không rõ nguyên nhân.'
           });
         }
 
