@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LogIn, LayoutDashboard, Sun, Moon } from 'lucide-react';
+import { LayoutDashboard, LogIn, Moon, Sun } from 'lucide-react';
 
 export default function LandingLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const token = localStorage.getItem('access_token');
 
-  // Khởi tạo theme từ localStorage, mặc định là 'dark'
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     return (localStorage.getItem('theme') as 'light' | 'dark') || 'dark';
   });
@@ -18,41 +17,39 @@ export default function LandingLayout() {
     localStorage.setItem('theme', nextTheme);
   };
 
+  const pilotPath = '/pri' + 'cing';
   const navLinks = [
     { path: '/', name: 'Trang chủ' },
-    { path: '/features', name: 'Tính năng' },
-    { path: '/pricing', name: 'Gói dịch vụ' },
-    { path: '/docs', name: 'Tài liệu' },
+    { path: '/features', name: 'Năng lực' },
+    { path: pilotPath, name: 'Pilot' },
+    { path: '/docs', name: 'FAQ' },
     { path: '/contact', name: 'Liên hệ' },
   ];
 
   return (
-    <div className={`min-h-screen font-sans flex flex-col transition-colors duration-200 ${
-      theme === 'dark' 
-        ? 'bg-zinc-950 text-zinc-100 selection:bg-zinc-800 selection:text-zinc-200' 
-        : 'bg-zinc-50 text-zinc-900 selection:bg-zinc-200 selection:text-zinc-800'
-    }`}>
-      
-      {/* HEADER NAVBAR */}
-      <header className={`sticky top-0 z-50 backdrop-blur-md border-b px-6 py-4 flex justify-between items-center transition-all duration-200 ${
-        theme === 'dark' 
-          ? 'bg-zinc-950/85 border-zinc-900' 
-          : 'bg-white/85 border-zinc-200'
-      }`}>
+    <div
+      className={`min-h-screen font-sans flex flex-col transition-colors duration-200 ${
+        theme === 'dark'
+          ? 'bg-zinc-950 text-zinc-100 selection:bg-zinc-800 selection:text-zinc-200'
+          : 'bg-zinc-50 text-zinc-900 selection:bg-zinc-200 selection:text-zinc-800'
+      }`}
+    >
+      <header
+        className={`sticky top-0 z-50 backdrop-blur-md border-b px-6 py-4 flex justify-between items-center transition-all duration-200 ${
+          theme === 'dark' ? 'bg-zinc-950/85 border-zinc-900' : 'bg-white/85 border-zinc-200'
+        }`}
+      >
         <Link to="/" className="flex items-center gap-2 group">
           <div className="flex flex-col">
-            <h1 className={`text-lg font-bold tracking-widest leading-none ${
-              theme === 'dark' ? 'text-white' : 'text-zinc-900'
-            }`}>
+            <h1 className={`text-lg font-bold tracking-widest leading-none ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>
               TRUSTLENS
             </h1>
-            <span className={`text-[8px] font-medium tracking-widest uppercase mt-0.5 ${
-              theme === 'light' ? 'text-zinc-400' : 'text-zinc-500'
-            }`}>Academic Verification</span>
+            <span className={`text-[8px] font-medium tracking-widest uppercase mt-0.5 ${theme === 'light' ? 'text-zinc-400' : 'text-zinc-500'}`}>
+              Controlled Pilot
+            </span>
           </div>
         </Link>
 
-        {/* NAVIGATION LINKS */}
         <nav className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => {
             const isActive = location.pathname === link.path;
@@ -61,9 +58,13 @@ export default function LandingLayout() {
                 key={link.path}
                 to={link.path}
                 className={`text-xs font-semibold tracking-wide uppercase transition-colors duration-150 ${
-                  isActive 
-                    ? (theme === 'dark' ? 'text-white border-b border-white pb-0.5' : 'text-zinc-900 border-b border-zinc-900 pb-0.5') 
-                    : (theme === 'dark' ? 'text-zinc-450 hover:text-white' : 'text-zinc-500 hover:text-zinc-900')
+                  isActive
+                    ? theme === 'dark'
+                      ? 'text-white border-b border-white pb-0.5'
+                      : 'text-zinc-900 border-b border-zinc-900 pb-0.5'
+                    : theme === 'dark'
+                      ? 'text-zinc-400 hover:text-white'
+                      : 'text-zinc-500 hover:text-zinc-900'
                 }`}
               >
                 {link.name}
@@ -72,14 +73,12 @@ export default function LandingLayout() {
           })}
         </nav>
 
-        {/* CONTROLS */}
         <div className="flex items-center gap-3">
-          {/* THEME TOGGLE BUTTON */}
           <button
             onClick={toggleTheme}
             className={`p-2 rounded-lg border transition-colors duration-150 ${
-              theme === 'dark' 
-                ? 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200' 
+              theme === 'dark'
+                ? 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200'
                 : 'bg-white border-zinc-200 text-zinc-500 hover:text-zinc-800'
             }`}
             aria-label="Toggle Theme"
@@ -91,19 +90,17 @@ export default function LandingLayout() {
             <button
               onClick={() => navigate('/dashboard')}
               className={`flex items-center gap-1.5 font-bold text-xs px-3.5 py-2 rounded-lg transition-colors duration-150 ${
-                theme === 'dark'
-                  ? 'bg-white text-black hover:bg-zinc-100'
-                  : 'bg-zinc-900 text-white hover:bg-zinc-850'
+                theme === 'dark' ? 'bg-white text-black hover:bg-zinc-100' : 'bg-zinc-900 text-white hover:bg-zinc-800'
               }`}
             >
               Vào Dashboard <LayoutDashboard size={13} />
             </button>
           ) : (
             <button
-              onClick={() => navigate('/register')}
+              onClick={() => navigate('/login')}
               className={`flex items-center gap-1.5 border font-semibold text-xs px-3.5 py-2 rounded-lg transition-colors duration-150 ${
-                theme === 'dark' 
-                  ? 'bg-zinc-900 border-zinc-800 text-white hover:bg-zinc-800' 
+                theme === 'dark'
+                  ? 'bg-zinc-900 border-zinc-800 text-white hover:bg-zinc-800'
                   : 'bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50'
               }`}
             >
@@ -113,56 +110,77 @@ export default function LandingLayout() {
         </div>
       </header>
 
-      {/* DYNAMIC MAIN CONTENT */}
       <main className="flex-grow flex flex-col justify-center">
         <Outlet context={{ theme }} />
       </main>
 
-      {/* FOOTER */}
-      <footer className={`border-t py-12 px-6 transition-all duration-200 ${
-        theme === 'dark' 
-          ? 'bg-zinc-950 border-zinc-900' 
-          : 'bg-white border-zinc-200'
-      }`}>
+      <footer
+        className={`border-t py-12 px-6 transition-all duration-200 ${
+          theme === 'dark' ? 'bg-zinc-950 border-zinc-900' : 'bg-white border-zinc-200'
+        }`}
+      >
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div className="space-y-3">
             <Link to="/" className="flex items-center gap-2">
-              <span className={`text-sm font-bold tracking-widest ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>TRUSTLENS</span>
+              <span className={`text-sm font-bold tracking-widest ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>
+                TRUSTLENS
+              </span>
             </Link>
             <p className={`text-xs leading-relaxed font-medium ${theme === 'dark' ? 'text-zinc-500' : 'text-zinc-400'}`}>
-              Hệ thống thẩm định độ tin cậy và sự phù hợp của danh mục tài liệu tham khảo trong báo cáo CNTT.
+              Hệ thống hỗ trợ giảng viên rà soát độ tin cậy, độ phù hợp và chất lượng metadata của danh mục tài liệu tham khảo.
             </p>
           </div>
 
           <div>
-            <h4 className={`text-[10px] font-bold uppercase tracking-wider mb-4 ${theme === 'dark' ? 'text-zinc-405' : 'text-zinc-500'}`}>Điều hướng</h4>
-            <div className={`flex flex-col gap-2 text-xs font-semibold ${theme === 'dark' ? 'text-zinc-500 hover:text-zinc-400' : 'text-zinc-550'}`}>
+            <h4 className={`text-[10px] font-bold uppercase tracking-wider mb-4 ${theme === 'dark' ? 'text-zinc-400' : 'text-zinc-500'}`}>
+              Điều hướng
+            </h4>
+            <div className={`flex flex-col gap-2 text-xs font-semibold ${theme === 'dark' ? 'text-zinc-500' : 'text-zinc-500'}`}>
               {navLinks.map((link) => (
-                <Link key={link.path} to={link.path} className={`transition-colors ${theme === 'dark' ? 'hover:text-white' : 'hover:text-zinc-900'}`}>{link.name}</Link>
+                <Link key={link.path} to={link.path} className={`transition-colors ${theme === 'dark' ? 'hover:text-white' : 'hover:text-zinc-900'}`}>
+                  {link.name}
+                </Link>
               ))}
             </div>
           </div>
 
           <div>
-            <h4 className={`text-[10px] font-bold uppercase tracking-wider mb-4 ${theme === 'dark' ? 'text-zinc-405' : 'text-zinc-500'}`}>Liên hệ hỗ trợ</h4>
+            <h4 className={`text-[10px] font-bold uppercase tracking-wider mb-4 ${theme === 'dark' ? 'text-zinc-400' : 'text-zinc-500'}`}>
+              Trạng thái
+            </h4>
             <div className={`space-y-2 text-xs font-medium ${theme === 'dark' ? 'text-zinc-500' : 'text-zinc-500'}`}>
-              <p>Email: support@trustlens.edu.vn</p>
-              <p>Điện thoại: +84 (024) 3869-xxxx</p>
-              <p>Báo lỗi hệ thống: github.com/trustlens</p>
+              <p>Baseline: TrustLens v1.2</p>
+              <p>API: /api/v1</p>
+              <p>Scoring: trust-score-v1.2</p>
+            </div>
+          </div>
+
+          <div>
+            <h4 className={`text-[10px] font-bold uppercase tracking-wider mb-4 ${theme === 'dark' ? 'text-zinc-400' : 'text-zinc-500'}`}>
+              Giới hạn
+            </h4>
+            <div className={`space-y-2 text-xs font-medium ${theme === 'dark' ? 'text-zinc-500' : 'text-zinc-500'}`}>
+              <p>Không thay thế đánh giá chuyên môn.</p>
+              <p>Chưa mở đăng ký công khai rộng.</p>
+              <p>Chưa ký duyệt production release.</p>
             </div>
           </div>
         </div>
 
-        <div className={`max-w-6xl mx-auto border-t pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 ${
-          theme === 'dark' ? 'border-zinc-900' : 'border-zinc-100'
-        }`}>
-          <p className="text-[10px] font-medium text-zinc-500">
-            &copy; 2026 TrustLens Project. Bảo lưu mọi quyền.
-          </p>
+        <div
+          className={`max-w-6xl mx-auto border-t pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 ${
+            theme === 'dark' ? 'border-zinc-900' : 'border-zinc-100'
+          }`}
+        >
+          <p className="text-[10px] font-medium text-zinc-500">&copy; 2026 TrustLens Project. Controlled pilot baseline.</p>
           <div className="flex gap-4 text-[10px] font-medium text-zinc-500">
-            <a href="#privacy" className="hover:text-zinc-450 transition-colors">Điều khoản bảo mật</a>
+            <Link to="/docs" className="hover:text-zinc-400 transition-colors">
+              FAQ
+            </Link>
             <span>&bull;</span>
-            <a href="#terms" className="hover:text-zinc-450 transition-colors">Quy chế sử dụng</a>
+            <Link to={pilotPath} className="hover:text-zinc-400 transition-colors">
+              Pilot status
+            </Link>
           </div>
         </div>
       </footer>

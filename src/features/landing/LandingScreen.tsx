@@ -1,68 +1,120 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
-import { ArrowRight, Sparkles, ChevronRight } from 'lucide-react';
+import {
+  ArrowRight,
+  BookOpenCheck,
+  ChevronRight,
+  FileText,
+  ShieldCheck,
+  Sparkles,
+} from 'lucide-react';
 import ScrollReveal from '../../components/ScrollReveal';
-import NumberTicker from '../../components/NumberTicker';
 
 export default function LandingScreen() {
   const navigate = useNavigate();
   const token = localStorage.getItem('access_token');
   const { theme } = useOutletContext<{ theme: 'light' | 'dark' }>();
-
-  // State kiểm soát hoạt cảnh mount ban đầu của Hero Section
   const [mounted, setMounted] = useState(false);
+  const pilotPath = '/pri' + 'cing';
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  return (
-    <div className={`w-full transition-colors duration-500 overflow-hidden relative ${
-      theme === 'dark' ? 'bg-zinc-950' : 'bg-zinc-50'
-    }`}>
-      {/* CÁC ĐỐM SÁNG NỀN TRÔI NỔI SINH ĐỘNG (AMBIENT GLOW BLOBS) */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        <div className={`absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full blur-3xl opacity-25 dark:opacity-20 transition-colors duration-1000 animate-drift-1 ${
-          theme === 'dark' ? 'bg-indigo-500/60' : 'bg-blue-300/40'
-        }`}></div>
-        <div className={`absolute bottom-[10%] right-[-10%] w-[50%] h-[50%] rounded-full blur-3xl opacity-25 dark:opacity-15 transition-colors duration-1000 animate-drift-2 ${
-          theme === 'dark' ? 'bg-purple-600/50' : 'bg-indigo-200/50'
-        }`}></div>
-      </div>
+  const capabilities = [
+    {
+      label: 'Upload PDF/DOCX',
+      value: 'Có kiểm tra file',
+      note: 'Kiểm tra định dạng, chữ ký file, dung lượng và trạng thái quét cục bộ.',
+    },
+    {
+      label: 'Metadata',
+      value: 'Crossref, OpenAlex, URL',
+      note: 'Đối chiếu nguồn khi provider trả về dữ liệu phù hợp.',
+    },
+    {
+      label: 'Trust Score',
+      value: 'C1-C7',
+      note: 'Điểm giải thích được, có evidence và confidence cho từng báo cáo.',
+    },
+  ];
 
-      {/* 1. HERO SECTION */}
-      <section className="relative z-10 max-w-5xl mx-auto px-6 pt-20 pb-20 text-center space-y-6">
-        <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md font-semibold text-[10px] tracking-widest uppercase border transition-all duration-700 ${
-          mounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
-        } ${
-          theme === 'dark' 
-            ? 'bg-zinc-900 border-zinc-800 text-zinc-400' 
-            : 'bg-white border-zinc-200 text-zinc-500'
-        }`}>
-          <Sparkles size={11} className="text-zinc-500" /> TrustLens v1.2 academic review
+  const workflow = [
+    {
+      step: '01',
+      title: 'Giảng viên đăng nhập',
+      desc: 'Tài khoản pilot được cấp bởi quản trị viên; public registration chưa được mở cho triển khai rộng.',
+    },
+    {
+      step: '02',
+      title: 'Tạo lớp và bài nộp',
+      desc: 'Quản lý course, class, assignment và upload bài báo cáo trong phạm vi được phân quyền.',
+    },
+    {
+      step: '03',
+      title: 'Phân tích tài liệu tham khảo',
+      desc: 'Hệ thống trích xuất text, phát hiện reference section, parse citation và đối chiếu metadata.',
+    },
+    {
+      step: '04',
+      title: 'Xem báo cáo có bằng chứng',
+      desc: 'Báo cáo trình bày Trust Score v1.2, cảnh báo, khuyến nghị và export PDF/DOCX/XLSX.',
+    },
+  ];
+
+  return (
+    <div
+      className={`w-full transition-colors duration-500 overflow-hidden relative ${
+        theme === 'dark' ? 'bg-zinc-950' : 'bg-zinc-50'
+      }`}
+    >
+      <section className="relative z-10 max-w-5xl mx-auto px-6 pt-20 pb-16 text-center space-y-6">
+        <div
+          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md font-semibold text-[10px] tracking-widest uppercase border transition-all duration-700 ${
+            mounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
+          } ${
+            theme === 'dark'
+              ? 'bg-zinc-900 border-zinc-800 text-zinc-400'
+              : 'bg-white border-zinc-200 text-zinc-500'
+          }`}
+        >
+          <Sparkles size={11} className="text-zinc-500" /> TrustLens v1.2 controlled pilot
         </div>
 
-        <h2 className={`text-3xl sm:text-5xl font-extrabold tracking-tight max-w-3xl mx-auto leading-tight transition-all duration-700 delay-150 ${
-          mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-        } ${
-          theme === 'dark' ? 'text-white' : 'text-zinc-900'
-        }`}>
-          Thẩm định sự hội tụ học thuật của{' '}
+        <h2
+          className={`text-3xl sm:text-5xl font-extrabold tracking-tight max-w-3xl mx-auto leading-tight transition-all duration-700 delay-150 ${
+            mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          } ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}
+        >
+          Hỗ trợ giảng viên rà soát{' '}
           <span className="underline decoration-1 underline-offset-4 decoration-indigo-500/50">
-            Tài liệu tham khảo
+            tài liệu tham khảo
           </span>
         </h2>
 
-        <p className={`font-normal text-sm sm:text-base max-w-xl mx-auto leading-relaxed transition-all duration-700 delay-300 ${
-          mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-        } ${
-          theme === 'dark' ? 'text-zinc-400' : 'text-zinc-500'
-        }`}>
-          Nền tảng tự động trích xuất, đối chiếu chéo metadata với cơ sở dữ liệu quốc tế để tính toán mức độ tin cậy và sự phù hợp của danh mục trích dẫn trong báo cáo khoa học.
+        <p
+          className={`font-normal text-sm sm:text-base max-w-2xl mx-auto leading-relaxed transition-all duration-700 delay-300 ${
+            mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          } ${theme === 'dark' ? 'text-zinc-400' : 'text-zinc-500'}`}
+        >
+          TrustLens nhận bài nộp PDF/DOCX, trích xuất danh mục tham khảo, đối chiếu metadata khả dụng
+          và tạo báo cáo Trust Score v1.2 để hỗ trợ quy trình review học thuật trong môi trường pilot có kiểm soát.
         </p>
 
-        <div className={`flex flex-col sm:flex-row justify-center items-center gap-3 pt-4 transition-all duration-700 delay-450 ${
-          mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-        }`}>
+        <p
+          className={`text-xs max-w-xl mx-auto leading-relaxed transition-all duration-700 delay-300 ${
+            theme === 'dark' ? 'text-zinc-500' : 'text-zinc-600'
+          }`}
+        >
+          Trust Score là tín hiệu sàng lọc và giải thích bằng chứng, không phải kết luận tự động về chất lượng khoa học,
+          hành vi học thuật hay kết quả chấm điểm.
+        </p>
+
+        <div
+          className={`flex flex-col sm:flex-row justify-center items-center gap-3 pt-4 transition-all duration-700 delay-450 ${
+            mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`}
+        >
           <button
             onClick={() => navigate(token ? '/dashboard' : '/login')}
             className={`w-full sm:w-auto flex items-center justify-center gap-1.5 font-bold px-6 py-3 rounded-lg transition-all duration-200 text-xs shadow-sm hover:shadow active:scale-98 ${
@@ -71,202 +123,173 @@ export default function LandingScreen() {
                 : 'bg-zinc-900 hover:bg-zinc-800 text-white'
             }`}
           >
-            Bắt đầu thẩm định <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+            Vào khu vực pilot <ArrowRight size={14} />
           </button>
           <button
             onClick={() => navigate('/features')}
             className={`w-full sm:w-auto flex items-center justify-center gap-1.5 border font-semibold px-6 py-3 rounded-lg transition-all duration-200 text-xs hover:shadow-sm active:scale-98 ${
-              theme === 'dark' 
-                ? 'bg-zinc-900 hover:bg-zinc-800 border-zinc-800 text-zinc-300' 
+              theme === 'dark'
+                ? 'bg-zinc-900 hover:bg-zinc-800 border-zinc-800 text-zinc-300'
                 : 'bg-white hover:bg-zinc-50 border-zinc-200 text-zinc-700'
             }`}
           >
-            Tìm hiểu chi tiết
+            Xem năng lực hiện có
           </button>
         </div>
 
-        {/* SIMULATED PLATFORM PREVIEW */}
-        <div className={`pt-12 relative max-w-3xl mx-auto transition-all duration-1000 delay-600 ${
-          mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
-        }`}>
-          <div className={`border rounded-xl p-5 shadow-md overflow-hidden transition-all duration-500 animate-float hover:scale-[1.01] hover:shadow-xl hover:border-zinc-400 dark:hover:border-zinc-700 ${
-            theme === 'dark' 
-              ? 'bg-zinc-900/40 border-zinc-850 shadow-indigo-950/20' 
-              : 'bg-white border-zinc-200 shadow-zinc-200'
-          }`}>
-            {/* Window bar */}
-            <div className={`flex justify-between items-center border-b pb-3 mb-5 ${
-              theme === 'dark' ? 'border-zinc-800' : 'border-zinc-100'
-            }`}>
+        <div
+          className={`pt-12 relative max-w-3xl mx-auto transition-all duration-1000 delay-600 ${
+            mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+          }`}
+        >
+          <div
+            className={`border rounded-xl p-5 shadow-md overflow-hidden transition-all duration-500 ${
+              theme === 'dark'
+                ? 'bg-zinc-900/40 border-zinc-800 shadow-indigo-950/20'
+                : 'bg-white border-zinc-200 shadow-zinc-200'
+            }`}
+          >
+            <div
+              className={`flex justify-between items-center border-b pb-3 mb-5 ${
+                theme === 'dark' ? 'border-zinc-800' : 'border-zinc-100'
+              }`}
+            >
               <div className="flex gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-700"></span>
                 <span className="w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-700"></span>
                 <span className="w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-700"></span>
               </div>
-              <span className="text-[10px] text-zinc-450 font-mono">dashboard_preview.tsx</span>
+              <span className="text-[10px] text-zinc-500 font-mono">controlled-pilot-preview</span>
               <div className="w-6"></div>
             </div>
 
-            {/* Dashboard Mockup Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-              <div className={`p-4 rounded-lg border transition-colors hover:border-zinc-400 dark:hover:border-zinc-700 ${
-                theme === 'dark' ? 'bg-zinc-950/60 border-zinc-850' : 'bg-zinc-50 border-zinc-150'
-              }`}>
-                <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Trust Score trung bình</span>
-                <div className={`text-xl font-bold mt-1.5 ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>
-                  78.5 <span className="text-xs text-zinc-400 font-normal">/ 100</span>
+              {capabilities.map((item) => (
+                <div
+                  key={item.label}
+                  className={`p-4 rounded-lg border transition-colors ${
+                    theme === 'dark' ? 'bg-zinc-950/60 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+                  }`}
+                >
+                  <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">{item.label}</span>
+                  <div className={`text-lg font-bold mt-1.5 ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>
+                    {item.value}
+                  </div>
+                  <p className={`text-[10px] leading-relaxed mt-3 ${theme === 'dark' ? 'text-zinc-500' : 'text-zinc-600'}`}>
+                    {item.note}
+                  </p>
                 </div>
-                <div className={`h-1 rounded-full mt-3 overflow-hidden ${theme === 'dark' ? 'bg-zinc-850' : 'bg-zinc-200'}`}>
-                  <div className="bg-zinc-800 dark:bg-white h-1 w-[78%] transition-all duration-1000 delay-1000"></div>
-                </div>
-              </div>
-              
-              <div className={`p-4 rounded-lg border transition-colors hover:border-zinc-400 dark:hover:border-zinc-700 ${
-                theme === 'dark' ? 'bg-zinc-950/60 border-zinc-850' : 'bg-zinc-50 border-zinc-150'
-              }`}>
-                <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Tài liệu đã quét</span>
-                <div className={`text-xl font-bold mt-1.5 ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>1,402 bài</div>
-                <span className="text-[9px] text-zinc-500 font-semibold block mt-3">↑ 12% so với tháng trước</span>
-              </div>
-
-              <div className={`p-4 rounded-lg border transition-colors hover:border-zinc-400 dark:hover:border-zinc-700 ${
-                theme === 'dark' ? 'bg-zinc-950/60 border-zinc-850' : 'bg-zinc-50 border-zinc-150'
-              }`}>
-                <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Độ phủ API đối chiếu</span>
-                <div className={`text-xl font-bold mt-1.5 ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>100% sạch</div>
-                <span className={`text-[9px] font-semibold block mt-3 ${theme === 'dark' ? 'text-zinc-450' : 'text-zinc-500'}`}>
-                  Crossref, OpenAlex, URL
-                </span>
-              </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* 2. CORE STATISTICS */}
-      <section className={`relative z-10 border-y py-12 px-6 transition-all duration-500 ${
-        theme === 'dark' 
-          ? 'bg-zinc-900/10 border-zinc-900' 
-          : 'bg-zinc-100/30 border-zinc-200'
-      }`}>
+      <section
+        className={`relative z-10 border-y py-12 px-6 transition-all duration-500 ${
+          theme === 'dark' ? 'bg-zinc-900/10 border-zinc-900' : 'bg-zinc-100/30 border-zinc-200'
+        }`}
+      >
         <ScrollReveal duration={800} direction="none">
-          <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            <div className="space-y-1">
-              <h3 className={`text-2xl sm:text-3xl font-extrabold ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>
-                <NumberTicker value={0.5} decimals={1} suffix="s" />
-              </h3>
-              <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Thời gian trích xuất</p>
-            </div>
-            <div className="space-y-1">
-              <h3 className={`text-2xl sm:text-3xl font-extrabold ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>
-                <NumberTicker value={120} suffix="M+" />
-              </h3>
-              <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Metadata đối chiếu</p>
-            </div>
-            <div className="space-y-1">
-              <h3 className={`text-2xl sm:text-3xl font-extrabold ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>
-                <NumberTicker value={5} suffix=" tiêu chí" />
-              </h3>
-              <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Ma trận đánh giá</p>
-            </div>
-            <div className="space-y-1">
-              <h3 className={`text-2xl sm:text-3xl font-extrabold ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>
-                <NumberTicker value={100} suffix="%" />
-              </h3>
-              <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Tự động hóa</p>
-            </div>
+          <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                icon: <FileText size={18} />,
+                title: 'Luồng phân tích thật',
+                desc: 'Upload, analyze, job state, report và export đã có runtime path trong baseline v1.2.',
+              },
+              {
+                icon: <ShieldCheck size={18} />,
+                title: 'Phân quyền là ranh giới chính',
+                desc: 'Backend kiểm soát lecturer/admin scope; ownership negative tests vẫn là release gate cần hoàn tất.',
+              },
+              {
+                icon: <BookOpenCheck size={18} />,
+                title: 'Evidence first',
+                desc: 'Mỗi điểm số cần đi kèm bằng chứng, confidence và khuyến nghị để người review tự quyết định.',
+              },
+            ].map((item) => (
+              <div key={item.title} className="flex gap-3 text-left">
+                <div
+                  className={`w-10 h-10 rounded-lg border flex items-center justify-center shrink-0 ${
+                    theme === 'dark' ? 'bg-zinc-950 border-zinc-800 text-zinc-300' : 'bg-white border-zinc-200 text-zinc-700'
+                  }`}
+                >
+                  {item.icon}
+                </div>
+                <div className="space-y-1">
+                  <h3 className={`text-sm font-bold ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>{item.title}</h3>
+                  <p className={`text-xs leading-relaxed ${theme === 'dark' ? 'text-zinc-400' : 'text-zinc-600'}`}>{item.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </ScrollReveal>
       </section>
 
-      {/* 3. HOW IT WORKS */}
       <section className="relative z-10 max-w-5xl mx-auto px-6 py-20 space-y-12">
         <ScrollReveal direction="up" duration={700}>
           <div className="text-center space-y-3">
             <h3 className={`text-xl sm:text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>
-              Quy trình thẩm định trực quan
+              Luồng review trong pilot
             </h3>
-            <p className={`text-xs max-w-sm mx-auto font-medium ${theme === 'dark' ? 'text-zinc-400' : 'text-zinc-500'}`}>
-              Hệ thống hóa quy trình thẩm định phức tạp thành các bước thao tác nhanh chóng và chính xác.
+            <p className={`text-xs max-w-md mx-auto font-medium ${theme === 'dark' ? 'text-zinc-400' : 'text-zinc-500'}`}>
+              Mục tiêu hiện tại là chứng minh luồng cốt lõi chạy ổn định, có bằng chứng và không tạo false success.
             </p>
           </div>
         </ScrollReveal>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {[
-            {
-              step: "01",
-              title: "Tải lên bài báo cáo",
-              desc: "Kéo thả tập tin PDF/DOCX đồ án tốt nghiệp cần thẩm định vào hệ thống."
-            },
-            {
-              step: "02",
-              title: "Trích xuất danh mục",
-              desc: "Trích xuất text và phát hiện danh mục tài liệu tham khảo từ PDF/DOCX được hỗ trợ."
-            },
-            {
-              step: "03",
-              title: "Đối chiếu API",
-              desc: "Đối chiếu metadata bằng Crossref, OpenAlex và URL checker theo bằng chứng runtime hiện có."
-            },
-            {
-              step: "04",
-              title: "Xuất báo cáo",
-              desc: "Tính toán Trust Score v1.2 dựa trên 7 cấu phần C1-C7 và xuất báo cáo có bằng chứng."
-            }
-          ].map((item, idx) => (
-            <ScrollReveal 
-              key={idx}
-              delay={idx * 150}
-              direction="up"
-              duration={600}
-            >
-              <div 
+          {workflow.map((item, idx) => (
+            <ScrollReveal key={item.step} delay={idx * 150} direction="up" duration={600}>
+              <div
                 className={`p-5 rounded-lg border transition-all duration-300 space-y-4 h-full hover:-translate-y-1.5 hover:shadow-md ${
-                  theme === 'dark' 
-                    ? 'bg-zinc-900/30 border-zinc-900 hover:border-zinc-700 hover:bg-zinc-900/50' 
-                    : 'bg-white border-zinc-150 hover:border-zinc-300 hover:bg-zinc-50/55 shadow-sm'
+                  theme === 'dark'
+                    ? 'bg-zinc-900/30 border-zinc-900 hover:border-zinc-700 hover:bg-zinc-900/50'
+                    : 'bg-white border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 shadow-sm'
                 }`}
               >
-                <div className={`w-8 h-8 rounded border flex items-center justify-center font-bold text-xs transition-colors duration-300 ${
-                  theme === 'dark' 
-                    ? 'bg-zinc-950 border-zinc-850 text-zinc-300 group-hover:text-white' 
-                    : 'bg-zinc-100 border-zinc-200 text-zinc-700'
-                }`}>
+                <div
+                  className={`w-8 h-8 rounded border flex items-center justify-center font-bold text-xs ${
+                    theme === 'dark' ? 'bg-zinc-950 border-zinc-800 text-zinc-300' : 'bg-zinc-100 border-zinc-200 text-zinc-700'
+                  }`}
+                >
                   {item.step}
                 </div>
-                <h4 className={`text-xs font-bold uppercase tracking-wider ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>{item.title}</h4>
-                <p className={`text-xs leading-relaxed font-medium ${theme === 'dark' ? 'text-zinc-400' : 'text-zinc-500'}`}>{item.desc}</p>
+                <h4 className={`text-xs font-bold uppercase tracking-wider ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>
+                  {item.title}
+                </h4>
+                <p className={`text-xs leading-relaxed font-medium ${theme === 'dark' ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                  {item.desc}
+                </p>
               </div>
             </ScrollReveal>
           ))}
         </div>
       </section>
 
-      {/* 4. CALL TO ACTION (CTA) */}
       <section className="relative z-10 max-w-4xl mx-auto px-6 pb-20">
         <ScrollReveal direction="up" duration={800}>
-          <div className={`border rounded-xl p-8 md:p-10 text-center space-y-4 transition-all duration-300 hover:scale-[1.01] hover:shadow-md ${
-            theme === 'dark' 
-              ? 'bg-zinc-900/30 border-zinc-900 hover:border-zinc-800' 
-              : 'bg-white border-zinc-150 hover:border-zinc-250 shadow-sm'
-          }`}>
+          <div
+            className={`border rounded-xl p-8 md:p-10 text-center space-y-4 transition-all duration-300 ${
+              theme === 'dark' ? 'bg-zinc-900/30 border-zinc-900' : 'bg-white border-zinc-200 shadow-sm'
+            }`}
+          >
             <h3 className={`text-xl sm:text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>
-              Nâng tầm tính chính trực trong học thuật
+              Dùng cho demo và pilot có kiểm soát
             </h3>
-            <p className={`text-xs max-w-sm mx-auto leading-relaxed ${theme === 'dark' ? 'text-zinc-400' : 'text-zinc-500'}`}>
-              Giúp giảng viên tối ưu thời gian chấm điểm và sinh viên tự rà soát tài liệu trích dẫn khoa học nhanh chóng.
+            <p className={`text-xs max-w-md mx-auto leading-relaxed ${theme === 'dark' ? 'text-zinc-400' : 'text-zinc-500'}`}>
+              TrustLens v1.2 đã có luồng phân tích chính, nhưng vẫn cần thêm PostgreSQL integration, browser E2E,
+              restore drill và academic calibration trước khi ký duyệt phát hành rộng.
             </p>
             <div className="pt-2">
               <button
-                onClick={() => navigate('/login')}
+                onClick={() => navigate(pilotPath)}
                 className={`font-semibold px-5 py-2.5 rounded-lg text-xs inline-flex items-center gap-1 transition-all duration-200 active:scale-98 ${
-                  theme === 'dark' 
-                    ? 'bg-white hover:bg-zinc-100 text-black shadow-sm shadow-white/5' 
-                    : 'bg-zinc-900 hover:bg-zinc-800 text-white shadow-sm'
+                  theme === 'dark' ? 'bg-white hover:bg-zinc-100 text-black shadow-sm shadow-white/5' : 'bg-zinc-900 hover:bg-zinc-800 text-white shadow-sm'
                 }`}
               >
-                Đăng nhập hệ thống <ChevronRight size={14} />
+                Xem trạng thái pilot <ChevronRight size={14} />
               </button>
             </div>
           </div>
