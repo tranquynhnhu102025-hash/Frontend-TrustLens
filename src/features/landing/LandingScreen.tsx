@@ -38,7 +38,7 @@ export default function LandingScreen() {
             ? 'bg-zinc-900 border-zinc-800 text-zinc-400' 
             : 'bg-white border-zinc-200 text-zinc-500'
         }`}>
-          <Sparkles size={11} className="text-zinc-500" /> Phiên bản Học thuật TrustLens v1.5
+          <Sparkles size={11} className="text-zinc-500" /> TrustLens v1.2 academic review
         </div>
 
         <h2 className={`text-3xl sm:text-5xl font-extrabold tracking-tight max-w-3xl mx-auto leading-tight transition-all duration-700 delay-150 ${
@@ -135,7 +135,7 @@ export default function LandingScreen() {
                 <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Độ phủ API đối chiếu</span>
                 <div className={`text-xl font-bold mt-1.5 ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>100% sạch</div>
                 <span className={`text-[9px] font-semibold block mt-3 ${theme === 'dark' ? 'text-zinc-450' : 'text-zinc-500'}`}>
-                  CrossRef, OpenAlex, Semantic
+                  Crossref, OpenAlex, URL
                 </span>
               </div>
             </div>
@@ -202,17 +202,17 @@ export default function LandingScreen() {
             {
               step: "02",
               title: "Trích xuất danh mục",
-              desc: "Sử dụng mô hình GROBID để bóc tách tự động danh sách tài liệu tham khảo thô."
+              desc: "Trích xuất text và phát hiện danh mục tài liệu tham khảo từ PDF/DOCX được hỗ trợ."
             },
             {
               step: "03",
               title: "Đối chiếu API",
-              desc: "Kết nối trực tiếp hệ thống CrossRef, Semantic Scholar, OpenAlex đối sánh DOI."
+              desc: "Đối chiếu metadata bằng Crossref, OpenAlex và URL checker theo bằng chứng runtime hiện có."
             },
             {
               step: "04",
               title: "Xuất báo cáo",
-              desc: "Tính toán Trust Score v1.1 dựa trên 7 cấu phần C1-C7 và xuất báo cáo kết luận."
+              desc: "Tính toán Trust Score v1.2 dựa trên 7 cấu phần C1-C7 và xuất báo cáo có bằng chứng."
             }
           ].map((item, idx) => (
             <ScrollReveal 
