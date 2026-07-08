@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Loader2, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import authService from '../../services/authService';
+import { isPublicRegistrationEnabled } from '../../config/authPolicy';
+import { formatApiError } from '../../services/apiError';
 
 export default function LoginScreen() {
   const navigate = useNavigate();
@@ -12,6 +14,7 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [shouldShake, setShouldShake] = useState(false);
+  const publicRegistrationEnabled = isPublicRegistrationEnabled();
 
   const handleLogin = async () => {
     if (!email.trim() || !password) {
@@ -30,7 +33,7 @@ export default function LoginScreen() {
         navigate('/dashboard');
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại!');
+      setError(formatApiError(err, 'Đăng nhập thất bại. Vui lòng thử lại!'));
       setShouldShake(true);
       setTimeout(() => setShouldShake(false), 400);
     } finally {
@@ -100,15 +103,21 @@ export default function LoginScreen() {
             {loading ? <Loader2 size={14} className="animate-spin" /> : 'Đăng nhập hệ thống'}
           </button>
           
-          <p className="text-center text-xs font-semibold text-zinc-400 dark:text-zinc-500 mt-6">
-            Chưa có tài khoản?{' '}
-            <button 
-              onClick={() => navigate('/register')}
-              className="text-zinc-900 dark:text-white font-bold hover:underline"
-            >
-              Đăng ký ngay
-            </button>
-          </p>
+          {publicRegistrationEnabled ? (
+            <p className="text-center text-xs font-semibold text-zinc-400 dark:text-zinc-500 mt-6">
+              Chưa có tài khoản?{' '}
+              <button
+                onClick={() => navigate('/register')}
+                className="text-zinc-900 dark:text-white font-bold hover:underline"
+              >
+                Đăng ký ngay
+              </button>
+            </p>
+          ) : (
+            <p className="text-center text-xs font-semibold text-zinc-400 dark:text-zinc-500 mt-6">
+              Tài khoản pilot do quản trị viên cấp.
+            </p>
+          )}
         </div>
       </div>
     </div>
